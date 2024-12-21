@@ -1,12 +1,17 @@
+<script>
+</script>
+
 <div class="flex min-h-screen flex-row items-center justify-center bg-blue-900 text-white">
+	<img src="src/lib/assets/images/uph_logo.jpg" class="rounded-full" alt="uph_logo" />
 	<div class="flex flex-col justify-center text-center">
 		<div class="flex flex-col">
-			<h1 class="text-[30px]">Welcome</h1>
 			<span class="text-[36px]">Universitas Pelita Harapan Medan</span>
 			<span class="text-[30px]"> Academic Service Website</span>
 		</div>
-		<div class="flex flex-col justify-center text-center">
-			<button class=" bg-white text-black rounded-md w-[100px] h-[50px]">Sign Up</button>
+		<div class="my-10 flex flex-col items-center justify-center gap-y-5">
+			<button class=" h-[50px] w-[100px] rounded-md bg-white text-black"
+				><a href="/register">Sign Up</a></button
+			>
 			<span>or already have an account? <a href="/login">Login</a></span>
 		</div>
 	</div>

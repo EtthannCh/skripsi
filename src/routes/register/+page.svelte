@@ -5,16 +5,24 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from './register-schema';
+	import { goto } from '$app/navigation';
 
 	let { data } = $props();
 	const form = superForm(data.form.data, {
 		validators: zodClient(registerSchema),
-		onResult: (event) => {
-			if (event.result.type == 'failure') {
-				toast('Register Successfully', event.result.data);
+		onResult: ({ result }) => {
+			if (result.type == 'success') {
+				toast.success('Register Successfully', {
+					position: 'top-right',
+					dismissable: true
+				});
 			} else {
-				toast('Invalid Credentials / Email Has already been used');
+				toast.error('Invalid Credentials / Email Has already been used', {
+					position: 'top-right',
+					dismissable: true
+				});
 			}
+			goto('../home');
 		}
 	});
 
@@ -23,7 +31,7 @@
 
 <div class="flex min-h-screen flex-col items-center justify-center">
 	<h1 class="my-5">Register</h1>
-	<form method="POST" use:enhance action="/register">
+	<form method="POST" use:enhance action="?/register">
 		<Form.Field {form} name="username">
 			<Form.Control let:attrs>
 				<Form.Label>Username</Form.Label>
@@ -45,10 +53,20 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Button
-			onclick={() => {
-				form.reset();
-			}}>Login</Form.Button
-		>
+
+		<div class="my-5 flex flex-col">
+			<span
+				>Already has an Account? <a
+					href="../login"
+					class="group relative text-[#18272F] no-underline"
+				>
+					Login
+					<span
+						class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-[#18272F] transition-transform group-hover:origin-left group-hover:scale-x-100"
+					></span>
+				</a></span
+			>
+			<Form.Button>Register</Form.Button>
+		</div>
 	</form>
 </div>

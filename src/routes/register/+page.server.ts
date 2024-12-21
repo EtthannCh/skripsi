@@ -13,7 +13,7 @@ export const load = async () => {
 }
 
 export const actions: Actions = {
-    default: async (event) => {
+    register: async (event) => {
         const form = await superValidate(event, zod(registerSchema));
         if (!form.valid) {
             return fail(400, {
@@ -23,21 +23,20 @@ export const actions: Actions = {
         try {
             const user = await query(`select * from user_credentials where email = '${form.data.email}'`);
             if (user.length > 0) {
-                return fail(400, { type: "error", message: "Invalid Credentials" })
+                return fail(400, { data: form })
             }
             const sql = `
             insert into user_credentials
-            (user_id, username, email, password)
+            (user_id, username, email, password, created_at)
             values
-            (gen_random_uuid(), '${form.data.username}', '${form.data.email}', '${form.data.password}')
+            (gen_random_uuid(), '${form.data.username}', '${form.data.email}', '${form.data.password}', now())
             `;
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const newUser = await query(sql);
-            // return redirect(300 , "../home")
+
+            await query(sql);
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: 'Internal server error', form });
         }
         return form;
     }
-}
+} satisfies Actions;
