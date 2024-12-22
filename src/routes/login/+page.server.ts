@@ -18,14 +18,14 @@ export const actions = {
             return fail(400, { form })
         }
         try {
-            const response = await query(`select * from user_credentials where email = '${form.data.email}'`)
+            const response = await query(`select id, user_id userId, username, password, email from user_credentials where email = '${form.data.email}'`)
             const user: UserSchema = JSON.parse(JSON.stringify(response[0]));
 
             if ((form.data.email == user.email && form.data.password != user.password) || !user) {
                 return fail(400, { data: form })
             }
             else if (form.data.email == user.email && form.data.password == user.password) {
-                cookies.set("user", JSON.stringify({ userId: user.userId, email: user.email, username: user.username }), {
+                cookies.set("user", JSON.stringify({ userId: user.userid, email: user.email, username: user.username }), {
                     path: "/",
                     httpOnly: true,
                     maxAge: 60 * 60 * 5

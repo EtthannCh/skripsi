@@ -8,5 +8,9 @@ export async function handle({ event, resolve }) {
     else if (user && (event.url.pathname.startsWith("/login") || event.url.pathname.startsWith("/register"))) {
         throw redirect(303, "/home")
     }
+    else if (user && event.url.pathname.startsWith("/logout")) {
+        event.cookies.delete("user", {path:"/"})
+        throw redirect(303, "/");
+    }
     return resolve(event);
 }

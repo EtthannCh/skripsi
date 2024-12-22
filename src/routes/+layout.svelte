@@ -1,20 +1,20 @@
 <script lang="ts">
-	import AppSidebar from '$lib/components/ui/sidebar/app-sidebar.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { goto } from '$app/navigation';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import '../app.css';
+	import type { UserCookiesSchema } from './home/user-schema';
 	let { children, data } = $props();
+	const user: UserCookiesSchema | undefined = data.user;
 	let isDrawerOpen = $state(false);
+	async function logout() {
+		const res = await fetch('/logout', { method: 'POST' });
+		if (res.ok) goto('/', { invalidateAll: true });
+	}
 </script>
 
 <Toaster position="top-center"></Toaster>
-<!-- <Sidebar.Provider>
-	<AppSidebar></AppSidebar>
-	<main>
-		<Sidebar.Trigger />
-		{@render children?.()}
-	</main>
-</Sidebar.Provider> -->
 <svelte:head>
 	<link
 		href="https://cdn.jsdelivr.net/npm/daisyui@2/dist/full.css"
@@ -24,44 +24,76 @@
 </svelte:head>
 
 <div class="flex h-screen w-full flex-col">
-	<div class="navbar w-full gap-2 bg-blue-800">
-		<div class="sm:hidden md:hidden lg:block">
-			<div class="flex w-full flex-row items-center justify-between">
-				<img
-					src="src/lib/assets/images/uph_logo.jpg"
-					alt="logo uph"
-					class="h-10 w-10 rounded-full"
-				/>
-				<span>tes</span>
+	{#if data.isLoggedIn}
+		<div class="navbar w-full gap-2 bg-gradient-to-br from-cyan-500 to-blue-800 text-white">
+			<div class="sm:hidden md:hidden lg:block">
+				<div class="flex w-full flex-row items-center justify-between">
+					<div>
+						<img
+							src="src/lib/assets/images/uph_logo.jpg"
+							alt="logo uph"
+							class="h-10 w-10 rounded-full"
+						/>
+					</div>
+					<div>
+						<span class="text-white">Universitas Pelita Harapan Medan Campus</span>
+					</div>
+					<div>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								<Button
+									variant="ghost"
+									class="rounded-md text-white hover:bg-white hover:text-blue-500"
+								>
+									<span>Profile</span>
+								</Button>
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content class="w-56" align="end">
+								<DropdownMenu.Label class="font-normal">
+									<div class="flex flex-col space-y-1">
+										<p class="text-sm font-medium leading-none">{user?.username}</p>
+										<p class="text-xs leading-none text-muted-foreground">{user?.email}</p>
+									</div>
+								</DropdownMenu.Label>
+								<DropdownMenu.Separator />
+								<DropdownMenu.Item class="bg-black text-white hover:bg-white hover:text-black">
+									<button type="submit" onclick={logout}>
+										<span>Log out</span>
+									</button>
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
+					</div>
+				</div>
+			</div>
+			<div class="flex-none lg:hidden">
+				<label
+					for="my-drawer-3"
+					class:swap-active={isDrawerOpen}
+					class="btn btn-circle swap swap-rotate"
+				>
+					<svg
+						class="swap-off fill-current"
+						xmlns="http://www.w3.org/2000/svg"
+						width="32"
+						height="32"
+						viewBox="0 0 512 512"
+						><path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" /></svg
+					>
+					<svg
+						class="swap-on fill-current"
+						xmlns="http://www.w3.org/2000/svg"
+						width="32"
+						height="32"
+						viewBox="0 0 512 512"
+						><polygon
+							points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49"
+						/></svg
+					>
+				</label>
 			</div>
 		</div>
-		<div class="flex-none lg:hidden">
-			<label
-				for="my-drawer-3"
-				class:swap-active={isDrawerOpen}
-				class="btn btn-circle swap swap-rotate"
-			>
-				<svg
-					class="swap-off fill-current"
-					xmlns="http://www.w3.org/2000/svg"
-					width="32"
-					height="32"
-					viewBox="0 0 512 512"
-					><path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" /></svg
-				>
-				<svg
-					class="swap-on fill-current"
-					xmlns="http://www.w3.org/2000/svg"
-					width="32"
-					height="32"
-					viewBox="0 0 512 512"
-					><polygon
-						points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49"
-					/></svg
-				>
-			</label>
-		</div>
-	</div>
+	{/if}
 
 	<div class="drawer h-full w-full">
 		<input id="my-drawer-3" type="checkbox" bind:checked={isDrawerOpen} class="drawer-toggle" />

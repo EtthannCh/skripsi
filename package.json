@@ -50,6 +50,7 @@
 		"dotenv": "^16.4.7",
 		"pg": "^8.13.1",
 		"shadcn-svelte": "^0.14.0",
-		"svelte-headless-table": "^0.18.3"
+		"svelte-headless-table": "^0.18.3",
+		"svelte-pdf-simple": "^2.0.0"
 	}
 }
