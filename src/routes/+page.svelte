@@ -1,7 +1,7 @@
 <script>
 </script>
 
-<div class="flex min-h-screen flex-row items-center justify-center">
+<div class="flex min-h-screen flex-row items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-800">
 	<img src="src/lib/assets/images/uph_logo.jpg" class="rounded-full" alt="uph_logo" />
 	<div class="flex flex-col justify-center text-center">
 		<div class="flex flex-col">

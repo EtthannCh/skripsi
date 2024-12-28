@@ -1,9 +1,11 @@
 import { query } from "$lib/db";
+import { supabase } from "$lib/supabaseClient";
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
 import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { registerSchema } from "./register-schema";
+import bcrypt from 'bcryptjs';
 
 export const load = async () => {
     const form = await superValidate(zod(registerSchema))
@@ -25,14 +27,16 @@ export const actions: Actions = {
             if (user.length > 0) {
                 return fail(400, { data: form })
             }
-            const sql = `
-            insert into user_credentials
-            (user_id, username, email, password, created_at)
-            values
-            (gen_random_uuid(), '${form.data.username}', '${form.data.email}', '${form.data.password}', now())
-            `;
-
-            await query(sql);
+            const { error } = await supabase.from("user_credentials")
+                .insert({
+                    username: form.data.username,
+                    email: form.data.email, password: await bcrypt.hash(form.data.password, 10)
+                });
+            if (error) {
+                console.log(error);
+                
+                return fail(400, { message: "Error" })
+            }
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: 'Internal server error', form });

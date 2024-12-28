@@ -23,7 +23,7 @@
 	/>
 </svelte:head>
 
-<div class="flex h-screen w-full flex-col">
+<div>
 	{#if data.isLoggedIn}
 		<div class="navbar w-full gap-2 bg-gradient-to-br from-cyan-500 to-blue-800 text-white">
 			<div class="sm:hidden md:hidden lg:block">
@@ -56,11 +56,13 @@
 									</div>
 								</DropdownMenu.Label>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item class="bg-black text-white hover:bg-white hover:text-black">
-									<button type="submit" onclick={logout}>
-										<span>Log out</span>
-									</button>
-								</DropdownMenu.Item>
+								<button
+									type="submit"
+									onclick={logout}
+									class="rounded-md p-2 transition ease-in hover:bg-black hover:text-white"
+								>
+									<span>Log out</span>
+								</button>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>
 					</div>
@@ -98,9 +100,9 @@
 	<div class="drawer h-full w-full">
 		<input id="my-drawer-3" type="checkbox" bind:checked={isDrawerOpen} class="drawer-toggle" />
 		<div class="drawer-content flex flex-col items-center justify-center">
-			<div class="w-full">
+			<main class="w-full">
 				{@render children?.()}
-			</div>
+			</main>
 		</div>
 		<div class="drawer-side">
 			<label for="my-drawer-3" class="drawer-overlay"></label>

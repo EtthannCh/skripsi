@@ -30,7 +30,7 @@
 </script>
 
 <div
-	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
+	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-800"
 >
 	<h1 class="my-5">LOGIN</h1>
 	<div class="flex items-center justify-center gap-10">

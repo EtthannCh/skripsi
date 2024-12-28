@@ -16,13 +16,13 @@
 					position: 'top-right',
 					dismissable: true
 				});
+				goto('../home');
 			} else {
 				toast.error('Invalid Credentials / Email Has already been used', {
 					position: 'top-right',
 					dismissable: true
 				});
 			}
-			goto('../home');
 		}
 	});
 
@@ -30,7 +30,7 @@
 </script>
 
 <div
-	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
+	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-800"
 >
 	<h1 class="my-5">Register</h1>
 	<div class="w-[750px]">
