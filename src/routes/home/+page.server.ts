@@ -5,20 +5,34 @@ import { zod } from "sveltekit-superforms/adapters";
 import type { PageServerLoad } from "./$types";
 import { userRequestSchema, type FormSchema, type RequestDbSchema, type UserCookiesSchema } from "./user-schema";
 
-export const load: PageServerLoad = async ({ cookies }) => {
+export const load: PageServerLoad = async ({ cookies, url }) => {
     const user: UserCookiesSchema = JSON.parse(cookies.get("user") ?? "");
     if (!user) {
         throw redirect(304, "/login");
     }
 
+    const filter = url.searchParams.get("filter") ?? "";
+    const filterQuery = filter.length > 0 ? `%${filter.toUpperCase()}%` : "";
     const form = await superValidate(zod(userRequestSchema));
     const formDbData = await supabase.from("form_db").select();
     const formSelection: FormSchema[] = JSON.parse(JSON.stringify(formDbData.data));
-    const requestDbDataFromDb = await supabase.from("request_db").select().filter("status", "in", '("PENDING", "AWAITING_APPROVAL)');
-    let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));
-    if (user.roleId == 3) {
-        requestDbData = [];
+    let query = (supabase.from("request_db")
+        .select(
+            `id, status, user_id, form_id, 
+            reason, created_by, created_at, form_db(code), user_credentials(email),
+            first_approver_name, second_approver_name
+            `
+        )
+    );
+    if (filter.length > 0) {
+        query = query.or(`created_by.ilike.${filterQuery}`)
     }
+    const requestDbDataFromDb = (await query).data;
+    let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));
+    if (user.roleId == 3 || !user.roleId) {
+        requestDbData = [];
+    };
+
     return {
         form,
         user,
@@ -41,11 +55,12 @@ export const actions = {
             const buffer = Buffer.from(await file.arrayBuffer());
 
             const userCookies: UserCookiesSchema = JSON.parse(cookies.get("user") ?? "");
-            const fileName = `${new Date().toLocaleDateString("id-ID", {
+            const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
+            const fileName = `${userCookies.userId}/${form.data.formId}/${userCookies.username}/${(new Date().toLocaleDateString("id-ID", {
                 day: "numeric",
-                month: "2-digit",
+                month: "short",
                 year: "numeric"
-            })}-${userCookies.userId}-${form.data.formId}-${userCookies.username}`;
+            }))}/${code}`;
             const { error } = await supabase.storage.from("request_form_files")
                 .upload(fileName, buffer, { contentType: "application/pdf" });
 

@@ -9,7 +9,7 @@ export async function handle({ event, resolve }) {
         throw redirect(303, "/home")
     }
     else if (user && event.url.pathname.startsWith("/logout")) {
-        event.cookies.delete("user", {path:"/"})
+        event.cookies.delete("user", { path: "/" })
         throw redirect(303, "/");
     }
     return resolve(event);

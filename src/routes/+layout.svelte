@@ -15,38 +15,37 @@
 </script>
 
 <Toaster position="top-center"></Toaster>
-<svelte:head>
+<head>
 	<link
 		href="https://cdn.jsdelivr.net/npm/daisyui@2/dist/full.css"
 		rel="stylesheet"
 		type="text/css"
 	/>
-</svelte:head>
+</head>
 
 <div>
 	{#if data.isLoggedIn}
-		<div class="navbar w-full gap-2 bg-gradient-to-br from-cyan-500 to-blue-800 text-white">
+		<nav class="navbar w-full bg-gradient-to-br from-cyan-500 to-blue-800 text-white">
 			<div class="sm:hidden md:hidden lg:block">
-				<div class="flex w-full flex-row items-center justify-between">
-					<div>
-						<img
-							src="src/lib/assets/images/uph_logo.jpg"
-							alt="logo uph"
-							class="h-10 w-10 rounded-full"
-						/>
+				<div class="flex flex-row items-center">
+					<div class="flex items-center gap-5">
+						<div>
+							<img
+								src="src/lib/assets/images/uph_logo.jpg"
+								alt="logo uph"
+								class="h-10 w-10 rounded-full"
+							/>
+						</div>
+						<div>
+							<span class="text-white">Universitas Pelita Harapan Medan Campus</span>
+						</div>
 					</div>
-					<div>
-						<span class="text-white">Universitas Pelita Harapan Medan Campus</span>
-					</div>
-					<div>
+					<div class="absolute right-3">
 						<DropdownMenu.Root>
-							<DropdownMenu.Trigger>
-								<Button
-									variant="ghost"
-									class="rounded-md text-white hover:bg-white hover:text-blue-500"
-								>
-									<span>Profile</span>
-								</Button>
+							<DropdownMenu.Trigger
+								class="ml-5 rounded-md p-3 transition ease-in hover:bg-white hover:text-black"
+							>
+								Profile
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content class="w-56" align="end">
 								<DropdownMenu.Label class="font-normal">
@@ -94,7 +93,7 @@
 					>
 				</label>
 			</div>
-		</div>
+		</nav>
 	{/if}
 
 	<div class="drawer h-full w-full">

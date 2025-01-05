@@ -5,23 +5,19 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from './register-schema';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
 	const form = superForm(data.form.data, {
 		validators: zodClient(registerSchema),
 		onResult: ({ result }) => {
-			if (result.type == 'success') {
-				toast.success('Register Successfully', {
-					position: 'top-right',
-					dismissable: true
-				});
-				goto('../home');
-			} else {
+			if (result.type != 'success') {
 				toast.error('Invalid Credentials / Email Has already been used', {
 					position: 'top-right',
 					dismissable: true
 				});
+			} else {
+				goto('/verify-user', { invalidateAll: true });
 			}
 		}
 	});

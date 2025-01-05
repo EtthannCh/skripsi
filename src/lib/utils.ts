@@ -60,3 +60,11 @@ export const flyAndScale = (
 		easing: cubicOut
 	};
 };
+
+let timer: number;
+export const debounce = (callback: () => void, timeout?: number) => {
+	clearTimeout(timer);
+	timer = setTimeout(() => {
+		callback();
+	}, timeout || 1000);
+}
