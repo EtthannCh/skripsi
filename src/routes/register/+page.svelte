@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { message } from 'sveltekit-superforms';
+	import { goto } from '$app/navigation';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from './register-schema';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
 	const form = superForm(data.form.data, {
@@ -17,7 +18,11 @@
 					dismissable: true
 				});
 			} else {
-				goto('/verify-user', { invalidateAll: true });
+				toast.success('Complete your Registration', {
+					position: 'top-right',
+					dismissable: true
+				});
+				return goto('/verify-user', { invalidateAll: true });
 			}
 		}
 	});

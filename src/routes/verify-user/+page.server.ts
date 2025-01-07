@@ -1,49 +1,45 @@
 import { supabase } from "$lib/supabaseClient";
 import { fail, redirect } from "@sveltejs/kit";
+import type { UserRegistration } from "../register/register-schema";
+import { sessionManager } from "$lib/server/sessionManager";
 
 export const load = async ({ cookies }) => {
-    const userCookies = cookies.get("username");
+    const userCookies: UserRegistration = (await sessionManager.getSession(await cookies)).data;
     if (!userCookies) {
         throw redirect(303, "/");
     }
-    const user = JSON.parse(userCookies);
+
     return {
-        user
+        userCookies
     }
 }
 
 export const actions = {
     verify: async ({ cookies, request }) => {
-        if (!cookies.get("username")) {
+        if (!cookies.get("session")) {
             throw redirect(304, "/");
         }
         const data = await request.formData();
         const otp = data.get("otp");
 
-        const emailCookies = JSON.parse(cookies.get("email") ?? "");
-        const verifyUserOtp = await supabase.auth.verifyOtp({
-            email: emailCookies, token: `${otp}`, type: "email"
-        })
-        if (verifyUserOtp.error) {
-            console.log(verifyUserOtp.error);
+        const userCookies: UserRegistration = (await sessionManager.getSession(await cookies)).data;
+        if (otp != userCookies.otp) {
+            return fail(400);
         }
-        const usernameCookies = JSON.parse(cookies.get("username") ?? "");
-        const passwordCookies = JSON.parse(cookies.get("password") ?? "");
         const { error } = await supabase.from("user_credentials")
             .insert({
-                username: usernameCookies,
-                email: emailCookies, password: passwordCookies
+                username: userCookies.username,
+                email: userCookies.email,
+                password: userCookies.password
             });
 
         if (error) {
             console.log(error);
             return fail(400, { message: "Error" })
         }
-
-        cookies.delete("username", { path: '/', domain: "localhost" });
-        cookies.delete("password", { path: '/', domain: "localhost" });
-        cookies.delete("email", { path: '/', domain: "localhost" });
-
+        await sessionManager.deleteSession(cookies);
+        await sessionManager.deleteCookie(cookies);
+        
         throw redirect(303, "/login")
     }
 }

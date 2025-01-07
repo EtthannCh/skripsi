@@ -8,3 +8,10 @@ export const registerSchema = z.object({
 })
 
 export type RegisterSchema = z.infer<typeof registerSchema>;
+
+export type UserRegistration = {
+    email: string;
+    username: string;
+    password: string;
+    otp: string;
+}

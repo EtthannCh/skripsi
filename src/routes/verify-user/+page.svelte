@@ -64,5 +64,5 @@
 			onclick={startTimer}>Kirim Kode Ulang {timer > 0 ? timer + ' Detik' : ''}</button
 		>
 	</form>
-	<span class="text-md">Kode dikirimkan ke alamat e-mail : {data.user.email}</span>
+	<span class="text-md">Kode dikirimkan ke alamat e-mail : {data.userCookies.email}</span>
 </div>
