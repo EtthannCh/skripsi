@@ -33,7 +33,7 @@
 <div
 	class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-800"
 >
-	<h1 class="my-5">Register</h1>
+	<h1 class="my-5 text-[36px]">REGISTER</h1>
 	<div class="w-[750px]">
 		<div class="flex items-center justify-center gap-10">
 			<img
@@ -60,6 +60,13 @@
 					<Form.Control let:attrs>
 						<Form.Label>Password</Form.Label>
 						<Input {...attrs} bind:value={$formData.password} type="password" />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Form.Field {form} name="confirmPassword">
+					<Form.Control let:attrs>
+						<Form.Label>Confirm Password</Form.Label>
+						<Input {...attrs} bind:value={$formData.confirmPassword} type="password" />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>

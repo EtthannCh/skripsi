@@ -20,9 +20,9 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         .select(
             `id, status, user_id, form_id, 
             reason, created_by, created_at, form_db(code), user_credentials(email),
-            first_approver_name, second_approver_name
+            first_approver_name, second_approver_name, form_url
             `
-        )
+        ).order("created_at", { ascending: true })
     );
     if (filter.length > 0) {
         query = query.or(`created_by.ilike.${filterQuery}`)
@@ -56,13 +56,14 @@ export const actions = {
 
             const userCookies: UserCookiesSchema = JSON.parse(cookies.get("user") ?? "");
             const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
-            const fileName = `${userCookies.userId}/${form.data.formId}/${userCookies.username}/${(new Date().toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "short",
-                year: "numeric"
-            }))}/${code}`;
+            const fileName = `${code}-${form.data.formId}-${userCookies.username}-${userCookies.userId}-${(new Date().toISOString())}`.toString();
             const { error } = await supabase.storage.from("request_form_files")
                 .upload(fileName, buffer, { contentType: "application/pdf" });
+
+            if (error) {
+                return fail(400, { form, message: (error as Error).message })
+            }
+            const fileUrl = supabase.storage.from("request_form_files").getPublicUrl(fileName);
 
             const { error: errorInsertRequest } = await supabase.from("request_db").insert({
                 status: "PENDING",
@@ -70,7 +71,8 @@ export const actions = {
                 form_id: form.data.formId,
                 reason: "",
                 created_by_id: userCookies.userId,
-                created_by: userCookies.username
+                created_by: userCookies.username,
+                form_url: fileUrl.data.publicUrl
             })
             if (error && errorInsertRequest) {
                 console.log(error, errorInsertRequest);

@@ -36,7 +36,7 @@ export const userRequestSchema = z.object({
     id: z.number(),
     userId: z.string(),
     formId: z.string(),
-    formFile: z.instanceof(File, { message: "please Upload a file" }).optional(),
+    formFile: z.instanceof(File, { message: "please Upload a file" }).refine((f) => f.size < 5 * 1024 * 1024, "Max 5 mb upload size.").optional(),
 })
 
 export type UserRequestSchema = z.infer<typeof userRequestSchema>;
@@ -82,6 +82,7 @@ export const requestDbSchema = z.object({
         email: z.string(),
     }),
     first_approver_name: z.string(),
-    second_approver_name: z.string()
+    second_approver_name: z.string(),
+    form_url: z.string(),
 })
 export type RequestDbSchema = z.infer<typeof requestDbSchema>;

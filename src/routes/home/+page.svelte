@@ -14,7 +14,7 @@
 	import { type ColumnDef, type TableOptions } from '@tanstack/svelte-table';
 	import { getCoreRowModel } from '@tanstack/table-core';
 	import { toast } from 'svelte-sonner';
-	import { fileProxy, superForm } from 'sveltekit-superforms';
+	import { fileProxy, superForm, message } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import {
@@ -30,6 +30,8 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { cn } from '$lib/utils.js';
+	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
+	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
 
 	let { data }: { data: PageData } = $props();
 	const user: UserCookiesSchema = data.user;
@@ -43,6 +45,8 @@
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
+			console.log(result);
+
 			if (result.type == 'success') {
 				toast.success('Successfully Saved', {
 					position: 'top-right',
@@ -51,7 +55,7 @@
 				goto('/home');
 				invalidateAll();
 			} else {
-				toast.info('Check Again', {
+				toast.info('Invalid Form / File size too big', {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -102,18 +106,33 @@
 		},
 		{
 			accessorKey: 'created_at',
-			accessorFn: (row) =>
-				new Date(row.created_at).toLocaleDateString('id-ID', {
-					day: '2-digit',
-					month: '2-digit',
-					year: 'numeric'
-				}),
-			header: 'Tanggal Permohonan'
+			accessorFn: (row) => row.created_at,
+			header: 'Tanggal Permohonan',
+			cell: ({ row }) => {
+				return renderComponent(DataTableMultipleRowCell, {
+					value: new Date(row.original.created_at).toLocaleDateString('id-ID', {
+						day: '2-digit',
+						month: 'short',
+						year: 'numeric'
+					}),
+					value1: new Date(row.original.created_at).toLocaleTimeString()
+				});
+			}
 		},
 		{
 			accessorKey: 'reason',
 			accessorFn: (row) => row.reason ?? '',
 			header: 'Alasan'
+		},
+		{
+			accessorKey: 'form_url',
+			accessorFn: (row) => row.form_url ?? '',
+			header: 'Form Permohonan',
+			cell: ({ row }) => {
+				console.log(row.original.form_url);
+
+				return renderComponent(DataTableLink, { url: row.original.form_url });
+			}
 		},
 		{
 			accessorKey: 'action',
@@ -271,8 +290,10 @@
 					</Form.Field>
 					<Form.Field {form} name="formFile">
 						<Form.Control let:attrs>
-							<Form.Label>Upload Form Permohonan</Form.Label>
-							<input accept="application/pdf" type="file" bind:files={$file} />
+							<div class="flex flex-col gap-5">
+								<Form.Label>{`Upload Form Permohonan (Max Size Allowed :  5mb)`}</Form.Label>
+								<input accept="application/pdf" type="file" bind:files={$file} />
+							</div>
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
