@@ -1,13 +1,13 @@
 import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from '$env/static/private';
 import { query } from "$lib/db";
+import { OtpSessionManager } from '$lib/server/sessionManager';
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
+import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { registerSchema, type UserRegistration } from "./register-schema";
-import bcrypt from "bcryptjs";
-import { sessionManager } from '$lib/server/sessionManager';
 
 export const load = async () => {
     const form = await superValidate(zod(registerSchema))
@@ -41,7 +41,7 @@ export const actions: Actions = {
                 password: pass,
                 otp: otp.toString()
             }
-            const { error, message } = await sessionManager.createSession(cookies, userRegistration, form.data.email.toString());
+            const { error, message } = await OtpSessionManager.createSession(cookies, userRegistration, form.data.email.toString());
             if (error) {
                 console.log(message);
                 return fail(400, {

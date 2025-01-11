@@ -45,8 +45,6 @@
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
-			console.log(result);
-
 			if (result.type == 'success') {
 				toast.success('Successfully Saved', {
 					position: 'top-right',
@@ -72,15 +70,6 @@
 	});
 
 	const defaultColumns: ColumnDef<RequestDbSchema>[] = [
-		{
-			accessorKey: 'id',
-			accessorFn: (row) => row.id,
-			size: 150,
-			cell: ({ row }) => {
-				return '';
-			},
-			header: ''
-		},
 		{
 			accessorKey: 'status',
 			accessorFn: (row) => row.status,
@@ -129,8 +118,6 @@
 			accessorFn: (row) => row.form_url ?? '',
 			header: 'Form Permohonan',
 			cell: ({ row }) => {
-				console.log(row.original.form_url);
-
 				return renderComponent(DataTableLink, { url: row.original.form_url });
 			}
 		},
@@ -208,6 +195,13 @@
 			triggerRef.focus();
 		});
 	}
+
+	const filterHandler = async () => {
+		await goto(`/home?${filter.length > 0 ? `filter=${filter}` : ''}`, {
+			invalidateAll: true,
+			replaceState: true
+		});
+	};
 </script>
 
 {#if user.roleId == 3 && user.roleId}
@@ -309,26 +303,11 @@
 		</Accordion.Item>
 	</Accordion.Root>
 {:else}
-	<div
-		class="m-3 mx-auto h-[600px] w-[1000px] overflow-y-scroll rounded-md border-2 border-gray-500 p-5"
-	>
-		<div class="flex flex-row items-center">
-			<div class="mx-3 my-5 flex flex-row items-center gap-5">
+	<div>
+		<div class="mx-[175px] flex flex-row items-center">
+			<div class="my-5 flex flex-row items-center gap-5">
 				<Label>Search</Label>
-				<Input
-					class="w-[100px] border-2 border-black"
-					onchange={() => {
-						debounce(
-							async () =>
-								await goto(`/home?${filter.length > 0 ? `filter=${filter}` : ''}`, {
-									invalidateAll: true,
-									replaceState: true
-								}),
-							500
-						);
-					}}
-					bind:value={filter}
-				/>
+				<Input class="w-[100px] border-2 border-black" bind:value={filter} />
 			</div>
 			<div class="mx-5 flex flex-row items-center gap-5">
 				<Label>Status</Label>
@@ -371,36 +350,48 @@
 					</Popover.Content>
 				</Popover.Root>
 			</div>
+			<button
+				onclick={filterHandler}
+				class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
+				>Filter</button
+			>
 		</div>
-		<Table.Root>
-			<Table.Header>
-				{#each table.getHeaderGroups() as headerGroup}
-					<Table.Row>
-						{#each headerGroup.headers as header}
-							<Table.Head>
-								{#if !header.isPlaceholder}
-									<FlexRender
-										content={header.column.columnDef.header}
-										context={header.getContext()}
-									/>
-								{/if}
-							</Table.Head>
-						{/each}
-					</Table.Row>
-				{/each}
-			</Table.Header>
-			<Table.Body>
-				{#each table.getRowModel().rows as row}
-					<Table.Row data-state={row.getIsSelected() && 'selected'}>
-						{#each row.getVisibleCells() as cell (cell.id)}
-							<Table.Cell>
-								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-							</Table.Cell>
-						{/each}
-					</Table.Row>
-				{/each}
-			</Table.Body>
-		</Table.Root>
+		<div
+			class="m-3 mx-auto h-[600px] w-[1000px] overflow-y-scroll rounded-md border-2 border-gray-500"
+		>
+			<Table.Root>
+				<Table.Header class="bg-gradient-to-br from-cyan-500 to-blue-800">
+					{#each table.getHeaderGroups() as headerGroup}
+						<Table.Row>
+							{#each headerGroup.headers as header}
+								<Table.Head
+									class="border-l-[1px] p-5 text-white first:border-none"
+									style="width: {header.column.getSize()}px"
+								>
+									{#if !header.isPlaceholder}
+										<FlexRender
+											content={header.column.columnDef.header}
+											context={header.getContext()}
+										/>
+									{/if}
+								</Table.Head>
+							{/each}
+						</Table.Row>
+					{/each}
+				</Table.Header>
+				<Table.Body>
+					{#each table.getRowModel().rows as row}
+						<Table.Row data-state={row.getIsSelected() && 'selected'}>
+							{#each row.getVisibleCells() as cell (cell.id)}
+								<Table.Cell class="border-l-[1px] first:border-none">
+									<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+								</Table.Cell>
+							{/each}
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
 	</div>
 {/if}
 

@@ -1,9 +1,10 @@
+import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail } from '@sveltejs/kit';
 import bcrypt from 'bcryptjs';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { UserDbSchema } from "../home/user-schema";
+import type { UserCookiesSchema, UserDbSchema } from "../home/user-schema";
 import { loginSchema } from "./login-schema";
 
 export const load = async () => {
@@ -30,16 +31,23 @@ export const actions = {
             }
 
             const matchPassword = await bcrypt.compare(form.data.password.toString(), user.password);
-
+            const userSession: UserCookiesSchema = {
+                id: user.id,
+                userId: user.user_id,
+                email: user.email,
+                username: user.username,
+                roleId: user.role_id,
+            }
             if ((form.data.email == user.email && !matchPassword)) {
                 return fail(400, { data: form })
             }
             else if (form.data.email == user.email && matchPassword) {
-                cookies.set("user", JSON.stringify({ userId: user.user_id, email: user.email, username: user.username, roleId: user.role_id }), {
-                    path: "/",
-                    httpOnly: true,
-                    maxAge: 60 * 60 * 5 // cookies max 5 jam
-                });
+                const { error, message } = await sessionManager.createSession(cookies, userSession, user.user_id);
+                if (error) {
+                    return fail(400, {
+                        message
+                    })
+                }
                 return form;
             }
         } catch (error) {

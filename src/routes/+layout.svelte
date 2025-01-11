@@ -24,7 +24,10 @@
 
 <div>
 	{#if data.isLoggedIn}
-		<nav class="navbar w-full bg-gradient-to-br from-cyan-500 to-blue-800 text-white">
+		<nav
+			class="navbar w-full bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
+			data-sveltekit-reload
+		>
 			<div class="sm:hidden md:hidden lg:block">
 				<div class="flex flex-row items-center">
 					<div class="flex items-center gap-5">
@@ -53,6 +56,12 @@
 										<p class="text-xs leading-none text-muted-foreground">{user?.email}</p>
 									</div>
 								</DropdownMenu.Label>
+								{#if user?.roleId == 3}
+									<DropdownMenu.Separator />
+									<DropdownMenu.Label>
+										<span><a href={`/user/request/${user.id}`}>Permohonan Saya</a></span>
+									</DropdownMenu.Label>
+								{/if}
 								<DropdownMenu.Separator />
 								<button
 									type="submit"

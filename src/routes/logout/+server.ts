@@ -1,8 +1,6 @@
 
-export async function POST({ cookies }) {
+export async function POST() {
     try {
-        cookies.delete("user", { path: "/" });
-        console.log("tes");
         return new Response(null, {
             status: 303,
             headers: { Location: "/" }

@@ -12,6 +12,7 @@ export const userDbSchema = z.object({
 export type UserDbSchema = z.infer<typeof userDbSchema>;
 
 export const userCookiesSchema = z.object({
+    id:z.number(),
     userId: z.string(),
     email: z.string(),
     username: z.string(),

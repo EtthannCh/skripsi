@@ -1,10 +1,10 @@
-import { sessionManager } from "$lib/server/sessionManager";
+import { OtpSessionManager, sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail, redirect } from "@sveltejs/kit";
 import type { UserRegistration } from "../register/register-schema";
 
 export const load = async ({ cookies }) => {
-    const userCookies: UserRegistration = (await sessionManager.getSession(await cookies)).data;
+    const userCookies: UserRegistration = (await OtpSessionManager.getSession(await cookies)).data;
     if (!userCookies) {
         throw redirect(303, "/");
     }
@@ -22,7 +22,7 @@ export const actions = {
         const data = await request.formData();
         const otp = data.get("otp");
 
-        const userCookies: UserRegistration = (await sessionManager.getSession(await cookies)).data;
+        const userCookies: UserRegistration = (await OtpSessionManager.getSession(await cookies)).data;
         if (otp != userCookies.otp) {
             return fail(400, { message: "Invalid OTP" });
         }

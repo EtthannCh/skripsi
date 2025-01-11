@@ -4,9 +4,10 @@ import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { PageServerLoad } from "./$types";
 import { userRequestSchema, type FormSchema, type RequestDbSchema, type UserCookiesSchema } from "./user-schema";
+import { sessionManager } from "$lib/server/sessionManager";
 
 export const load: PageServerLoad = async ({ cookies, url }) => {
-    const user: UserCookiesSchema = JSON.parse(cookies.get("user") ?? "");
+    const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data ;
     if (!user) {
         throw redirect(304, "/login");
     }
