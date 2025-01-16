@@ -14,12 +14,13 @@
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.4",
+		"@internationalized/date": "^3.6.0",
 		"@sveltejs/adapter-vercel": "^5.5.2",
 		"@sveltejs/kit": "^2.15.1",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
 		"@types/pg": "^8.11.10",
 		"autoprefixer": "^10.4.20",
-		"bits-ui": "1.0.0-next.76",
+		"bits-ui": "1.0.0-next.77",
 		"clsx": "^2.1.1",
 		"eslint": "^9.17.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -64,6 +65,7 @@
 		"pg": "^8.13.1",
 		"shadcn-svelte": "^0.14.0",
 		"svelte-headless-table": "^0.18.3",
+		"svelte-loading-spinners": "^0.3.6",
 		"svelte-pdf-simple": "^2.0.0",
 		"ts-node": "^10.9.2"
 	}

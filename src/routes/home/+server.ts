@@ -1,9 +1,10 @@
 import { fail, json, type RequestHandler } from "@sveltejs/kit";
 import type { UserCookiesSchema } from "./user-schema";
 import { supabase } from "$lib/supabaseClient";
+import { sessionManager } from "$lib/server/sessionManager";
 
 export const POST: RequestHandler = async ({ cookies, request }) => {
-    const user: UserCookiesSchema = JSON.parse(cookies.get("user") ?? "");
+    const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
     const { status, id } = await request.json();
     if (!user || user.roleId == 3) {
         throw fail(400);
@@ -16,6 +17,7 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
                 first_approver_name: user.username,
                 first_approved_at: new Date().toLocaleDateString()
             }).eq("id", id);
+            // email admin sesuai dengan prodi yang sama
         if (error) {
             console.log(error);
             throw fail(400, { message: "Update Unsuccessfull" })
@@ -29,6 +31,7 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
                 second_approver_name: user.username,
                 second_approved_at: new Date().toLocaleDateString()
             }).eq("id", id);
+            // send email to student
         if (error) {
             console.log(error);
             throw fail(400, { message: "Update Unsuccessfull" })

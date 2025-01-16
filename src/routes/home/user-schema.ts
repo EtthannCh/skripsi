@@ -6,17 +6,19 @@ export const userDbSchema = z.object({
     username: z.string().max(100),
     password: z.string().max(200),
     email: z.string().max(200),
-    role_id: z.number()
+    role_id: z.number(),
+    major_id: z.number(),
 });
 
 export type UserDbSchema = z.infer<typeof userDbSchema>;
 
 export const userCookiesSchema = z.object({
-    id:z.number(),
+    id: z.number(),
     userId: z.string(),
     email: z.string(),
     username: z.string(),
-    roleId: z.number()
+    roleId: z.number(),
+    majorId: z.number()
 })
 
 export type UserCookiesSchema = z.infer<typeof userCookiesSchema>;
@@ -77,10 +79,12 @@ export const requestDbSchema = z.object({
     created_by: z.string(),
     created_at: z.string(),
     form_db: z.object({
-        code: z.string()
+        code: z.string(),
+        name: z.string(),
     }),
     user_credentials: z.object({
         email: z.string(),
+        user_pkey: z.string(),
     }),
     first_approver_name: z.string(),
     second_approver_name: z.string(),

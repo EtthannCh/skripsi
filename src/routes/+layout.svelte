@@ -4,6 +4,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import '../app.css';
 	import type { UserCookiesSchema } from './home/user-schema';
+	import uphLogo from '../lib/assets/images/uph_logo.jpg';
 	let { children, data } = $props();
 	const user: UserCookiesSchema | undefined = data.user;
 	let isDrawerOpen = $state(false);
@@ -32,11 +33,7 @@
 				<div class="flex flex-row items-center">
 					<div class="flex items-center gap-5">
 						<div>
-							<img
-								src="src/lib/assets/images/uph_logo.jpg"
-								alt="logo uph"
-								class="h-10 w-10 rounded-full"
-							/>
+							<img src={uphLogo} alt="logo uph" class="h-10 w-10 rounded-full" />
 						</div>
 						<div>
 							<span class="text-white">Universitas Pelita Harapan Medan Campus</span>
@@ -107,7 +104,7 @@
 	<div class="drawer h-full w-full">
 		<input id="my-drawer-3" type="checkbox" bind:checked={isDrawerOpen} class="drawer-toggle" />
 		<div class="drawer-content flex flex-col items-center justify-center">
-			<main class="w-full">
+			<main class="h-full w-full">
 				{@render children?.()}
 			</main>
 		</div>

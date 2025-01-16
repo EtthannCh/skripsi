@@ -37,6 +37,7 @@ export const actions = {
                 email: user.email,
                 username: user.username,
                 roleId: user.role_id,
+                majorId: user.major_id,
             }
             if ((form.data.email == user.email && !matchPassword)) {
                 return fail(400, { data: form })

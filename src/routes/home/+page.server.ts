@@ -7,12 +7,13 @@ import { userRequestSchema, type FormSchema, type RequestDbSchema, type UserCook
 import { sessionManager } from "$lib/server/sessionManager";
 
 export const load: PageServerLoad = async ({ cookies, url }) => {
-    const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data ;
+    const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
     if (!user) {
         throw redirect(304, "/login");
     }
 
     const filter = url.searchParams.get("filter") ?? "";
+    const status = url.searchParams.get("status") ?? "";
     const filterQuery = filter.length > 0 ? `%${filter.toUpperCase()}%` : "";
     const form = await superValidate(zod(userRequestSchema));
     const formDbData = await supabase.from("form_db").select();
@@ -20,13 +21,16 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
     let query = (supabase.from("request_db")
         .select(
             `id, status, user_id, form_id, 
-            reason, created_by, created_at, form_db(code), user_credentials(email),
+            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),
             first_approver_name, second_approver_name, form_url
             `
         ).order("created_at", { ascending: true })
     );
     if (filter.length > 0) {
         query = query.or(`created_by.ilike.${filterQuery}`)
+    }
+    if (status.length > 0) {
+        query = query.eq(`status`, status)
     }
     const requestDbDataFromDb = (await query).data;
     let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));

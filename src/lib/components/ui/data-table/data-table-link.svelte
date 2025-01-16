@@ -1,7 +1,8 @@
 <script lang="ts">
-	let { url }: { url: string } = $props();
+	let { url, label, blank }: { url: string; label: string; blank?: boolean } = $props();
 </script>
 
 <div>
-	<a href={`${url}`} target="_blank" class="hover:underline">Link PDF</a>
+	<a href={`${url}`} target={blank ? `_blank` : ''} class="underline hover:text-gray-400">{label}</a
+	>
 </div>

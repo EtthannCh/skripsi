@@ -1,20 +1,37 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import { navigating } from '$app/state';
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Command from '$lib/components/ui/command/index.js';
 	import { createSvelteTable, FlexRender, renderComponent } from '$lib/components/ui/data-table';
-	import DataTableActions from '$lib/components/ui/data-table/data-table-actions.svelte';
+	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
+	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import { RangeCalendar } from '$lib/components/ui/range-calendar/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
+	import { cn } from '$lib/utils.js';
+	import {
+		CalendarDate,
+		DateFormatter,
+		getLocalTimeZone,
+		type DateValue
+	} from '@internationalized/date';
 	import { type ColumnDef, type TableOptions } from '@tanstack/svelte-table';
 	import { getCoreRowModel } from '@tanstack/table-core';
+	import CalendarIcon from 'lucide-svelte/icons/calendar';
+	import Check from 'lucide-svelte/icons/check';
+	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
+	import { tick } from 'svelte';
+	import { Stretch } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
-	import { fileProxy, superForm, message } from 'sveltekit-superforms';
+	import { fileProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import {
@@ -23,16 +40,16 @@
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './user-schema';
-	import { debounce } from '$lib/utils';
-	import Check from 'lucide-svelte/icons/check';
-	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
-	import { tick } from 'svelte';
-	import * as Command from '$lib/components/ui/command/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import { cn } from '$lib/utils.js';
-	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
-	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
 
+	const df = new DateFormatter('en-US', {
+		dateStyle: 'long'
+	});
+
+	let calenderValue = $state({
+		start: new CalendarDate(2022, 1, 20),
+		end: new CalendarDate(2022, 1, 20).add({ days: 20 })
+	});
+	let startValue: DateValue | undefined = $state(undefined);
 	let { data }: { data: PageData } = $props();
 	const user: UserCookiesSchema = data.user;
 	let submitPressed = $state(false);
@@ -73,30 +90,40 @@
 		{
 			accessorKey: 'status',
 			accessorFn: (row) => row.status,
-			header: 'Status Permohonan',
-			size: 100
+			header: 'Application Status',
+			size: 100,
+			cell: ({ row }) => {
+				return row.original.status.split('_').join(' ');
+			}
 		},
 		{
 			accessorKey: 'user_name',
 			accessorFn: (row) => row.created_by,
-			header: 'Nama Pemohon',
-			size: 100
-		},
-		{
-			accessorKey: 'nim',
-			accessorFn: (row) => row.user_credentials.email.split('@')[0],
-			header: 'NIM Pemohon'
+			header: "Applicant's Name",
+			size: 200,
+			cell: ({ row }) => {
+				return renderComponent(DataTableMultipleRowCell, {
+					value: `Name : ${row.original.created_by}`,
+					value2: `NIM : ${row.original.user_credentials.email.split('@')[0]}`
+				});
+			}
 		},
 		{
 			accessorKey: 'form_code',
 			accessorFn: (row) => row.form_db.code,
-			header: 'Kode Form',
-			size: 100
+			header: 'Form Details',
+			cell: ({ row }) => {
+				return renderComponent(DataTableMultipleRowCell, {
+					value: `Name : ${row.original.form_db.name}`,
+					value2: `Code : ${row.original.form_db.code}`
+				});
+			},
+			size: 200
 		},
 		{
 			accessorKey: 'created_at',
 			accessorFn: (row) => row.created_at,
-			header: 'Tanggal Permohonan',
+			header: 'Date of Request',
 			cell: ({ row }) => {
 				return renderComponent(DataTableMultipleRowCell, {
 					value: new Date(row.original.created_at).toLocaleDateString('id-ID', {
@@ -106,39 +133,43 @@
 					}),
 					value1: new Date(row.original.created_at).toLocaleTimeString()
 				});
-			}
-		},
-		{
-			accessorKey: 'reason',
-			accessorFn: (row) => row.reason ?? '',
-			header: 'Alasan'
+			},
+			size: 200
 		},
 		{
 			accessorKey: 'form_url',
 			accessorFn: (row) => row.form_url ?? '',
-			header: 'Form Permohonan',
+			header: 'Application File',
 			cell: ({ row }) => {
-				return renderComponent(DataTableLink, { url: row.original.form_url });
+				return renderComponent(DataTableLink, {
+					url: row.original.form_url,
+					label: 'Link PDF',
+					blank: true
+				});
 			}
 		},
 		{
 			accessorKey: 'action',
 			header: '',
 			cell: ({ row }) => {
-				if (
-					row.original.status == 'REJECTED' ||
-					row.original.status == 'APPROVED' ||
-					(row.original.status == 'AWAITING_APPROVAL' && user.roleId != 2) ||
-					(row.original.status == 'PENDING' && user.roleId != 1)
-				) {
-					return;
-				} else {
-					return renderComponent(DataTableActions, {
-						id: row.original.id.toString(),
-						approveFunc: async () => handleActions(user.roleId.toString(), row.original.id),
-						rejectFunc: async () => handleActions('REJECTED', row.original.id)
-					});
-				}
+				return renderComponent(DataTableLink, {
+					url: `/user/${row.original.user_credentials.user_pkey}/detail/${row.original.id}`,
+					label: 'Detail'
+				});
+				// if (
+				// 	row.original.status == 'REJECTED' ||
+				// 	row.original.status == 'APPROVED' ||
+				// 	(row.original.status == 'AWAITING_APPROVAL' && user.roleId != 2) ||
+				// 	(row.original.status == 'PENDING' && user.roleId != 1)
+				// ) {
+				// 	return;
+				// } else {
+				// 	return renderComponent(DataTableActions, {
+				// 		id: row.original.id.toString(),
+				// 		approveFunc: async () => handleActions(user.roleId.toString(), row.original.id),
+				// 		rejectFunc: async () => handleActions('REJECTED', row.original.id)
+				// 	});
+				// }
 			}
 		}
 	];
@@ -188,6 +219,7 @@
 	};
 
 	let filter: string = $state('');
+	let statusValue: string = $state('');
 
 	function closeAndFocusTrigger() {
 		open = false;
@@ -197,7 +229,7 @@
 	}
 
 	const filterHandler = async () => {
-		await goto(`/home?${filter.length > 0 ? `filter=${filter}` : ''}`, {
+		await goto(`/home?filter=${filter}&status=${statusValue}`, {
 			invalidateAll: true,
 			replaceState: true
 		});
@@ -306,11 +338,9 @@
 	<div>
 		<div class="mx-[175px] flex flex-row items-center">
 			<div class="my-5 flex flex-row items-center gap-5">
-				<Label>Search</Label>
-				<Input class="w-[100px] border-2 border-black" bind:value={filter} />
+				<Input class="w-[100px] border-2 border-black" bind:value={filter} placeholder="Search" />
 			</div>
 			<div class="mx-5 flex flex-row items-center gap-5">
-				<Label>Status</Label>
 				<Popover.Root bind:open>
 					<Popover.Trigger bind:ref={triggerRef}>
 						{#snippet child({ props })}
@@ -330,13 +360,13 @@
 						<Command.Root>
 							<Command.Input placeholder="Cari Status..." />
 							<Command.List>
-								<Command.Empty>No framework found.</Command.Empty>
 								<Command.Group>
 									{#each requestDbStatusCombobox as status}
 										<Command.Item
 											value={status.value}
 											onSelect={() => {
 												value = status.value;
+												statusValue = status.value;
 												closeAndFocusTrigger();
 											}}
 										>
@@ -349,18 +379,68 @@
 						</Command.Root>
 					</Popover.Content>
 				</Popover.Root>
+				<div class="grid gap-2">
+					<Popover.Root>
+						<Popover.Trigger
+							class={cn(
+								buttonVariants({ variant: 'outline' }),
+								!calenderValue && 'text-muted-foreground'
+							)}
+						>
+							<CalendarIcon class="mr-2 size-4" />
+							{#if calenderValue && calenderValue.start}
+								{#if calenderValue.end}
+									{df.format(calenderValue.start.toDate(getLocalTimeZone()))} - {df.format(
+										calenderValue.end.toDate(getLocalTimeZone())
+									)}
+								{:else}
+									{df.format(calenderValue.start.toDate(getLocalTimeZone()))}
+								{/if}
+							{:else if startValue}
+								{df.format(startValue.toDate(getLocalTimeZone()))}
+							{:else}
+								Pick a date
+							{/if}
+						</Popover.Trigger>
+						<Popover.Content class="w-auto p-0" align="start">
+							<RangeCalendar
+								bind:value={calenderValue}
+								onStartValueChange={(v) => {
+									startValue = v;
+								}}
+								numberOfMonths={2}
+							/>
+						</Popover.Content>
+					</Popover.Root>
+				</div>
 			</div>
-			<button
-				onclick={filterHandler}
-				class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
-				>Filter</button
-			>
+			<div class="flex flex-row items-center gap-5">
+				<button
+					onclick={filterHandler}
+					class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
+					>Filter</button
+				>
+				<button
+					class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
+					onclick={() => {
+						filter = '';
+						statusValue = '';
+						filterHandler();
+					}}
+					>Reset
+				</button>
+				{#if navigating.to}
+					<div class="mb-4 h-10">
+						<Stretch color="#314986" />
+					</div>
+				{/if}
+			</div>
 		</div>
 		<div
-			class="m-3 mx-auto h-[600px] w-[1000px] overflow-y-scroll rounded-md border-2 border-gray-500"
+			class="border-gray-500s m-3 mx-auto max-h-[500px] w-[1000px] overflow-y-scroll rounded-md border-2"
 		>
 			<Table.Root>
-				<Table.Header class="bg-gradient-to-br from-cyan-500 to-blue-800">
+				<Table.Header class="bg-uph">
 					{#each table.getHeaderGroups() as headerGroup}
 						<Table.Row>
 							{#each headerGroup.headers as header}

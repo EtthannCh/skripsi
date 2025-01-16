@@ -47,7 +47,10 @@ const config: Config = {
 				card: {
 					DEFAULT: "hsl(var(--card) / <alpha-value>)",
 					foreground: "hsl(var(--card-foreground) / <alpha-value>)"
-				}
+				},
+				uph: '#022c76',
+				uphButton: '#3e74c5',
+				uphRedButton: '#e72f51'
 			},
 			borderRadius: {
 				lg: "var(--radius)",
