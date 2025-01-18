@@ -2,11 +2,10 @@ import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail, json, type RequestHandler } from "@sveltejs/kit";
 import type { UserCookiesSchema } from "../../../../home/user-schema";
-import { message } from "sveltekit-superforms";
 
 export const POST: RequestHandler = async ({ cookies, request }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
-    const { status, requestId, action } = await request.json();
+    const { status, requestId} = await request.json();
     if (!user || user.roleId == 3) {
         throw fail(400);
     }
