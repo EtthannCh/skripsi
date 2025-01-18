@@ -14,7 +14,7 @@
 	}
 </script>
 
-<Toaster position="top-center"></Toaster>
+<Toaster position="top-center" class="absolute top-0"></Toaster>
 <head>
 	<link
 		href="https://cdn.jsdelivr.net/npm/daisyui@2/dist/full.css"
@@ -26,7 +26,7 @@
 <div>
 	{#if data.isLoggedIn}
 		<nav
-			class="navbar w-full bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
+			class="navbar w-full bg-uph text-white"
 			data-sveltekit-reload
 		>
 			<div class="sm:hidden md:hidden lg:block">
@@ -113,7 +113,7 @@
 			<ul class="menu w-80 overflow-y-auto bg-white p-4">
 				<li class="lg:hidden">
 					<img
-						src="src/lib/assets/images/uph_logo.jpg"
+						src={uphLogo}
 						alt="logo uph"
 						class="swap-off h-20 w-24 rounded-full"
 					/>

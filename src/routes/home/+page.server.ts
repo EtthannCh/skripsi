@@ -14,15 +14,18 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 
     const filter = url.searchParams.get("filter") ?? "";
     const status = url.searchParams.get("status") ?? "";
+    const startDate = url.searchParams.get("startDate") ?? "";
+    const endDate = url.searchParams.get("endDate") ?? "";
     const filterQuery = filter.length > 0 ? `%${filter.toUpperCase()}%` : "";
+
     const form = await superValidate(zod(userRequestSchema));
+
     const formDbData = await supabase.from("form_db").select();
     const formSelection: FormSchema[] = JSON.parse(JSON.stringify(formDbData.data));
     let query = (supabase.from("request_db")
         .select(
             `id, status, user_id, form_id, 
-            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),
-            first_approver_name, second_approver_name, form_url
+            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url
             `
         ).order("created_at", { ascending: true })
     );
@@ -32,6 +35,10 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
     if (status.length > 0) {
         query = query.eq(`status`, status)
     }
+    if (startDate ) {
+        query = query.lte("created_at", new Date(endDate).toISOString()).gte("created_at", new Date(startDate).toISOString())
+    }
+    
     const requestDbDataFromDb = (await query).data;
     let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));
     if (user.roleId == 3 || !user.roleId) {

@@ -44,20 +44,24 @@
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
 	});
+	const currentDate = new Date();
 
 	let calenderValue = $state({
-		start: new CalendarDate(2022, 1, 20),
-		end: new CalendarDate(2022, 1, 20).add({ days: 20 })
+		start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
+		end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1).add({ days: 20 })
 	});
 	let startValue: DateValue | undefined = $state(undefined);
+
 	let { data }: { data: PageData } = $props();
+
 	const user: UserCookiesSchema = data.user;
+
 	let submitPressed = $state(false);
 	let open = $state(false);
-	let value = $state('');
+	let statusValue = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
 
-	const selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === value)?.label);
+	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
 
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
@@ -219,7 +223,6 @@
 	};
 
 	let filter: string = $state('');
-	let statusValue: string = $state('');
 
 	function closeAndFocusTrigger() {
 		open = false;
@@ -229,10 +232,13 @@
 	}
 
 	const filterHandler = async () => {
-		await goto(`/home?filter=${filter}&status=${statusValue}`, {
-			invalidateAll: true,
-			replaceState: true
-		});
+		await goto(
+			`/home?filter=${filter}&status=${statusValue}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}`,
+			{
+				invalidateAll: true,
+				replaceState: true
+			}
+		);
 	};
 </script>
 
@@ -365,12 +371,16 @@
 										<Command.Item
 											value={status.value}
 											onSelect={() => {
-												value = status.value;
-												statusValue = status.value;
+												if (statusValue && statusValue == status.value) {
+													statusValue = '';
+												} else {
+													statusValue = status.value;
+												}
+
 												closeAndFocusTrigger();
 											}}
 										>
-											<Check class={cn(value !== status.value && 'text-transparent')} />
+											<Check class={cn(statusValue !== status.value && 'text-transparent')} />
 											{status.label}
 										</Command.Item>
 									{/each}
@@ -408,7 +418,7 @@
 								onStartValueChange={(v) => {
 									startValue = v;
 								}}
-								numberOfMonths={2}
+								numberOfMonths={3}
 							/>
 						</Popover.Content>
 					</Popover.Root>
@@ -425,6 +435,12 @@
 					onclick={() => {
 						filter = '';
 						statusValue = '';
+						calenderValue = {
+							start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
+							end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1).add({
+								days: 20
+							})
+						};
 						filterHandler();
 					}}
 					>Reset
