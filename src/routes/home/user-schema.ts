@@ -48,7 +48,11 @@ export const requestDbStatusEnum = {
     PENDING: "PENDING",
     APPROVED: "APPROVED",
     REJECTED: "REJECTED",
-    AWAITING_APPROVAL: "AWAITING_APPROVAL"
+    ONGOING: "ONGOING",
+    PROCESSING: "PROCESSING",
+    COMPLETED: "COMPLETED",
+    AWAITING_FINALIZED: "AWAITING FINALIZED",
+    FINALIZED: "FINALIZED"
 };
 
 export const requestDbStatusCombobox = [
@@ -65,8 +69,16 @@ export const requestDbStatusCombobox = [
         value: "REJECTED",
     },
     {
-        label: "Awaiting Approval",
-        value: "AWAITING_APPROVAL",
+        label: "Ongoing",
+        value: "ONGOING"
+    },
+    {
+        label: "Processing",
+        value: "PROCESSING",
+    },
+    {
+        label: "Completed",
+        value: "COMPLETED",
     }
 ]
 

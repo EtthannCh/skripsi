@@ -36,10 +36,12 @@
 	import type { PageData } from './$types';
 	import {
 		requestDbStatusCombobox,
+		requestDbStatusEnum,
 		userRequestSchema,
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './user-schema';
+	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -60,6 +62,17 @@
 	let open = $state(false);
 	let statusValue = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
+
+	const requestEnumColor = {
+		PENDING: 'bg-gray-300 text-gray-900',
+		APPROVED: 'bg-blue-500 text-white',
+		REJECTED: 'bg-red-500 text-red-900',
+		ONGOING: 'bg-yellow-300 text-yellow-800',
+		PROCESSING: '',
+		COMPLETED: 'bg-green-500 text-white',
+		AWAITING_FINALIZED: 'bg-teal-500 text-teal-900',
+		FINALIZED: 'bg-green-500 text-green-900'
+	};
 
 	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
 
@@ -97,7 +110,11 @@
 			header: 'Application Status',
 			size: 100,
 			cell: ({ row }) => {
-				return row.original.status.split('_').join(' ');
+				return renderComponent(DataTableBadgeCell, {
+					value: requestDbStatusEnum[row.original.status],
+					className: requestEnumColor[row.original.status]
+				});
+				// return row.original.status.split('_').join(' ');
 			}
 		},
 		{

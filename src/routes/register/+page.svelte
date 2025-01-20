@@ -41,28 +41,28 @@
 				<Form.Field {form} name="username">
 					<Form.Control let:attrs>
 						<Form.Label>Username</Form.Label>
-						<Input {...attrs} bind:value={$formData.username} />
+						<Input {...attrs} bind:value={$formData.username} class="text-black"/>
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
 				<Form.Field {form} name="email">
 					<Form.Control let:attrs>
 						<Form.Label>Email</Form.Label>
-						<Input {...attrs} bind:value={$formData.email} />
+						<Input {...attrs} bind:value={$formData.email} class="text-black" />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
 				<Form.Field {form} name="password">
 					<Form.Control let:attrs>
 						<Form.Label>Password</Form.Label>
-						<Input {...attrs} bind:value={$formData.password} type="password" />
+						<Input {...attrs} bind:value={$formData.password} type="password" class="text-black"/>
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
 				<Form.Field {form} name="confirmPassword">
 					<Form.Control let:attrs>
 						<Form.Label>Confirm Password</Form.Label>
-						<Input {...attrs} bind:value={$formData.confirmPassword} type="password" />
+						<Input {...attrs} bind:value={$formData.confirmPassword} type="password" class="text-black"/>
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>

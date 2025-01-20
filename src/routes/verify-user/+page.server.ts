@@ -16,7 +16,7 @@ export const load = async ({ cookies }) => {
 
 export const actions = {
     verify: async ({ cookies, request }) => {
-        if (!cookies.get("session")) {
+        if (!cookies.get("otpSession")) {
             throw redirect(304, "/");
         }
         const data = await request.formData();
@@ -30,7 +30,8 @@ export const actions = {
             .insert({
                 username: userCookies.username,
                 email: userCookies.email,
-                password: userCookies.password
+                password: userCookies.password,
+                major_id:1
             });
 
         if (error) {

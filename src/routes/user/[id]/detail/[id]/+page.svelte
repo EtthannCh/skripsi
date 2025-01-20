@@ -18,6 +18,7 @@
 	import { approveRejectSchema } from './user-detail-schema';
 	import { page } from '$app/stores';
 	import { FileText } from 'lucide-svelte';
+	import { spring } from 'svelte/motion';
 
 	let { data }: { data: PageData } = $props();
 
@@ -26,7 +27,7 @@
 		dataType: 'json'
 	});
 
-	const { form: formData, enhance } = form;
+	const { form: formData } = form;
 	const file = fileProxy(form, 'approvalFile');
 
 	const handleActions = async (requestId: number, status: string, action: string) => {
@@ -51,10 +52,16 @@
 	};
 
 	const processArray = [
-		'Date of Approval (By Head of Department)',
-		'Date of Process (By Admin)',
-		'Date of Completion (By Admin)',
-		'Date Delivered (To Student)'
+		'Date of Approval',
+		'Date of Process',
+		'Date of Completion',
+		'Date Delivered'
+	];
+	const processCaptionArray = [
+		'(By Head of Department)',
+		'(By Admin)',
+		'(By Admin)',
+		'(To Student)'
 	];
 	let files: FileList | null = $state(null);
 </script>
@@ -142,63 +149,94 @@
 							</Label>
 						</div>
 						<div class="lg:w-[300px]">
-							{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'AWAITING_APPROVAL' && data.user?.roleId == 2)}
-								<Tabs.Root value="account" class="flex flex-col justify-between">
-									<Tabs.List class="grid w-full grid-cols-2">
-										<Tabs.Trigger value="approve"
-											><strong class="text-black">Approve</strong></Tabs.Trigger
-										>
-										<Tabs.Trigger value="reject"
-											><strong class="text-black">Reject</strong></Tabs.Trigger
-										>
-									</Tabs.List>
-									<Tabs.Content value="approve">
-										<Card.Root>
-											<Card.Content class="space-y-2">
-												<div class="space-y-1">
-													<Label for="approvalFile">Approval Form</Label>
-													<Input
-														id="approvalFile"
-														type="file"
-														accept="application/pdf"
-														bind:value={files}
-													/>
-												</div>
-											</Card.Content>
-											<Card.Footer>
-												<Button
-													disabled={!files}
-													onclick={() => {
-														handleActions(
-															data.requestData?.id ?? 0,
-															data.requestData?.status ?? '',
-															'APPROVE'
-														);
-													}}>Approve Application</Button
-												>
-											</Card.Footer>
-										</Card.Root>
-									</Tabs.Content>
-									<Tabs.Content value="reject">
-										<Card.Root>
-											<Card.Content class="space-y-2">
-												<div class="space-y-1">
-													<Label for="reason">Reason</Label>
-													<Input
-														id="reason"
-														type="text"
-														placeholder="Reason of Rejection"
-														bind:value={$formData.reason}
-													/>
-												</div>
-											</Card.Content>
-											<Card.Footer>
-												<Button>Reject Application</Button>
-											</Card.Footer>
-										</Card.Root>
-									</Tabs.Content>
-								</Tabs.Root>
-							{/if}
+							<form action="">
+								{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
+									<Tabs.Root value="account" class="flex flex-col justify-between">
+										<Tabs.List class="grid w-full grid-cols-2">
+											<Tabs.Trigger value="approve"
+												><strong class="text-black">
+													{#if data.requestData.status == 'ONGOING'}
+														<span>Process</span>
+													{:else if data.requestData.status == 'PROCESSING'}
+														<span>Complete Process</span>
+													{:else}
+														<span>Aprove</span>
+													{/if}
+												</strong></Tabs.Trigger
+											>
+											<Tabs.Trigger value="reject"
+												><strong class="text-black">Reject</strong></Tabs.Trigger
+											>
+										</Tabs.List>
+										<Tabs.Content value="approve">
+											<Card.Root>
+												{#if data.requestData.status != 'ONGOING' && data.requestData.status != 'PENDING'}
+													<Card.Content class="space-y-2">
+														<div class="space-y-1">
+															<Label for="approvalFile">Approval Form</Label>
+															<Input
+																id="approvalFile"
+																type="file"
+																accept="application/pdf"
+																bind:value={files}
+															/>
+														</div>
+													</Card.Content>
+												{/if}
+												<Card.Footer>
+													<Button
+														disabled={!files && data.requestData.status == 'PROCESSING'}
+														onclick={() => {
+															handleActions(
+																data.requestData?.id ?? 0,
+																data.requestData?.status ?? '',
+																data.requestData?.status == 'ONGOING'
+																	? 'ONGOING'
+																	: data.requestData?.status == 'PROCESSING'
+																		? 'PROCESSING'
+																		: data.requestData?.status == 'COMPLETED'
+																			? 'COMPLETED'
+																			: 'APPROVE'
+															);
+														}}
+														>{#if data.requestData.status == 'ONGOING'}
+															<span>Process</span>
+														{:else if data.requestData.status == 'PROCESSING'}
+															<span>Complete</span>
+														{:else}
+															<span>Aprove</span>
+														{/if}
+														Application
+													</Button>
+												</Card.Footer>
+											</Card.Root>
+										</Tabs.Content>
+										{#if data.requestData.status == 'PROCESSING'}
+											<Tabs.Content value="reject">
+												<Card.Root>
+													<Card.Content class="space-y-2">
+														<div class="space-y-1">
+															<Label for="reason">Reason</Label>
+															<Input
+																id="reason"
+																type="text"
+																disabled={data.requestData.status == 'PROCESSING'}
+																placeholder="Reason of Rejection"
+																bind:value={$formData.reason}
+															/>
+														</div>
+													</Card.Content>
+													<Card.Footer>
+														<Button disabled={data.requestData.status == 'PROCESSING'}
+															>Reject Application</Button
+														>
+													</Card.Footer>
+												</Card.Root>
+											</Tabs.Content>
+										{/if}
+									</Tabs.Root>
+								{/if}
+							</form>
 						</div>
 					</div>
 				</Card.Content>
@@ -219,7 +257,8 @@
 			<div class="scrollbar-hidden flex flex-row gap-5">
 				<Label class="text-lg">
 					<div class="flex flex-col items-start justify-between gap-5">
-						<span>Date of Submission</span>
+						<span class="text-xl">Date of Submission</span>
+						<span></span>
 						<span class="flex flex-col">
 							<span
 								>{data.requestData?.created_at
@@ -227,31 +266,36 @@
 											day: '2-digit',
 											month: 'short',
 											year: 'numeric'
-										})} (${new Date(data.requestData.created_at).toLocaleTimeString()})`
+										})}`
 									: ''}</span
 							>
 						</span>
 					</div>
 				</Label>
-				{#each data.requetsHistoryData ?? [] as historyData, idx}
-					<Label class="text-lg">
-						<div class="flex flex-col items-start justify-between gap-5">
-							<span>{processArray[idx]}</span>
-							<span class="flex flex-col">
-								<span
-									>{historyData.created_at
-										? `${new Date(historyData.created_at).toLocaleDateString('id-ID', {
-												day: '2-digit',
-												month: 'short',
-												year: 'numeric'
-											})} (${new Date(historyData.created_at).toLocaleTimeString()})`
-										: 'No Data'}</span
-								>
-								<span> {historyData.file_url} </span>
-							</span>
-						</div>
-					</Label>
-				{/each}
+				<div class="flex justify-between gap-6">
+					{#each data.requetsHistoryData ?? [] as historyData, idx}
+						<Label class="text-lg ">
+							<div class="flex flex-col items-start justify-between gap-5">
+								<div class="flex flex-col">
+									<span class="text-xl">{processArray[idx]}</span>
+									<span class="text-sm">{processCaptionArray[idx]}</span>
+								</div>
+								<span class="flex flex-col">
+									<span
+										>{historyData.created_at
+											? `${new Date(historyData.created_at).toLocaleDateString('id-ID', {
+													day: '2-digit',
+													month: 'short',
+													year: 'numeric'
+												})}`
+											: 'No Data'}</span
+									>
+									<span> {historyData.file_url} </span>
+								</span>
+							</div>
+						</Label>
+					{/each}
+				</div>
 			</div>
 		</Card.Content>
 	</Card.Root>

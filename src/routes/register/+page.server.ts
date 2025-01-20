@@ -2,10 +2,10 @@ import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from '$env/static/private';
 import { query } from "$lib/db";
 import { OtpSessionManager } from '$lib/server/sessionManager';
 import type { Actions } from "@sveltejs/kit";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
-import { message, superValidate } from "sveltekit-superforms";
+import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { registerSchema, type UserRegistration } from "./register-schema";
 
@@ -53,7 +53,7 @@ export const actions: Actions = {
             console.log(e);
             return fail(400);
         }
-        return message(form, "Complete Your Registration");
+        throw redirect(300, "/verify-user");
     }
 } satisfies Actions;
 

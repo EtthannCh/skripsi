@@ -64,8 +64,8 @@
 							class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
 						></span>
 					</a></span
-				>
-				<Form.Button class="bg-black text-white hover:bg-white hover:text-black">Login</Form.Button>
+				>	
+				<button class="bg-uphButton p-2 my-3 rounded-md">Login</button>
 			</div>
 		</form>
 	</div>

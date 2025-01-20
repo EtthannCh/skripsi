@@ -5,7 +5,7 @@ import type { UserCookiesSchema } from "../../../../home/user-schema";
 
 export const POST: RequestHandler = async ({ cookies, request }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
-    const { status, requestId} = await request.json();
+    const { status, requestId } = await request.json();
     if (!user || user.roleId == 3) {
         throw fail(400);
     }
@@ -38,11 +38,15 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
     else if (status == "APPROVED" && user.roleId != 4) {
         throw fail(400, { message: "Permission not Allowed" })
     }
+
     if (status == "PENDING" && user.roleId == 1) {
-        currentStatus = "AWAITING_APPROVAL";
+        currentStatus = "ONGOING";
     }
-    else if(status == "AWAITING_APPROVAL" && user.roleId == 2){
-        currentStatus = "APPROVED";
+    else if (status == "ONGOING" && user.roleId == 2) {
+        currentStatus = "PROCESSING";
+    }
+    else if (status == "PROCESSING" && user.roleId == 2) {
+        currentStatus = "COMPLETED";
     }
 
     const insertApprovalToDb = await supabase.from("approval_db").insert({

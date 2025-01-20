@@ -35,10 +35,10 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
     if (status.length > 0) {
         query = query.eq(`status`, status)
     }
-    if (startDate ) {
+    if (startDate) {
         query = query.lte("created_at", new Date(endDate).toISOString()).gte("created_at", new Date(startDate).toISOString())
     }
-    
+
     const requestDbDataFromDb = (await query).data;
     let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));
     if (user.roleId == 3 || !user.roleId) {
@@ -59,45 +59,40 @@ export const actions = {
         if (!form.valid) {
             return fail(400, { form });
         }
-        try {
-            const file = form.data.formFile as File;
-            if (!file) {
-                return fail(400, { form })
-            }
-            const buffer = Buffer.from(await file.arrayBuffer());
-
-            const userCookies: UserCookiesSchema = JSON.parse(cookies.get("user") ?? "");
-            const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
-            const fileName = `${code}-${form.data.formId}-${userCookies.username}-${userCookies.userId}-${(new Date().toISOString())}`.toString();
-            const { error } = await supabase.storage.from("request_form_files")
-                .upload(fileName, buffer, { contentType: "application/pdf" });
-
-            if (error) {
-                return fail(400, { form, message: (error as Error).message })
-            }
-            const fileUrl = supabase.storage.from("request_form_files").getPublicUrl(fileName);
-
-            const { error: errorInsertRequest } = await supabase.from("request_db").insert({
-                status: "PENDING",
-                user_id: userCookies.userId,
-                form_id: form.data.formId,
-                reason: "",
-                created_by_id: userCookies.userId,
-                created_by: userCookies.username,
-                form_url: fileUrl.data.publicUrl
-            })
-            if (error && errorInsertRequest) {
-                console.log(error, errorInsertRequest);
-                return fail(400)
-            }
-            return {
-                success: true,
-                message: "Form Uploaded Successfully"
-            };
-        } catch (error) {
-            console.error('Database error:', error);
-            return fail(500, { error: 'Internal server error', form });
+        const file = form.data.formFile as File;
+        if (!file) {
+            return fail(400, { form })
         }
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-    },
+        const userCookies: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
+        const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
+        const fileName = `${code}-${form.data.formId}-${userCookies.username}-${userCookies.userId}-${(new Date().toISOString())}`.toString();
+        const { error } = await supabase.storage.from("request_form_files")
+            .upload(fileName, buffer, { contentType: "application/pdf" });
+
+        if (error) {
+            return fail(400, { form, message: (error as Error).message })
+        }
+        const fileUrl = supabase.storage.from("request_form_files").getPublicUrl(fileName);
+
+        const { error: errorInsertRequest } = await supabase.from("request_db").insert({
+            status: "PENDING",
+            user_id: userCookies.userId,
+            form_id: form.data.formId,
+            reason: "",
+            created_by_id: userCookies.userId,
+            created_by: userCookies.username,
+            form_url: fileUrl.data.publicUrl
+        })
+        if (error || errorInsertRequest) {
+            console.log(error, errorInsertRequest);
+            return fail(400)
+        }
+        return {
+            success: true,
+            message: "Form Uploaded Successfully"
+        };
+    }
+
 }
