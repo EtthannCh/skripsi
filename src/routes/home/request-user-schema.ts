@@ -29,8 +29,7 @@ export const formSchema = z.object({
     name: z.string(),
     code: z.string(),
     description: z.string().optional(),
-    file: z.any(),
-    mimeType: z.string()
+    form_url: z.string(),
 })
 
 export type FormSchema = z.infer<typeof formSchema>;
@@ -53,6 +52,17 @@ export const requestDbStatusEnum = {
     COMPLETED: "COMPLETED",
     AWAITING_FINALIZED: "AWAITING FINALIZED",
     FINALIZED: "FINALIZED"
+};
+
+export const requestEnumColor = {
+    PENDING: 'bg-gray-300 text-gray-900',
+    APPROVED: 'bg-blue-500 text-white',
+    REJECTED: 'bg-red-500 text-red-900',
+    ONGOING: 'bg-yellow-300 text-yellow-800',
+    PROCESSING: '',
+    COMPLETED: 'bg-green-500 text-white',
+    AWAITING_FINALIZED: 'bg-teal-500 text-teal-900',
+    FINALIZED: 'bg-green-500 text-green-900'
 };
 
 export const requestDbStatusCombobox = [
@@ -98,8 +108,26 @@ export const requestDbSchema = z.object({
         email: z.string(),
         user_pkey: z.string(),
     }),
-    first_approver_name: z.string(),
-    second_approver_name: z.string(),
     form_url: z.string(),
+    request_code: z.string(),
 })
 export type RequestDbSchema = z.infer<typeof requestDbSchema>;
+
+export const majorDbSchema = z.object({
+    id: z.number(),
+    code: z.string(),
+    name: z.string(),
+})
+
+export type MajorDbSchema = z.infer<typeof majorDbSchema>;
+
+export const sequenceSchema = z.object({
+    id: z.string(),
+    major_id: z.number(),
+    current_number: z.string(),
+    reset_condition: z.string(),
+    created_at: z.string(),
+    format: z.string(),
+})
+
+export type SequenceSchema = z.infer<typeof sequenceSchema>;

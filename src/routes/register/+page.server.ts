@@ -1,12 +1,13 @@
 import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from '$env/static/private';
-import { query } from "$lib/db";
 import { OtpSessionManager } from '$lib/server/sessionManager';
+import { supabase } from '$lib/supabaseClient';
 import type { Actions } from "@sveltejs/kit";
 import { fail, redirect } from "@sveltejs/kit";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
+import type { UserDbSchema } from '../home/request-user-schema';
 import { registerSchema, type UserRegistration } from "./register-schema";
 
 export const load = async () => {
@@ -26,34 +27,57 @@ export const actions: Actions = {
             })
         }
 
-        const user = await query(`select * from user_credentials where email = '${form.data.email}'`);
-        if (user.length > 0) {
+        const userDbResponse = await supabase.from("user_credentials").select("*").eq("email", form.data.email);
+        const userDb: UserDbSchema = JSON.parse(JSON.stringify(userDbResponse.data))
+        if (userDb.id > 0) {
             return fail(400, { data: form })
         }
 
         const otp: number = Math.floor(Math.random() * (999999 - 100000) + 100000);
-
-        try {
-            const pass = await bcrypt.hash(form.data.password, 15)
-            const userRegistration: UserRegistration = {
-                email: form.data.email,
-                username: form.data.username,
-                password: pass,
-                otp: otp.toString()
-            }
-            const { error, message } = await OtpSessionManager.createSession(cookies, userRegistration, form.data.email.toString());
-            if (error) {
-                console.log(message);
-                return fail(400, {
-                    message
-                })
-            }
-            sendEmail(form.data.email, "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp}`);
-        } catch (e) {
-            console.log(e);
-            return fail(400);
+        const NIM = form.data.email.split("@")[0];
+        const emailType = form.data.email.split(".")[0].split("@")[1];
+        const majorCode = NIM.substring(2, 5);
+        let majorId: number = 0;
+        let roleId: number = 0;
+        if (majorCode == "082") {
+            majorId = 1;
         }
+        else if (majorCode == "081") {
+            majorId = 2;
+        }
+
+        if (emailType == "student") {
+            roleId = 3;
+        }
+        else if (emailType == "uph") {
+            roleId = 1;
+        }
+        else {
+            roleId = 0;
+        }
+        if (roleId == 0) {
+            throw fail(400, { message: "Not Allowed" })
+        }
+
+        const pass = await bcrypt.hash(form.data.password, 15)
+        const userRegistration: UserRegistration = {
+            email: form.data.email,
+            username: form.data.username,
+            password: pass,
+            otp: otp.toString(),
+            majorId,
+            roleId
+        }
+        const { error, message } = await OtpSessionManager.createSession(cookies, userRegistration, form.data.email.toString());
+        if (error) {
+            console.log(message);
+            return fail(400, {
+                message
+            })
+        }
+        sendEmail(form.data.email, "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp}`);
         throw redirect(300, "/verify-user");
+
     }
 } satisfies Actions;
 

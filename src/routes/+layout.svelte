@@ -3,7 +3,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import '../app.css';
-	import type { UserCookiesSchema } from './home/user-schema';
+	import type { UserCookiesSchema } from './home/request-user-schema';
 	import uphLogo from '../lib/assets/images/uph_logo.jpg';
 	let { children, data } = $props();
 	const user: UserCookiesSchema | undefined = data.user;
@@ -25,10 +25,7 @@
 
 <div>
 	{#if data.isLoggedIn}
-		<nav
-			class="navbar w-full bg-uph text-white"
-			data-sveltekit-reload
-		>
+		<nav class="navbar w-full bg-uph text-white" data-sveltekit-reload>
 			<div class="sm:hidden md:hidden lg:block">
 				<div class="flex flex-row items-center">
 					<div class="flex items-center gap-5">
@@ -49,8 +46,11 @@
 							<DropdownMenu.Content class="w-56" align="end">
 								<DropdownMenu.Label class="font-normal">
 									<div class="flex flex-col space-y-1">
-										<p class="text-sm font-medium leading-none">{user?.username}</p>
-										<p class="text-xs leading-none text-muted-foreground">{user?.email}</p>
+										{#if user && data.majorDb}
+											<p class="text-lg font-medium leading-none">{user.username.toUpperCase()}</p>
+											<p class="text-xs leading-none text-muted-foreground">{user.email}</p>
+											<p class="text-xs leading-none text-muted-foreground">{data.majorDb.name}</p>
+										{/if}
 									</div>
 								</DropdownMenu.Label>
 								{#if user?.roleId == 3}
@@ -112,11 +112,7 @@
 			<label for="my-drawer-3" class="drawer-overlay"></label>
 			<ul class="menu w-80 overflow-y-auto bg-white p-4">
 				<li class="lg:hidden">
-					<img
-						src={uphLogo}
-						alt="logo uph"
-						class="swap-off h-20 w-24 rounded-full"
-					/>
+					<img src={uphLogo} alt="logo uph" class="swap-off h-20 w-24 rounded-full" />
 				</li>
 				<li><span>Sidebar Item 1</span></li>
 				<li><span>Sidebar Item 2</span></li>

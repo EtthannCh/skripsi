@@ -6,6 +6,7 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import { createSvelteTable, FlexRender, renderComponent } from '$lib/components/ui/data-table';
+	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
 	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
@@ -37,11 +38,11 @@
 	import {
 		requestDbStatusCombobox,
 		requestDbStatusEnum,
+		requestEnumColor,
 		userRequestSchema,
 		type RequestDbSchema,
 		type UserCookiesSchema
-	} from './user-schema';
-	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
+	} from './request-user-schema';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -50,7 +51,11 @@
 
 	let calenderValue = $state({
 		start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
-		end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1).add({ days: 20 })
+		end: new CalendarDate(
+			currentDate.getFullYear(),
+			currentDate.getMonth(),
+			currentDate.getDate()
+		).add({ days: 1 })
 	});
 	let startValue: DateValue | undefined = $state(undefined);
 
@@ -60,34 +65,33 @@
 
 	let submitPressed = $state(false);
 	let open = $state(false);
+	let openFormCombobox = $state(false);
 	let statusValue = $state('');
+	let formValue = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
 
-	const requestEnumColor = {
-		PENDING: 'bg-gray-300 text-gray-900',
-		APPROVED: 'bg-blue-500 text-white',
-		REJECTED: 'bg-red-500 text-red-900',
-		ONGOING: 'bg-yellow-300 text-yellow-800',
-		PROCESSING: '',
-		COMPLETED: 'bg-green-500 text-white',
-		AWAITING_FINALIZED: 'bg-teal-500 text-teal-900',
-		FINALIZED: 'bg-green-500 text-green-900'
-	};
+	const formDbCombobox = data.formSelection.flatMap((v) => {
+		return {
+			label: v.code,
+			value: v.id.toString()
+		};
+	});
 
 	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
+	let selectedFormValue = $derived(formDbCombobox.find((f) => f.value === formValue)?.label);
 
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
 			if (result.type == 'success') {
-				toast.success('Successfully Saved', {
+				toast.success(result.data?.form.message, {
 					position: 'top-right',
 					dismissable: true
 				});
 				goto('/home');
 				invalidateAll();
-			} else {
-				toast.info('Invalid Form / File size too big', {
+			} else if (result.type === 'failure') {
+				toast.info(result.data?.form.message, {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -105,6 +109,12 @@
 
 	const defaultColumns: ColumnDef<RequestDbSchema>[] = [
 		{
+			accessorKey: 'request_code',
+			accessorFn: (row) => row.request_code,
+			header: 'Request Number',
+			size: 150
+		},
+		{
 			accessorKey: 'status',
 			accessorFn: (row) => row.status,
 			header: 'Application Status',
@@ -114,7 +124,6 @@
 					value: requestDbStatusEnum[row.original.status],
 					className: requestEnumColor[row.original.status]
 				});
-				// return row.original.status.split('_').join(' ');
 			}
 		},
 		{
@@ -136,7 +145,7 @@
 			cell: ({ row }) => {
 				return renderComponent(DataTableMultipleRowCell, {
 					value: `Name : ${row.original.form_db.name}`,
-					value2: `Code : ${row.original.form_db.code}`
+					value2: `Code : ${row.original.form_db.code.replace('_', '-')}`
 				});
 			},
 			size: 200
@@ -177,20 +186,6 @@
 					url: `/user/${row.original.user_credentials.user_pkey}/detail/${row.original.id}`,
 					label: 'Detail'
 				});
-				// if (
-				// 	row.original.status == 'REJECTED' ||
-				// 	row.original.status == 'APPROVED' ||
-				// 	(row.original.status == 'AWAITING_APPROVAL' && user.roleId != 2) ||
-				// 	(row.original.status == 'PENDING' && user.roleId != 1)
-				// ) {
-				// 	return;
-				// } else {
-				// 	return renderComponent(DataTableActions, {
-				// 		id: row.original.id.toString(),
-				// 		approveFunc: async () => handleActions(user.roleId.toString(), row.original.id),
-				// 		rejectFunc: async () => handleActions('REJECTED', row.original.id)
-				// 	});
-				// }
 			}
 		}
 	];
@@ -211,34 +206,6 @@
 	const { form: formData, enhance, errors } = form;
 	const file = fileProxy(form, 'formFile');
 
-	const handleActions = async (param: string, id: number) => {
-		let tempParam = '';
-		if (param == '1') {
-			tempParam = 'AWAITING_APPROVAL';
-		} else if (param == '2') {
-			tempParam = 'APPROVED';
-		} else {
-			tempParam = param;
-		}
-		const response = await fetch('/home', {
-			method: 'post',
-			body: JSON.stringify({
-				status: tempParam,
-				id
-			}),
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-		if (response.status.toString() == '200') {
-			toast.success('Success', {
-				position: 'top-right',
-				dismissable: true
-			});
-		}
-		await goto('/home', { invalidateAll: true });
-	};
-
 	let filter: string = $state('');
 
 	function closeAndFocusTrigger() {
@@ -248,9 +215,16 @@
 		});
 	}
 
+	function closeAndFocusTriggerForFormDbx() {
+		openFormCombobox = false;
+		tick().then(() => {
+			triggerRef.focus();
+		});
+	}
+
 	const filterHandler = async () => {
 		await goto(
-			`/home?filter=${filter}&status=${statusValue}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}`,
+			`/home?filter=${filter}&status=${statusValue}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}`,
 			{
 				invalidateAll: true,
 				replaceState: true
@@ -262,11 +236,11 @@
 {#if user.roleId == 3 && user.roleId}
 	<Accordion.Root
 		type="single"
-		class="mx-auto my-auto flex w-[700px] flex-col justify-center sm:max-w-[30%] md:max-w-[50%] lg:max-w-[100%]"
+		class="mx-auto my-auto flex w-[700px] flex-col justify-center sm:max-w-[30%] md:max-w-[50%] lg:max-w-[100%] "
 	>
 		<Accordion.Item value="item-1">
 			<Accordion.Trigger>Pengambilan Form</Accordion.Trigger>
-			<Accordion.Content>
+			<Accordion.Content class="scroll-none max-h-[550px] overflow-y-scroll">
 				{#each data.formSelection as form}
 					<Card.Root class="my-5 flex w-full items-center justify-between">
 						<Card.Header class="px-5 py-0">
@@ -275,14 +249,14 @@
 						</Card.Header>
 						<Card.Content class="grid gap-4">
 							<div class="flex flex-col items-center justify-center gap-0.5 text-right">
-								<Label>{form.code}</Label>
+								<Label>{form.code.replace('_', '-')}</Label>
 								<span
 									><a
-										href={`/api/pdf/${form.id}`}
-										download={form.name}
+										href={`${form.form_url}`}
+										target="_blank"
 										class="group relative text-[#18272F] no-underline"
 									>
-										Download PDF
+										View PDF
 										<span
 											class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-[#18272F] transition-transform group-hover:origin-left group-hover:scale-x-100"
 										></span>
@@ -324,7 +298,10 @@
 									<Select.Content>
 										<Select.Group>
 											{#each formSelection as form}
-												<Select.Item value={form.value} label={form.label}>{form.label}</Select.Item
+												<Select.Item value={form.value} label={form.label}
+													>{form.label.replace('_', '-')} ({data.formSelection.find(
+														(v) => v.id == Number(form.value)
+													)?.name})</Select.Item
 												>
 											{/each}
 										</Select.Group>
@@ -341,17 +318,20 @@
 						<Form.Control let:attrs>
 							<div class="flex flex-col gap-5">
 								<Form.Label>{`Upload Form Permohonan (Max Size Allowed :  5mb)`}</Form.Label>
+								<span class="text-sm"
+									>(Penamaan File :
+									KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon)</span
+								>
 								<input accept="application/pdf" type="file" bind:files={$file} />
 							</div>
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
-					<Form.Button
-						class="my-5 bg-black text-white"
-						type="submit"
+					<button
+						class="my-5 rounded-md bg-uphButton p-2 text-white"
 						onclick={() => {
 							submitPressed = true;
-						}}>Submit</Form.Button
+						}}>Submit</button
 					>
 				</form>
 			</Accordion.Content>
@@ -374,14 +354,14 @@
 								role="combobox"
 								aria-expanded={open}
 							>
-								{selectedValue || 'Pilih Status'}
+								{selectedValue || 'Choose Status'}
 								<ChevronsUpDown class="opacity-50" />
 							</Button>
 						{/snippet}
 					</Popover.Trigger>
 					<Popover.Content class="w-[200px] p-0">
 						<Command.Root>
-							<Command.Input placeholder="Cari Status..." />
+							<Command.Input placeholder="Choose Status..." />
 							<Command.List>
 								<Command.Group>
 									{#each requestDbStatusCombobox as status}
@@ -440,6 +420,48 @@
 						</Popover.Content>
 					</Popover.Root>
 				</div>
+				<Popover.Root bind:open={openFormCombobox}>
+					<Popover.Trigger bind:ref={triggerRef}>
+						{#snippet child({ props })}
+							<Button
+								variant="outline"
+								class="w-[200px] justify-between"
+								{...props}
+								role="combobox"
+								aria-expanded={open}
+							>
+								{selectedFormValue || 'Choose Form Type'}
+								<ChevronsUpDown class="opacity-50" />
+							</Button>
+						{/snippet}
+					</Popover.Trigger>
+					<Popover.Content class="w-[200px] p-0">
+						<Command.Root>
+							<Command.Input placeholder="Cari Status..." />
+							<Command.List>
+								<Command.Group>
+									{#each formDbCombobox as form}
+										<Command.Item
+											value={form.value}
+											onSelect={() => {
+												if (formValue && formValue == form.value) {
+													formValue = '';
+												} else {
+													formValue = form.value;
+												}
+
+												closeAndFocusTriggerForFormDbx();
+											}}
+										>
+											<Check class={cn(formValue !== form.value && 'text-transparent')} />
+											{form.label.replace('_', '-')}
+										</Command.Item>
+									{/each}
+								</Command.Group>
+							</Command.List>
+						</Command.Root>
+					</Popover.Content>
+				</Popover.Root>
 			</div>
 			<div class="flex flex-row items-center gap-5">
 				<button
@@ -452,6 +474,7 @@
 					onclick={() => {
 						filter = '';
 						statusValue = '';
+						formValue = '';
 						calenderValue = {
 							start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
 							end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1).add({

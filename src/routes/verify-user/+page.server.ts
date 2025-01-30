@@ -31,7 +31,8 @@ export const actions = {
                 username: userCookies.username,
                 email: userCookies.email,
                 password: userCookies.password,
-                major_id:1
+                major_id: userCookies.majorId,
+                role_id: userCookies.roleId
             });
 
         if (error) {

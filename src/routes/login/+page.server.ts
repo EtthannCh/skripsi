@@ -4,7 +4,7 @@ import { fail } from '@sveltejs/kit';
 import bcrypt from 'bcryptjs';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { UserCookiesSchema, UserDbSchema } from "../home/user-schema";
+import type { UserCookiesSchema, UserDbSchema } from "../home/request-user-schema";
 import { loginSchema } from "./login-schema";
 
 export const load = async () => {
@@ -23,7 +23,7 @@ export const actions = {
         try {
             const { data, error } = await supabase.from("user_credentials")
                 .select('*')
-                .eq("email", form.data.email); // where email = form.data.email
+                .eq("email", form.data.email);
             const user: UserDbSchema = JSON.parse(JSON.stringify(data))[0];
             if (!user) {
                 console.log(error);

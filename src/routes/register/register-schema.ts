@@ -23,4 +23,6 @@ export type UserRegistration = {
     username: string;
     password: string;
     otp: string;
+    majorId: number;
+    roleId: number;
 }

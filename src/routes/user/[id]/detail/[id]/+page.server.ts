@@ -2,7 +2,7 @@ import { supabase } from '$lib/supabaseClient.js';
 import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { RequestDbSchema } from '../../../../home/user-schema';
+import type { RequestDbSchema } from '../../../../home/request-user-schema';
 import type { RequestHistorySchema, UserDetailSchema } from './user-detail-schema';
 import { approveRejectSchema } from './user-detail-schema';
 

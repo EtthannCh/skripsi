@@ -1,7 +1,7 @@
 import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail, json, type RequestHandler } from "@sveltejs/kit";
-import type { UserCookiesSchema } from "../../../../home/user-schema";
+import type { UserCookiesSchema } from "../../../../home/request-user-schema";
 
 export const POST: RequestHandler = async ({ cookies, request }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;

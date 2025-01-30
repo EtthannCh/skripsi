@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { requestDbStatusEnum } from "../../../../home/request-user-schema";
 
 export const userDetailSchema = z.object({
     id: z.number(),
@@ -26,3 +27,18 @@ export const requestHistorySchema = z.object({
 })
 
 export type RequestHistorySchema = z.infer<typeof requestHistorySchema>;
+
+export const userRequestSchema = z.object({
+    id: z.number(),
+    status: z.enum(Object.keys(requestDbStatusEnum) as [keyof typeof requestDbStatusEnum, ...Array<keyof typeof requestDbStatusEnum>]),
+    form_db: z.object({
+        code: z.string(),
+        name: z.string(),
+    }),
+    reason: z.string(),
+    form_url: z.string(),
+    last_updated_by: z.string(),
+    request_code: z.string()
+})
+
+export type UserRequestSchema = z.infer<typeof userRequestSchema>;

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import FormLegend from './../../../../../lib/components/ui/form/form-legend.svelte';
 	import { goto } from '$app/navigation';
 	import { navigating } from '$app/state';
+	import { page } from '$app/stores';
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -9,16 +9,13 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
-	import { ArrowLeft, User } from 'lucide-svelte';
+	import { ArrowLeft, FileText } from 'lucide-svelte';
 	import { Stretch } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import { approveRejectSchema } from './user-detail-schema';
-	import { page } from '$app/stores';
-	import { FileText } from 'lucide-svelte';
-	import { spring } from 'svelte/motion';
 
 	let { data }: { data: PageData } = $props();
 
