@@ -9,8 +9,8 @@ export const load = async ({ params }) => {
         console.log(userRequestHistoryResponse.error);
         throw fail(400);
     }
-    const userRequestHistoryFromDb : RequestHistorySchema[] = userRequestHistoryResponse.data;
+    const userRequestHistoryFromDb: RequestHistorySchema[] = JSON.parse(JSON.stringify(userRequestHistoryResponse.data));
     return {
-        userRequestHistory:userRequestHistoryFromDb
+        userRequestHistory: userRequestHistoryFromDb
     }
 }

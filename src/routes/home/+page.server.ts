@@ -117,7 +117,7 @@ export const actions = {
         const numberFormat = format.slice(1, -1).split('/')[1]
         const newNumberFormat = (numberFormat.slice(currentNumber.toString().length) + currentNumber).replaceAll('#', '0');
         const year = new Date().getFullYear();
-        const newFormat = `IF/${newNumberFormat}/MDN/${year}`
+        const newFormat = `${majorDbData.code}/${newNumberFormat}/MDN/${year}`
 
         const { error: errorInsertRequest } = await supabase.from("request_db").insert({
             status: "PENDING",

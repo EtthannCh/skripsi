@@ -1,8 +1,9 @@
 <script lang="ts">
-	import type { RequestHistorySchema } from '../../../[id]/detail/[id]/user-detail-schema';
-	
-	let { data, requestId }: { data: RequestHistorySchema[]; requestId: number } = $props();
-    const processArray = [
+	import { Stretch } from 'svelte-loading-spinners';
+	import type { PageData } from './$types';
+
+	let { data, requestCode }: { data: PageData; requestCode: string } = $props();
+	const processArray = [
 		'Date of Approval',
 		'Date of Process',
 		'Date of Completion',
@@ -17,7 +18,14 @@
 </script>
 
 <div>
-	{#each data as history, idx}
-		<span>{processArray[idx]} : {history.created_by}</span>
-	{/each}
+	<h1>{requestCode}</h1>
+	{#if data && data.userRequestHistory}
+		{#each data.userRequestHistory ?? [] as history, idx}
+			<span>{processArray[idx]} : {history.created_by}</span>
+		{/each}
+	{:else}
+		<div class="mx-10 mb-4 h-10">
+			<Stretch color="#314986" />
+		</div>
+	{/if}
 </div>

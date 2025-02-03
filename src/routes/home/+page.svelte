@@ -239,7 +239,7 @@
 		class="mx-auto my-auto flex w-[700px] flex-col justify-center sm:max-w-[30%] md:max-w-[50%] lg:max-w-[100%] "
 	>
 		<Accordion.Item value="item-1">
-			<Accordion.Trigger>Pengambilan Form</Accordion.Trigger>
+			<Accordion.Trigger class="text-2xl">Pengambilan Form</Accordion.Trigger>
 			<Accordion.Content class="scroll-none max-h-[550px] overflow-y-scroll">
 				{#each data.formSelection as form}
 					<Card.Root class="my-5 flex w-full items-center justify-between">
@@ -269,7 +269,7 @@
 			</Accordion.Content>
 		</Accordion.Item>
 		<Accordion.Item value="item-2">
-			<Accordion.Trigger>Pengajuan Form</Accordion.Trigger>
+			<Accordion.Trigger class="text-2xl">Pengajuan Form</Accordion.Trigger>
 			<Accordion.Content>
 				<form action="?/submit" enctype="multipart/form-data" method="post" use:enhance>
 					<Form.Field {form} name="userId">
@@ -322,6 +322,8 @@
 									>(Penamaan File :
 									KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon)</span
 								>
+								<span class="text-red-600">(NOTE : Kode Form pada penamaan file yang diupload jika tidak sama, tidak dapat dilanjutkan)</span>
+								<span>HARUS DI BOLD / DIBEDAKAN / DIBESARKAN</span>
 								<input accept="application/pdf" type="file" bind:files={$file} />
 							</div>
 						</Form.Control>

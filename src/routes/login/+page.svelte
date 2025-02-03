@@ -17,10 +17,10 @@
 					position: 'top-right',
 					dismissable: true
 				});
-				goto('../home');
+				goto('/home');
 				invalidateAll();
 			} else {
-				toast.info('Credentials Invalid', {
+				toast.error('Credentials Invalid', {
 					position: 'top-right',
 					dismissable: true
 				});
