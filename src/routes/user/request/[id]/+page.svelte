@@ -59,10 +59,7 @@
 							<div class="flex flex-col gap-5">
 								<span>Form Code : {userRequest.form_db.code.replace('_', '-')}</span>
 								<span>Form Name : {userRequest.form_db.name}</span>
-								<Sheet.Root
-									open={page.state.preloadedData != null}
-									
-								>
+								<Sheet.Root open={page.state.preloadedData != null}>
 									<Sheet.Trigger
 										class={buttonVariants({ variant: 'outline' })}
 										onclick={() => {

@@ -22,7 +22,7 @@
 </script>
 
 <div
-	class="mx-auto flex h-[400px] w-[800px] flex-col items-center justify-center gap-10 rounded-md bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
+	class="flex flex-col justify-center items-center gap-10 h-full rounded-md bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
 >
 	<Label class="text-lg font-bold">Gunakan Kode yang diberikan untuk Registrasi</Label>
 	<span class="text-md">Kode yang diberikan tidak valid dalam waktu 5 MENIT</span>

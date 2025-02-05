@@ -20,11 +20,11 @@
 
 <Toaster richColors position="top-right"></Toaster>
 
-<Sidebar.Provider style="--sidebar:width:20rem; --sidebar-width-mobile:20rem;" data-sveltekit-reload>
+<Sidebar.Provider style="--sidebar:width:20rem; --sidebar-width-mobile:20rem;" data-sveltekit-reload open={false}>
 	{#if data.isLoggedIn && user && data.majorDb}
 		<AppSidebar {user} majorData={data.majorDb}/>
 	{/if}
-	<main class="w-full">
+	<main class="w-full bg-gray-100">
 		{#if data.isLoggedIn}
 			<Sidebar.Trigger/>
 		{/if}

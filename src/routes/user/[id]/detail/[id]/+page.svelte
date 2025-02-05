@@ -45,7 +45,7 @@
 				dismissable: true
 			});
 		}
-		await goto('/home', { invalidateAll: true });
+		await goto($page.url.pathname, { invalidateAll: true });
 	};
 
 	const processArray = [
@@ -97,13 +97,13 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
-	<div class="flex items-center justify-between">
+	<div class="flex items-center justify-between gap-10">
 		<img
 			src={uphLogo}
 			alt="logo_uph"
 			class="rounded-full sm:hidden md:hidden lg:block lg:w-[300px]"
 		/>
-		<div class="md:h-[200px] lg:h-[400px]">
+		<div class="w-full md:h-[200px] lg:h-[400px]">
 			<Card.Root>
 				<Card.Header>
 					<Card.Title>Applicant's Detail</Card.Title>
@@ -144,6 +144,14 @@
 									>
 								</div>
 							</Label>
+							{#if data.requestData?.reason}
+								<Label class="text-lg">
+									<div class="flex items-center justify-between">
+										<span>Reject Reason</span>
+										<span class="lg:w-[250px]"> : {data.requestData.reason}</span>
+									</div>
+								</Label>
+							{/if}
 						</div>
 						<div class="lg:w-[300px]">
 							<form action="">
@@ -208,29 +216,36 @@
 												</Card.Footer>
 											</Card.Root>
 										</Tabs.Content>
-										{#if data.requestData.status == 'PROCESSING'}
-											<Tabs.Content value="reject">
-												<Card.Root>
-													<Card.Content class="space-y-2">
-														<div class="space-y-1">
-															<Label for="reason">Reason</Label>
-															<Input
-																id="reason"
-																type="text"
-																disabled={data.requestData.status == 'PROCESSING'}
-																placeholder="Reason of Rejection"
-																bind:value={$formData.reason}
-															/>
-														</div>
-													</Card.Content>
-													<Card.Footer>
-														<Button disabled={data.requestData.status == 'PROCESSING'}
-															>Reject Application</Button
-														>
-													</Card.Footer>
-												</Card.Root>
-											</Tabs.Content>
-										{/if}
+										<!-- {#if data.requestData.status == 'PROCESSING'} -->
+										<Tabs.Content value="reject">
+											<Card.Root>
+												<Card.Content class="space-y-2">
+													<div class="space-y-1">
+														<Label for="reason">Reason</Label>
+														<Input
+															id="reason"
+															type="text"
+															disabled={data.requestData.status == 'PROCESSING'}
+															placeholder="Reason of Rejection"
+															bind:value={$formData.reason}
+														/>
+													</div>
+												</Card.Content>
+												<Card.Footer>
+													<Button
+														disabled={data.requestData.status == 'PROCESSING'}
+														onclick={() => {
+															handleActions(
+																data.requestData?.id ?? 0,
+																"REJECTED",
+																'reject'
+															);
+														}}>Reject Application</Button
+													>
+												</Card.Footer>
+											</Card.Root>
+										</Tabs.Content>
+										<!-- {/if} -->
 									</Tabs.Root>
 								{/if}
 							</form>
@@ -287,6 +302,7 @@
 												})}`
 											: 'No Data'}</span
 									>
+									<span>ab</span>
 									<span> {historyData.file_url} </span>
 								</span>
 							</div>

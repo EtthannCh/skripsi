@@ -4,7 +4,7 @@ import type { UserCookiesSchema } from './routes/home/request-user-schema';
 
 export async function handle({ event, resolve }) {
     const userResponse = await sessionManager.getSession(await event.cookies);
-    if(userResponse.error){
+    if (userResponse.error) {
         console.log(userResponse.message);
     }
     const user: UserCookiesSchema = userResponse.data;
@@ -19,5 +19,5 @@ export async function handle({ event, resolve }) {
         sessionManager.deleteSession(event.cookies);
         throw redirect(303, "/");
     }
-    return resolve(event);
+    return await resolve(event);
 }

@@ -2,10 +2,10 @@ import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from '$env/static/private';
 import { OtpSessionManager } from '$lib/server/sessionManager';
 import { supabase } from '$lib/supabaseClient';
 import type { Actions } from "@sveltejs/kit";
-import { fail, redirect } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
-import { superValidate } from "sveltekit-superforms";
+import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { UserDbSchema } from '../home/request-user-schema';
 import { registerSchema, type UserRegistration } from "./register-schema";
@@ -23,14 +23,15 @@ export const actions: Actions = {
         const form = await superValidate(reqForm, zod(registerSchema));
         if (!form.valid) {
             return fail(400, {
-                form,
+                data: form,
+                message: "Invalid Form"
             })
         }
 
         const userDbResponse = await supabase.from("user_credentials").select("*").eq("email", form.data.email);
-        const userDb: UserDbSchema = JSON.parse(JSON.stringify(userDbResponse.data))
-        if (userDb.id > 0) {
-            return fail(400, { data: form })
+        const userDb: UserDbSchema[] = JSON.parse(JSON.stringify(userDbResponse.data))
+        if (userDb.length > 0) {
+            return fail(400, { data: form, message: "Invalid User" });
         }
 
         const otp: number = Math.floor(Math.random() * (999999 - 100000) + 100000);
@@ -56,7 +57,7 @@ export const actions: Actions = {
             roleId = 0;
         }
         if (roleId == 0) {
-            throw fail(400, { message: "Not Allowed" })
+            return fail(400, { data: form, message: "Invalid Input" });
         }
 
         const pass = await bcrypt.hash(form.data.password, 15)
@@ -68,16 +69,14 @@ export const actions: Actions = {
             majorId,
             roleId
         }
-        const { error, message } = await OtpSessionManager.createSession(cookies, userRegistration, form.data.email.toString());
-        if (error) {
-            console.log(message);
-            return fail(400, {
-                message
-            })
+        const otpResponse = await OtpSessionManager.createSession(cookies, userRegistration, form.data.email.toString());
+        if (otpResponse.error) {
+            console.log(otpResponse.message);
+            return fail(400, { data: form });
         }
-        sendEmail(form.data.email, "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp}`);
-        throw redirect(300, "/verify-user");
 
+        sendEmail("kelvinrogue6@gmail.com", "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp}`);
+        return message(form, "Complete Your Registration");
     }
 } satisfies Actions;
 

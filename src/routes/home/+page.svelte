@@ -83,15 +83,16 @@
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
+			console.log(result);
+
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
 					position: 'top-right',
 					dismissable: true
 				});
-				goto('/home');
-				invalidateAll();
-			} else if (result.type === 'failure') {
-				toast.info(result.data?.form.message, {
+				return goto('/home', { invalidateAll: true });
+			} else if (result.type == 'failure') {
+				toast.error(result.data?.message, {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -322,8 +323,11 @@
 									>(Penamaan File :
 									KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon)</span
 								>
-								<span class="text-red-600">(NOTE : Kode Form pada penamaan file yang diupload jika tidak sama, tidak dapat dilanjutkan)</span>
-								<span>HARUS DI BOLD / DIBEDAKAN / DIBESARKAN</span>
+								<span class="text-red-600"
+									>({'NOTE : Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan'
+										.toString()
+										.toUpperCase()})</span
+								>
 								<input accept="application/pdf" type="file" bind:files={$file} />
 							</div>
 						</Form.Control>
@@ -503,7 +507,7 @@
 						<Table.Row>
 							{#each headerGroup.headers as header}
 								<Table.Head
-									class="border-l-[1px] p-5 text-white first:border-none"
+									class="border-x-[1px] p-5 border-y-[1px] text-white border-black"
 									style="width: {header.column.getSize()}px"
 								>
 									{#if !header.isPlaceholder}
@@ -521,7 +525,7 @@
 					{#each table.getRowModel().rows as row}
 						<Table.Row data-state={row.getIsSelected() && 'selected'}>
 							{#each row.getVisibleCells() as cell (cell.id)}
-								<Table.Cell class="border-l-[1px] first:border-none">
+								<Table.Cell class="border-x-[1px] border-y-[1px] border-black">
 									<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 								</Table.Cell>
 							{/each}

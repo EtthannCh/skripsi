@@ -12,27 +12,25 @@
 	const form = superForm(data.form.data, {
 		validators: zodClient(registerSchema),
 		onResult: ({ result }) => {
-			if (result.type != 'success') {
-				toast.error('Invalid Credentials / Email Has already been used', {
-					position: 'top-right',
-					dismissable: true
-				});
-			} else {
-				toast.success('Complete your Registration', {
-					position: 'top-right',
+			if (result.type == 'success') {
+				toast.success(result.data?.form.message, {
+					position: 'top-center',
 					dismissable: true
 				});
 				return goto('/verify-user', { invalidateAll: true });
-			}
+			} else if (result.type == 'failure') {
+				toast.error(result.data?.message, {
+					position: 'top-right',
+					dismissable: true
+				});
+			} 
 		}
 	});
 
 	const { form: formData, enhance } = form;
 </script>
 
-<div
-	class="flex min-h-screen flex-col items-center justify-center bg-uph text-white"
->
+<div class="flex min-h-screen flex-col items-center justify-center bg-uph text-white">
 	<h1 class="my-5 text-[36px]">REGISTER</h1>
 	<div class="w-[750px]">
 		<div class="flex items-center justify-center gap-10">
@@ -41,7 +39,7 @@
 				<Form.Field {form} name="username">
 					<Form.Control let:attrs>
 						<Form.Label>Username</Form.Label>
-						<Input {...attrs} bind:value={$formData.username} class="text-black"/>
+						<Input {...attrs} bind:value={$formData.username} class="text-black" />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
@@ -55,14 +53,19 @@
 				<Form.Field {form} name="password">
 					<Form.Control let:attrs>
 						<Form.Label>Password</Form.Label>
-						<Input {...attrs} bind:value={$formData.password} type="password" class="text-black"/>
+						<Input {...attrs} bind:value={$formData.password} type="password" class="text-black" />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
 				<Form.Field {form} name="confirmPassword">
 					<Form.Control let:attrs>
 						<Form.Label>Confirm Password</Form.Label>
-						<Input {...attrs} bind:value={$formData.confirmPassword} type="password" class="text-black"/>
+						<Input
+							{...attrs}
+							bind:value={$formData.confirmPassword}
+							type="password"
+							class="text-black"
+						/>
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
@@ -79,7 +82,7 @@
 							></span>
 						</a></span
 					>
-					<button class="bg-uphButton p-2 my-3 rounded-md">Register</button>
+					<button class="my-3 rounded-md bg-uphButton p-2">Register</button>
 				</div>
 			</form>
 		</div>

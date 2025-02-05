@@ -1,5 +1,5 @@
 import { supabase } from "$lib/supabaseClient";
-import { fail, redirect } from "@sveltejs/kit";
+import { fail, redirect, type Actions } from "@sveltejs/kit";
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { PageServerLoad } from "./$types";
@@ -62,17 +62,17 @@ export const actions = {
     submit: async ({ request, cookies }) => {
         const form = await superValidate(request, zod(userRequestSchema));
         if (!form.valid) {
-            return fail(400, { data: form });
+            return message(form, { type: "failure", message: "Invalid Form" });
         }
         const file = form.data.formFile as File;
         if (!file) {
-            return message(form, "Please Check again uploaded File")
+            return fail(400, { data: form, message: "Please Check again uploaded File" })
         }
         const buffer = Buffer.from(await file.arrayBuffer());
         const formName = form.data.formFile?.name.slice(0, - 4);
 
         if (formName?.split("-").length != 4) {
-            return message(form, "Invalid FIle Name... Please Make Sure Again");
+            return fail(400, { data: form, message: "Invalid File Name... Please Make Sure Again" })
         }
 
         const userCookies: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
@@ -80,22 +80,27 @@ export const actions = {
 
         const splittedField: string[] = formName.split("-");
         if (splittedField[0] != code) {
-            return message(form, "Form does not Match with Selected File.. Please Rename or Choose the Correct Form");
+            return fail(400, { message: "Form does not Match with Selected File.. Please Rename or Choose the Correct Form" })
         }
-        if ((!splittedField[1].startsWith("0308") || splittedField[1].length != 11) || (!splittedField[1].startsWith("0308") && splittedField[1].length != 11)) {
-            return message(form, "Invalid Student Number");
+
+        if (
+            (!splittedField[1].startsWith("0308") || splittedField[1].length != 11) || (!splittedField[1].startsWith("0308") && splittedField[1].length != 11)
+            || splittedField[1] != userCookies.email.split("@")[0]
+        ) {
+            return fail(400, { message: "Invalid Student Number" })
         }
+        
         const majorDataResponse = await supabase.from("major_db").select("*").eq("code", splittedField[2])
         if (majorDataResponse.error || majorDataResponse.data.length == 0) {
             console.log(majorDataResponse.error);
-            return message(form, "Major Not Found");
+            return fail(400, { message: "Major Not Found" });
         }
         const majorDbData: MajorDbSchema = majorDataResponse.data[0];
         if (majorDbData.id != userCookies.majorId) {
-            return message(form, "Invalid Major... Please Check Again");
+            return fail(400, { message: "Invalid Major... Please Check Again" });
         }
         if (splittedField[3] != userCookies.email && userCookies.roleId == 3) {
-            return message(form, "Invalid Student Email.. Please Use your Student Account");
+            return fail(400, { message: "Invalid Student Email.. Please Use your Student Account" });
         }
 
         const fileName = `${code}-${form.data.formId}-${userCookies.username}-${userCookies.userId}-${(new Date().toISOString())}`.toString();
@@ -143,4 +148,4 @@ export const actions = {
         return message(form, "Form Uploaded Successfully");
     }
 
-}
+} satisfies Actions;

@@ -18,11 +18,13 @@
 </script>
 
 <div>
-	<h1>{requestCode}</h1>
+	<h1 class="text-xl">Request Code : {requestCode}</h1>
 	{#if data && data.userRequestHistory}
-		{#each data.userRequestHistory ?? [] as history, idx}
-			<span>{processArray[idx]} : {history.created_by}</span>
-		{/each}
+		<div class="flex flex-col gap-5 mt-5">
+			{#each data.userRequestHistory ?? [] as history, idx}
+				<span>{processArray[idx]} : {history.created_by}</span>
+			{/each}
+		</div>
 	{:else}
 		<div class="mx-10 mb-4 h-10">
 			<Stretch color="#314986" />

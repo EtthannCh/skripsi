@@ -48,6 +48,9 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
     else if (status == "PROCESSING" && user.roleId == 2) {
         currentStatus = "COMPLETED";
     }
+    else if (status == "REJECTED") {
+        currentStatus = "REJECTED"
+    }
 
     const insertApprovalToDb = await supabase.from("approval_db").insert({
         request_id: requestId,

@@ -84,7 +84,7 @@
 							>
 								<span class="flex flex-col gap-1">
 									<span>
-										{`${user.username.toUpperCase()} ( ${majorData.name.toUpperCase()} )`}
+										{`${user.username.toUpperCase()} ( ${majorData.code.toUpperCase()} )`}
 									</span>
 									<span class="text-sm">
 										{user.email}
@@ -96,9 +96,11 @@
 						{/snippet}
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content side="top" class="w-[--bits-dropdown-menu-anchor-width]">
+						{#if user.roleId == 3}
 						<DropdownMenu.Item>
 							<span><a href={`/user/request/${user.id}`}>My Request</a></span>
 						</DropdownMenu.Item>
+						{/if}
 						<DropdownMenu.Item onclick={logout}>
 							<span>Log Out</span>
 						</DropdownMenu.Item>
