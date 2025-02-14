@@ -18,6 +18,13 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
     const endDate = url.searchParams.get("endDate") ?? "";
     const formFilter = url.searchParams.get("form") ?? "";
     const filterQuery = filter.length > 0 ? `%${filter.toUpperCase()}%` : "";
+    let pages = Number(url.searchParams.get("pages") ?? 0);
+
+    if (pages % 10 == 0) {
+        pages = Math.floor(pages) / 10;
+    } else {
+        pages = (Math.floor(pages) / 10) + 1;
+    }
 
     const form = await superValidate(zod(userRequestSchema));
 
@@ -30,6 +37,8 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
             `
         ).order("created_at", { ascending: true })
         .eq("major_id", user.majorId)
+        .range(pages * 10, (pages + 1) * 10)
+        .limit(10)
     );
     if (filter.length > 0) {
         query = query.or(`created_by.ilike.${filterQuery},request_code.ilike.${filterQuery}`)
@@ -44,6 +53,17 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         query = query.eq("form_id", formFilter);
     }
 
+    const totalCountResponse = await supabase.from("request_db")
+        .select(
+            `id, status, user_id, form_id, request_code,
+            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url
+            `, {count:"exact"}
+        ).order("created_at", { ascending: true })
+        .eq("major_id", user.majorId);
+    if((totalCountResponse).error){
+        throw fail(400, {message:"Error Fetch"});
+    }
+
     const requestDbDataFromDb = (await query).data;
     let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));
     if (user.roleId == 3 || !user.roleId) {
@@ -54,7 +74,8 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         form,
         user,
         formSelection,
-        requestDbData
+        requestDbData,
+        totalCount:totalCountResponse.count
     };
 }
 
@@ -89,7 +110,7 @@ export const actions = {
         ) {
             return fail(400, { message: "Invalid Student Number" })
         }
-        
+
         const majorDataResponse = await supabase.from("major_db").select("*").eq("code", splittedField[2])
         if (majorDataResponse.error || majorDataResponse.data.length == 0) {
             console.log(majorDataResponse.error);

@@ -12,9 +12,17 @@
 	import type { PageData } from './$types';
 	import RequestDetailPage from './[requestId]/+page.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import * as Pagination from '$lib/components/ui/pagination/index.js';
+	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
+	import { MediaQuery } from 'svelte/reactivity';
 
 	let { data }: { data: PageData } = $props();
 
+	const isDesktop = new MediaQuery('(min-width: 768px)');
+	const count = data.data.totalCount;
+	const perPage = $derived(isDesktop.current ? 6 : 6);
+	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 	const fetchPreloadData = async (requestId: number) => {
 		console.log(page.url.pathname);
 		const url = `${page.url.pathname}/${requestId}`;
@@ -26,13 +34,24 @@
 			goto(url);
 		}
 	};
+
+	let pagesFilter: number = $state(0);
+	$effect.root(() => {
+		const pagesParam = page.url.searchParams.get('pages') ?? 0;
+
+		pagesFilter = Number(pagesParam);
+	});
+
+	const filterHandler = () => {
+		goto(`${page.url.pathname}?pages=${pagesFilter}`);
+	};
 	let requestCode = $state('');
 </script>
 
 <button
 	class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
 	onclick={() => {
-		window.history.back();
+		goto('/home');
 	}}
 >
 	<ArrowLeft />
@@ -43,8 +62,10 @@
 		<Stretch color="#314986" />
 	</div>
 {/if}
-<div class="p-10 w-full">
-	<div class="grid overflow-y-scroll sm:grid-cols-1 sm:gap-36 md:grid-cols-2 md:gap-24 lg:grid-cols-3 lg:gap-10">
+<div class="w-full p-10">
+	<div
+		class="grid overflow-y-scroll sm:grid-cols-1 sm:gap-36 md:grid-cols-2 md:gap-24 lg:grid-cols-3 lg:gap-10"
+	>
 		{#each data.data.userRequestFromDb as userRequest}
 			<div class="w-[320px]">
 				<Card.Root>
@@ -83,7 +104,10 @@
 				</Card.Root>
 			</div>
 		{/each}
-		<Sheet.Root open={page.state.preloadedData != null}>
+
+		<Sheet.Root
+			open={page.state.preloadedData != null}
+		>
 			<Sheet.Content side="right">
 				<Sheet.Header>
 					<Sheet.Title>Process Details</Sheet.Title>
@@ -91,5 +115,55 @@
 				<RequestDetailPage data={page.state.preloadedData} {requestCode}></RequestDetailPage>
 			</Sheet.Content>
 		</Sheet.Root>
+	</div>
+	<div class="sticky bottom-0 mt-3 rounded-md bg-white pb-5 pt-10">
+		<Pagination.Root count={count ?? 0} {perPage} {siblingCount}>
+			{#snippet children({ pages })}
+				<Pagination.Content>
+					<Pagination.Item>
+						<Pagination.PrevButton
+							onclick={() => {
+								pagesFilter -= 1;
+								filterHandler();
+							}}
+						>
+							<ChevronLeft class="size-4" />
+							<span class="hidden sm:block">Previous</span>
+						</Pagination.PrevButton>
+					</Pagination.Item>
+					{#each pages as page (page.key)}
+						{#if page.type === 'ellipsis'}
+							<Pagination.Item>
+								<Pagination.Ellipsis />
+							</Pagination.Item>
+						{:else}
+							<Pagination.Item>
+								<Pagination.Link
+									{page}
+									isActive={pagesFilter + 1 === page.value}
+									onclick={() => {
+										pagesFilter = Number(page.value) - 1;
+										filterHandler();
+									}}
+								>
+									{page.value}
+								</Pagination.Link>
+							</Pagination.Item>
+						{/if}
+					{/each}
+					<Pagination.Item>
+						<Pagination.NextButton
+							onclick={() => {
+								pagesFilter += 1;
+								filterHandler();
+							}}
+						>
+							<span class="hidden sm:block">Next</span>
+							<ChevronRight class="size-4" />
+						</Pagination.NextButton>
+					</Pagination.Item>
+				</Pagination.Content>
+			{/snippet}
+		</Pagination.Root>
 	</div>
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { navigating, page } from '$app/state';
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
@@ -13,6 +13,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label/index.js';
+	import * as Pagination from '$lib/components/ui/pagination/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { RangeCalendar } from '$lib/components/ui/range-calendar/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
@@ -28,10 +29,13 @@
 	import { getCoreRowModel } from '@tanstack/table-core';
 	import CalendarIcon from 'lucide-svelte/icons/calendar';
 	import Check from 'lucide-svelte/icons/check';
+	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import { tick } from 'svelte';
 	import { Stretch } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
@@ -101,7 +105,7 @@
 		dataType: 'json'
 	});
 
-	function toTitleCase(str:string) {
+	function toTitleCase(str: string) {
 		return str.replace(
 			/\w\S*/g,
 			(text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
@@ -229,16 +233,7 @@
 			triggerRef.focus();
 		});
 	}
-
-	const filterHandler = async () => {
-		await goto(
-			`/home?filter=${filter}&status=${statusValue}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}`,
-			{
-				invalidateAll: true,
-				replaceState: true
-			}
-		);
-	};
+	let pageFilter = $state(0);
 
 	$effect.root(() => {
 		const searchParam = page.url.searchParams.get('filter') ?? '';
@@ -246,23 +241,42 @@
 		const startDateParam = page.url.searchParams.get('startDate') ?? new Date();
 		const endDateParam = page.url.searchParams.get('endDate') ?? new Date();
 		const formTypeParam = page.url.searchParams.get('form') ?? '';
+		const pagesParam = page.url.searchParams.get('pages') ?? 0;
 
 		const startDate = new Date(startDateParam);
 		const endDate = new Date(endDateParam);
+		
+		
 		filter = searchParam;
 		statusValue = statusParam;
 		calenderValue.start = new CalendarDate(
 			startDate.getFullYear(),
 			startDate.getMonth(),
-			startDate.getDay()
+			startDate.getDate()
 		);
 		calenderValue.end = new CalendarDate(
 			endDate.getFullYear(),
 			endDate.getMonth(),
-			endDate.getDay()
+			endDate.getDate()
 		);
 		formValue = formTypeParam;
+		pageFilter = Number(pagesParam);
 	});
+
+	const filterHandler = async () => {
+		await goto(
+			`/home?pages=${pageFilter}&filter=${filter}&status=${statusValue}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}`,
+			{
+				invalidateAll: true,
+				replaceState: true
+			}
+		);
+	};
+	const isDesktop = new MediaQuery('(min-width: 768px)');
+
+	const count = data.requestDbData.length;
+	const perPage = $derived(isDesktop.current ? 10 : 5);
+	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 </script>
 
 {#if user.roleId == 3 && user.roleId}
@@ -377,7 +391,7 @@
 {:else}
 	<div>
 		<div class="flex items-center justify-center">
-			<h1>Hi, {toTitleCase(user.username)} </h1>
+			<h1>Hi, {toTitleCase(user.username)}</h1>
 		</div>
 		<div class="mx-[175px] flex items-center justify-center sm:flex-col md:flex-col lg:flex-row">
 			<div class="my-5 flex flex-row items-center gap-5">
@@ -508,7 +522,9 @@
 		</div>
 		<div class="my-5 flex flex-row items-center justify-center gap-5">
 			<button
-				onclick={filterHandler}
+				onclick={() => {
+					filterHandler();
+				}}
 				class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
 				>Filter</button
 			>
@@ -524,6 +540,7 @@
 							days: 20
 						})
 					};
+					pageFilter = 0;
 					filterHandler();
 				}}
 				>Reset
@@ -534,7 +551,7 @@
 				</div>
 			{/if}
 		</div>
-		<div class="overflow-x-auto px-5 py-10">
+		<div class="overflow-x-auto px-5">
 			<div
 				class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1000px] overflow-y-scroll rounded-md border-2"
 			>
@@ -572,6 +589,56 @@
 				</Table.Root>
 			</div>
 		</div>
+	</div>
+	<div class="sticky bottom-0 pb-16">
+		<Pagination.Root count={data.totalCount??0} {perPage} {siblingCount}>
+			{#snippet children({ pages })}
+				<Pagination.Content>
+					<Pagination.Item>
+						<Pagination.PrevButton
+							onclick={() => {
+								pageFilter -= 1;
+								filterHandler();
+							}}
+						>
+							<ChevronLeft class="size-4" />
+							<span class="hidden sm:block">Previous</span>
+						</Pagination.PrevButton>
+					</Pagination.Item>
+					{#each pages as page (page.key)}
+						{#if page.type === 'ellipsis'}
+							<Pagination.Item>
+								<Pagination.Ellipsis />
+							</Pagination.Item>
+						{:else}
+							<Pagination.Item>
+								<Pagination.Link
+									{page}
+									isActive={pageFilter+1 === page.value}
+									onclick={() => {
+										pageFilter = Number(page.value) - 1;
+										filterHandler();
+									}}
+								>
+									{page.value}
+								</Pagination.Link>
+							</Pagination.Item>
+						{/if}
+					{/each}
+					<Pagination.Item>
+						<Pagination.NextButton
+							onclick={() => {
+								pageFilter += 1;
+								filterHandler();
+							}}
+						>
+							<span class="hidden sm:block">Next</span>
+							<ChevronRight class="size-4" />
+						</Pagination.NextButton>
+					</Pagination.Item>
+				</Pagination.Content>
+			{/snippet}
+		</Pagination.Root>
 	</div>
 {/if}
 
