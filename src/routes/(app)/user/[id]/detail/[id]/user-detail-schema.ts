@@ -10,6 +10,9 @@ export const userDetailSchema = z.object({
 export type UserDetailSchema = z.infer<typeof userDetailSchema>;
 
 export const approveRejectSchema = z.object({
+    requestId: z.number(),
+    status: z.enum(Object.keys(requestDbStatusEnum) as [keyof typeof requestDbStatusEnum, ...Array<keyof typeof requestDbStatusEnum>]),
+    process: z.string(),
     approvalFile: z.instanceof(File, { message: "please Upload a file" }).refine((f) => f.size < 5 * 1024 * 1024, "Max 5 mb upload size.").optional(),
     reason: z.string().optional()
 })
@@ -38,7 +41,8 @@ export const userRequestSchema = z.object({
     reason: z.string(),
     form_url: z.string(),
     last_updated_by: z.string(),
-    request_code: z.string()
+    request_code: z.string(),
+    created_at: z.string()
 })
 
 export type UserRequestSchema = z.infer<typeof userRequestSchema>;

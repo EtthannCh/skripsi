@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import { navigating } from '$app/state';
+	import { navigating, page } from '$app/state';
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -101,6 +101,13 @@
 		dataType: 'json'
 	});
 
+	function toTitleCase(str:string) {
+		return str.replace(
+			/\w\S*/g,
+			(text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+		);
+	}
+
 	const formSelection = data.formSelection.map((v) => {
 		return {
 			label: v.code,
@@ -134,7 +141,7 @@
 			size: 200,
 			cell: ({ row }) => {
 				return renderComponent(DataTableMultipleRowCell, {
-					value: `Name : ${row.original.created_by}`,
+					value: `Name : ${toTitleCase(row.original.created_by)}`,
 					value2: `NIM : ${row.original.user_credentials.email.split('@')[0]}`
 				});
 			}
@@ -232,6 +239,30 @@
 			}
 		);
 	};
+
+	$effect.root(() => {
+		const searchParam = page.url.searchParams.get('filter') ?? '';
+		const statusParam = page.url.searchParams.get('status') ?? '';
+		const startDateParam = page.url.searchParams.get('startDate') ?? new Date();
+		const endDateParam = page.url.searchParams.get('endDate') ?? new Date();
+		const formTypeParam = page.url.searchParams.get('form') ?? '';
+
+		const startDate = new Date(startDateParam);
+		const endDate = new Date(endDateParam);
+		filter = searchParam;
+		statusValue = statusParam;
+		calenderValue.start = new CalendarDate(
+			startDate.getFullYear(),
+			startDate.getMonth(),
+			startDate.getDay()
+		);
+		calenderValue.end = new CalendarDate(
+			endDate.getFullYear(),
+			endDate.getMonth(),
+			endDate.getDay()
+		);
+		formValue = formTypeParam;
+	});
 </script>
 
 {#if user.roleId == 3 && user.roleId}
@@ -321,7 +352,7 @@
 								<Form.Label>{`Upload Form Permohonan (Max Size Allowed :  5mb)`}</Form.Label>
 								<span class="text-sm"
 									>(Penamaan File :
-									KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon)</span
+									KodeForm_NIMPemohon_KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)_EmailPemohon.pdf)</span
 								>
 								<span class="text-red-600"
 									>({'NOTE : Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan'
@@ -345,17 +376,22 @@
 	</Accordion.Root>
 {:else}
 	<div>
-		<div class="mx-[175px] flex flex-row items-center">
+		<div class="flex items-center justify-center">
+			<h1>Hi, {toTitleCase(user.username)} </h1>
+		</div>
+		<div class="mx-[175px] flex items-center justify-center sm:flex-col md:flex-col lg:flex-row">
 			<div class="my-5 flex flex-row items-center gap-5">
 				<Input class="w-[100px] border-2 border-black" bind:value={filter} placeholder="Search" />
 			</div>
-			<div class="mx-5 flex flex-row items-center gap-5">
+			<div
+				class="mx-5 flex items-center gap-5 max-md:flex-col max-sm:flex-col sm:flex-col md:flex-col lg:flex-row"
+			>
 				<Popover.Root bind:open>
 					<Popover.Trigger bind:ref={triggerRef}>
 						{#snippet child({ props })}
 							<Button
 								variant="outline"
-								class="w-[200px] justify-between"
+								class="justify-between max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
 								{...props}
 								role="combobox"
 								aria-expanded={open}
@@ -431,7 +467,7 @@
 						{#snippet child({ props })}
 							<Button
 								variant="outline"
-								class="w-[200px] justify-between"
+								class="justify-between max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
 								{...props}
 								role="combobox"
 								aria-expanded={open}
@@ -469,70 +505,72 @@
 					</Popover.Content>
 				</Popover.Root>
 			</div>
-			<div class="flex flex-row items-center gap-5">
-				<button
-					onclick={filterHandler}
-					class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
-					>Filter</button
-				>
-				<button
-					class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
-					onclick={() => {
-						filter = '';
-						statusValue = '';
-						formValue = '';
-						calenderValue = {
-							start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
-							end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1).add({
-								days: 20
-							})
-						};
-						filterHandler();
-					}}
-					>Reset
-				</button>
-				{#if navigating.to}
-					<div class="mb-4 h-10">
-						<Stretch color="#314986" />
-					</div>
-				{/if}
-			</div>
 		</div>
-		<div
-			class="border-gray-500s m-3 mx-auto max-h-[500px] w-[1000px] overflow-y-scroll rounded-md border-2"
-		>
-			<Table.Root>
-				<Table.Header class="bg-uph">
-					{#each table.getHeaderGroups() as headerGroup}
-						<Table.Row>
-							{#each headerGroup.headers as header}
-								<Table.Head
-									class="border-x-[1px] p-5 border-y-[1px] text-white border-black"
-									style="width: {header.column.getSize()}px"
-								>
-									{#if !header.isPlaceholder}
-										<FlexRender
-											content={header.column.columnDef.header}
-											context={header.getContext()}
-										/>
-									{/if}
-								</Table.Head>
-							{/each}
-						</Table.Row>
-					{/each}
-				</Table.Header>
-				<Table.Body>
-					{#each table.getRowModel().rows as row}
-						<Table.Row data-state={row.getIsSelected() && 'selected'}>
-							{#each row.getVisibleCells() as cell (cell.id)}
-								<Table.Cell class="border-x-[1px] border-y-[1px] border-black">
-									<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-								</Table.Cell>
-							{/each}
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
+		<div class="my-5 flex flex-row items-center justify-center gap-5">
+			<button
+				onclick={filterHandler}
+				class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
+				>Filter</button
+			>
+			<button
+				class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
+				onclick={() => {
+					filter = '';
+					statusValue = '';
+					formValue = '';
+					calenderValue = {
+						start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
+						end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1).add({
+							days: 20
+						})
+					};
+					filterHandler();
+				}}
+				>Reset
+			</button>
+			{#if navigating.to}
+				<div class="mb-4 h-10">
+					<Stretch color="#314986" />
+				</div>
+			{/if}
+		</div>
+		<div class="overflow-x-auto px-5 py-10">
+			<div
+				class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1000px] overflow-y-scroll rounded-md border-2"
+			>
+				<Table.Root>
+					<Table.Header class="bg-uph">
+						{#each table.getHeaderGroups() as headerGroup}
+							<Table.Row>
+								{#each headerGroup.headers as header}
+									<Table.Head
+										class="border-x-[1px] border-y-[1px] border-black p-5 text-white"
+										style="width: {header.column.getSize()}px"
+									>
+										{#if !header.isPlaceholder}
+											<FlexRender
+												content={header.column.columnDef.header}
+												context={header.getContext()}
+											/>
+										{/if}
+									</Table.Head>
+								{/each}
+							</Table.Row>
+						{/each}
+					</Table.Header>
+					<Table.Body>
+						{#each table.getRowModel().rows as row}
+							<Table.Row data-state={row.getIsSelected() && 'selected'}>
+								{#each row.getVisibleCells() as cell (cell.id)}
+									<Table.Cell class="border-x-[1px] border-y-[1px] border-black">
+										<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+									</Table.Cell>
+								{/each}
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
+			</div>
 		</div>
 	</div>
 {/if}

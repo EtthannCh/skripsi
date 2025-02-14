@@ -57,7 +57,7 @@ export const requestDbStatusEnum = {
 export const requestEnumColor = {
     PENDING: 'bg-gray-300 text-gray-900',
     APPROVED: 'bg-blue-500 text-white',
-    REJECTED: 'bg-red-500 text-red-900',
+    REJECTED: 'bg-red-500 text-white',
     ONGOING: 'bg-yellow-300 text-yellow-800',
     PROCESSING: '',
     COMPLETED: 'bg-green-500 text-white',

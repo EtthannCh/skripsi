@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { navigating } from '$app/state';
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/state';
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -12,28 +11,23 @@
 	import { ArrowLeft, FileText } from 'lucide-svelte';
 	import { Stretch } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
-	import { fileProxy, superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import SuperDebug, { fileProxy, superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { requestDbStatusEnum, requestEnumColor } from '../../../../home/request-user-schema';
 	import type { PageData } from './$types';
+	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 	import { approveRejectSchema } from './user-detail-schema';
 
 	let { data }: { data: PageData } = $props();
 
-	const form = superForm(data.form, {
-		validators: zodClient(approveRejectSchema),
-		dataType: 'json'
-	});
-
-	const { form: formData } = form;
-	const file = fileProxy(form, 'approvalFile');
-
 	const handleActions = async (requestId: number, status: string, action: string) => {
-		const response = await fetch($page.url.pathname, {
+		const response = await fetch(page.url.pathname, {
 			method: 'post',
 			body: JSON.stringify({
 				status,
 				requestId,
-				action
+				action,
+				reason
 			}),
 			headers: {
 				'Content-Type': 'application/json'
@@ -45,7 +39,6 @@
 				dismissable: true
 			});
 		}
-		await goto($page.url.pathname, { invalidateAll: true });
 	};
 
 	const processArray = [
@@ -60,13 +53,26 @@
 		'(By Admin)',
 		'(To Student)'
 	];
-	let files: FileList | null = $state(null);
+	const form = superForm(data.form, {
+		validators: zod(approveRejectSchema),
+		dataType: 'json',
+		onResult: ({ result }) => {
+			goto(page.url.pathname, { invalidateAll: true });
+		}
+	});
+	const { form: formData } = form;
+	let file = fileProxy(form, 'approvalFile', { empty: undefined });
+	let reason: string | undefined = $state('');
+	let processType: string = $state('');
+	$effect.root(() => {
+		$formData.requestId = data.requestData?.id;
+	});
 </script>
 
 <button
 	class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
 	onclick={() => {
-		window.history.back();
+		goto('/home');
 	}}
 >
 	<ArrowLeft />
@@ -77,6 +83,7 @@
 		<Stretch color="#314986" />
 	</div>
 {/if}
+<SuperDebug data={$formData}></SuperDebug>
 <!-- {#if data.user?.roleId == 3} -->
 <div class="mx-10 my-10 rounded-md border-2 bg-uph p-5 md:h-[600px] lg:h-[570px]">
 	<div class="mb-10">
@@ -90,9 +97,14 @@
 					>
 				</div>
 				<div class="flex justify-between">
-					<Label class="text-lg"
-						>Status : <strong>{data.requestData?.status.split('_').join(' ')}</strong></Label
-					>
+					{#if data.requestData}
+						<DataTableBadgeCell
+							value={data.requestData?.status.split('_').join(' ') ?? ''}
+							className={requestEnumColor[
+								data.requestData.status.split('_').join(' ') as keyof typeof requestDbStatusEnum
+							]}
+						></DataTableBadgeCell>
+					{/if}
 				</div>
 			</Card.Content>
 		</Card.Root>
@@ -103,7 +115,8 @@
 			alt="logo_uph"
 			class="rounded-full sm:hidden md:hidden lg:block lg:w-[300px]"
 		/>
-		<div class="w-full md:h-[200px] lg:h-[400px]">
+
+		<div class="w-full overflow-x-scroll md:h-[200px] lg:h-[400px]">
 			<Card.Root>
 				<Card.Header>
 					<Card.Title>Applicant's Detail</Card.Title>
@@ -146,7 +159,7 @@
 							</Label>
 							{#if data.requestData?.reason}
 								<Label class="text-lg">
-									<div class="flex items-center justify-between">
+									<div class="flex items-center justify-between text-red-500">
 										<span>Reject Reason</span>
 										<span class="lg:w-[250px]"> : {data.requestData.reason}</span>
 									</div>
@@ -154,7 +167,10 @@
 							{/if}
 						</div>
 						<div class="lg:w-[300px]">
-							<form action="">
+							<form action="?/submit" method="post" enctype="multipart/form-data">
+								<input type="hidden" name="status" value={data.requestData?.status} />
+								<input type="hidden" name="requestId" bind:value={$formData.requestId} />
+								<input type="hidden" name="process" bind:value={$formData.process} />
 								{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
 									<Tabs.Root value="account" class="flex flex-col justify-between">
 										<Tabs.List class="grid w-full grid-cols-2">
@@ -179,31 +195,20 @@
 													<Card.Content class="space-y-2">
 														<div class="space-y-1">
 															<Label for="approvalFile">Approval Form</Label>
-															<Input
+															<input
 																id="approvalFile"
 																type="file"
 																accept="application/pdf"
-																bind:value={files}
+																bind:files={$file}
+																name="approvalFile"
 															/>
 														</div>
 													</Card.Content>
 												{/if}
 												<Card.Footer>
 													<Button
-														disabled={!files && data.requestData.status == 'PROCESSING'}
-														onclick={() => {
-															handleActions(
-																data.requestData?.id ?? 0,
-																data.requestData?.status ?? '',
-																data.requestData?.status == 'ONGOING'
-																	? 'ONGOING'
-																	: data.requestData?.status == 'PROCESSING'
-																		? 'PROCESSING'
-																		: data.requestData?.status == 'COMPLETED'
-																			? 'COMPLETED'
-																			: 'APPROVE'
-															);
-														}}
+														disabled={!$file && data.requestData.status == 'PROCESSING'}
+														type="submit"
 														>{#if data.requestData.status == 'ONGOING'}
 															<span>Process</span>
 														{:else if data.requestData.status == 'PROCESSING'}
@@ -225,21 +230,23 @@
 														<Input
 															id="reason"
 															type="text"
-															disabled={data.requestData.status == 'PROCESSING'}
 															placeholder="Reason of Rejection"
 															bind:value={$formData.reason}
+															name="reason"
+															disabled={$file.length != 0 &&
+																(data.requestData.status == 'PROCESSING' ||
+																	data.requestData.status == 'ONGOING')}
 														/>
 													</div>
 												</Card.Content>
 												<Card.Footer>
 													<Button
-														disabled={data.requestData.status == 'PROCESSING'}
+														disabled={$file.length != 0 &&
+															(data.requestData.status == 'PROCESSING' ||
+																data.requestData.status == 'ONGOING')}
+														type="submit"
 														onclick={() => {
-															handleActions(
-																data.requestData?.id ?? 0,
-																"REJECTED",
-																'reject'
-															);
+															$formData.process = 'REJECT';
 														}}>Reject Application</Button
 													>
 												</Card.Footer>
@@ -266,11 +273,10 @@
 		</Card.Header>
 		<Separator />
 		<Card.Content>
-			<div class="scrollbar-hidden flex flex-row gap-5">
+			<div class="flex flex-row gap-5">
 				<Label class="text-lg">
 					<div class="flex flex-col items-start justify-between gap-5">
 						<span class="text-xl">Date of Submission</span>
-						<span></span>
 						<span class="flex flex-col">
 							<span
 								>{data.requestData?.created_at
@@ -285,29 +291,36 @@
 					</div>
 				</Label>
 				<div class="flex justify-between gap-6">
-					{#each data.requetsHistoryData ?? [] as historyData, idx}
-						<Label class="text-lg ">
-							<div class="flex flex-col items-start justify-between gap-5">
-								<div class="flex flex-col">
-									<span class="text-xl">{processArray[idx]}</span>
-									<span class="text-sm">{processCaptionArray[idx]}</span>
+					{#if data.requetsHistoryData}
+						{#each data.requetsHistoryData as historyData, idx}
+							<Label class="text-lg ">
+								<div class="flex flex-col items-start justify-between gap-5">
+									<div class="flex flex-col">
+										<span class="text-xl">{processArray[idx]}</span>
+										<span class="text-sm">{processCaptionArray[idx]}</span>
+									</div>
+									<span class="flex flex-col">
+										<span
+											>{historyData.created_at
+												? `${new Date(historyData.created_at).toLocaleDateString('id-ID', {
+														day: '2-digit',
+														month: 'short',
+														year: 'numeric'
+													})}`
+												: 'No Data'}</span
+										>
+										{#if historyData.file_url}
+											<span class="mt-3">
+												<a class="lg:w-[250px]" href={historyData.file_url} target="_blank"
+													><FileText /></a
+												>
+											</span>
+										{/if}
+									</span>
 								</div>
-								<span class="flex flex-col">
-									<span
-										>{historyData.created_at
-											? `${new Date(historyData.created_at).toLocaleDateString('id-ID', {
-													day: '2-digit',
-													month: 'short',
-													year: 'numeric'
-												})}`
-											: 'No Data'}</span
-									>
-									<span>ab</span>
-									<span> {historyData.file_url} </span>
-								</span>
-							</div>
-						</Label>
-					{/each}
+							</Label>
+						{/each}
+					{/if}
 				</div>
 			</div>
 		</Card.Content>

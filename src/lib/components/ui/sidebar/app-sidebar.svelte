@@ -9,11 +9,8 @@
 	import { ChevronUp } from 'lucide-svelte';
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 
-	import type {
-		MajorDbSchema,
-		UserCookiesSchema
-	} from '../../../../routes/home/request-user-schema';
 	import { goto } from '$app/navigation';
+	import type { MajorDbSchema, UserCookiesSchema } from '../../../../routes/(app)/home/request-user-schema';
 	const items = [
 		{
 			title: 'Home',
@@ -48,7 +45,7 @@
 	};
 </script>
 
-<Sidebar.Root class="bg-uph text-white" data-sveltekit-reload>
+<Sidebar.Root class="bg-uph text-white">
 	<Sidebar.Content>
 		<Sidebar.Group>
 			<Sidebar.GroupLabel class="text-xl my-5 flex gap-3"

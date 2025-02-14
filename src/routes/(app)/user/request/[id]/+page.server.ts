@@ -8,7 +8,7 @@ export const load = async ({ cookies }) => {
 
     const userRequestResponse = await supabase.from("request_db").select(
         `
-        id, status, form_db!inner(code, name), reason, form_url, last_updated_by, request_code
+        id, status, form_db!inner(code, name), reason, form_url, last_updated_by, request_code, created_at
         `
     ).eq("user_id", userCookies.userId);
     const userRequestFromDb: UserRequestSchema[] = JSON.parse(JSON.stringify(userRequestResponse.data));
