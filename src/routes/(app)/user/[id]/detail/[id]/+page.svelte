@@ -4,6 +4,7 @@
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator/index.js';
@@ -15,7 +16,6 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { requestDbStatusEnum, requestEnumColor } from '../../../../home/request-user-schema';
 	import type { PageData } from './$types';
-	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 	import { approveRejectSchema } from './user-detail-schema';
 
 	let { data }: { data: PageData } = $props();
@@ -56,14 +56,14 @@
 	const form = superForm(data.form, {
 		validators: zod(approveRejectSchema),
 		dataType: 'json',
-		onResult: ({ result }) => {
+		onResult: () => {
 			goto(page.url.pathname, { invalidateAll: true });
 		}
 	});
 	const { form: formData } = form;
 	let file = fileProxy(form, 'approvalFile', { empty: undefined });
+	let rejectFile = fileProxy(form, 'rejectFile', { empty: undefined });
 	let reason: string | undefined = $state('');
-	let processType: string = $state('');
 	$effect.root(() => {
 		$formData.requestId = data.requestData?.id;
 	});
@@ -83,7 +83,7 @@
 		<Stretch color="#314986" />
 	</div>
 {/if}
-<SuperDebug data={$formData}></SuperDebug>
+
 <!-- {#if data.user?.roleId == 3} -->
 <div class="mx-10 my-10 rounded-md border-2 bg-uph p-5 md:h-[600px] lg:h-[570px]">
 	<div class="mb-10">
@@ -201,13 +201,20 @@
 																accept="application/pdf"
 																bind:files={$file}
 																name="approvalFile"
+																disabled={$rejectFile.length != 0 &&
+																	data.requestData.status == 'PROCESSING'}
 															/>
 														</div>
 													</Card.Content>
 												{/if}
 												<Card.Footer>
 													<Button
-														disabled={!$file && data.requestData.status == 'PROCESSING'}
+														disabled={($file.length == 0 &&
+															data.requestData.status == 'PROCESSING') ||
+															(data.requestData.status == 'ONGOING' &&
+																($rejectFile.length != 0 || $formData.reason != '')) ||
+															(data.requestData.status == 'PENDING' &&
+																($rejectFile.length != 0 || $formData.reason != ''))}
 														type="submit"
 														>{#if data.requestData.status == 'ONGOING'}
 															<span>Process</span>
@@ -234,16 +241,27 @@
 															bind:value={$formData.reason}
 															name="reason"
 															disabled={$file.length != 0 &&
-																(data.requestData.status == 'PROCESSING' ||
-																	data.requestData.status == 'ONGOING')}
+																data.requestData.status == 'PROCESSING'}
+														/>
+													</div>
+													<div class="space-y-1">
+														<Label for="reason">Rejection File</Label>
+														<input
+															id="rejectFile"
+															name="rejectFile"
+															type="file"
+															bind:files={$rejectFile}
+															disabled={$file.length != 0 &&
+																data.requestData.status == 'PROCESSING'}
 														/>
 													</div>
 												</Card.Content>
 												<Card.Footer>
 													<Button
-														disabled={$file.length != 0 &&
-															(data.requestData.status == 'PROCESSING' ||
-																data.requestData.status == 'ONGOING')}
+														disabled={(($rejectFile.length == 0 || $formData.reason == '') &&
+															data.requestData.status == 'ONGOING') ||
+															(data.requestData.status == 'PROCESSING' &&
+																($file.length != 0 || $rejectFile.length == 0))}
 														type="submit"
 														onclick={() => {
 															$formData.process = 'REJECT';
@@ -309,17 +327,31 @@
 													})}`
 												: 'No Data'}</span
 										>
-										{#if historyData.file_url}
-											<span class="mt-3">
-												<a class="lg:w-[250px]" href={historyData.file_url} target="_blank"
-													><FileText /></a
-												>
-											</span>
+										{#if data.requestData.status == 'COMPLETED' && idx == data.requetsHistoryData.length - 1}
+											<a
+												class="lg:w-[250px]"
+												href={data.requestData.completion_file_url}
+												target="_blank"><FileText /></a
+											>
 										{/if}
 									</span>
 								</div>
 							</Label>
 						{/each}
+						{#if data.requestData.status == 'REJECTED'}
+							<div class="flex flex-col items-start justify-between gap-5">
+								<div class="flex flex-col">
+									<span class="text-xl text-red-600">{'REJECTED'}</span>
+								</div>
+								<span class="mt-3">
+									<a
+										class="lg:w-[250px]"
+										href={data.requestData.completion_file_url}
+										target="_blank"><FileText /></a
+									>
+								</span>
+							</div>
+						{/if}
 					{/if}
 				</div>
 			</div>

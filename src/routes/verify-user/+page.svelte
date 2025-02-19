@@ -19,10 +19,11 @@
 			}, 1000);
 		}
 	};
+	let reverify: boolean = $state(false);
 </script>
 
 <div
-	class="flex flex-col justify-center items-center gap-10 h-full rounded-md bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
+	class="flex min-h-screen flex-col items-center justify-center gap-10 rounded-md bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
 >
 	<Label class="text-lg font-bold">Gunakan Kode yang diberikan untuk Registrasi</Label>
 	<span class="text-md">Kode yang diberikan tidak valid dalam waktu 5 MENIT</span>
@@ -54,14 +55,20 @@
 			{/snippet}
 		</InputOTP.Root>
 		<button
-			class={`rounded-md bg-black px-5 py-3 ${timer > 0 ? 'bg-gray-500 text-gray-300' : ''}`}
-			type="submit"
-			onclick={startTimer}>Verify {timer > 0 ? timer + ' Detik' : ''}</button
-		>
-		<button
+			name="action"
+			value="verify"
 			class={`rounded-md bg-black px-5 py-3 ${timer > 0 ? 'bg-gray-500 text-gray-300' : ''}`}
 			disabled={timer > 0}
-			onclick={startTimer}>Kirim Kode Ulang {timer > 0 ? timer + ' Detik' : ''}</button
+			type="submit"
+			onclick={startTimer()}>Verify {timer > 0 ? timer + ' Detik' : ''}</button
+		>	
+		<button
+			name="action"
+			value="reverify"
+			class={`rounded-md bg-black px-5 py-3 ${timer > 0 ? 'bg-gray-500 text-gray-300' : ''}`}
+			disabled={timer > 0}
+			type="submit"
+			onclick={startTimer()}>Kirim Kode Ulang {timer > 0 ? timer + ' Detik' : ''}</button
 		>
 	</form>
 	<span class="text-md">Kode dikirimkan ke alamat e-mail : {data.userCookies.email}</span>

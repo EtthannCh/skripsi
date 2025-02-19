@@ -19,11 +19,11 @@
 				});
 				return goto('/verify-user', { invalidateAll: true });
 			} else if (result.type == 'failure') {
-				toast.error(result.data?.message, {
+				toast.error('Credentials Invalid', {
 					position: 'top-right',
 					dismissable: true
 				});
-			} 
+			}
 		}
 	});
 

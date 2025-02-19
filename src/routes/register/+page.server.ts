@@ -7,8 +7,8 @@ import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import type { UserDbSchema } from '../home/request-user-schema';
 import { registerSchema, type UserRegistration } from "./register-schema";
+import type { UserDbSchema } from '../(app)/home/request-user-schema';
 
 export const load = async () => {
     const form = await superValidate(zod(registerSchema))
@@ -31,7 +31,7 @@ export const actions: Actions = {
         const userDbResponse = await supabase.from("user_credentials").select("*").eq("email", form.data.email);
         const userDb: UserDbSchema[] = JSON.parse(JSON.stringify(userDbResponse.data))
         if (userDb.length > 0) {
-            return fail(400, { data: form, message: "Invalid User" });
+            return fail(400, { data: form, message: "User Exist" });
         }
 
         const otp: number = Math.floor(Math.random() * (999999 - 100000) + 100000);
@@ -56,8 +56,8 @@ export const actions: Actions = {
         else {
             roleId = 0;
         }
-        if (roleId == 0) {
-            return fail(400, { data: form, message: "Invalid Input" });
+        if (roleId == 0 || majorId == 0) {
+            return fail(400, { data: form, message: "Invalid Input, Please Check Again" });
         }
 
         const pass = await bcrypt.hash(form.data.password, 15)

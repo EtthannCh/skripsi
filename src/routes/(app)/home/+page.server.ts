@@ -12,19 +12,19 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         throw redirect(304, "/login");
     }
 
+    const date = new Date();
+    const defaultStartDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    const defaultEndDate = new Date(date.getFullYear(), date.getMonth()+1, 0);
+    defaultStartDate.setDate(defaultStartDate.getDate()+1);
+    defaultEndDate.setDate(defaultEndDate.getDate()+1)
     const filter = url.searchParams.get("filter") ?? "";
     const status = url.searchParams.get("status") ?? "";
-    const startDate = url.searchParams.get("startDate") ?? "";
-    const endDate = url.searchParams.get("endDate") ?? "";
+    
+    const startDate = url.searchParams.get("startDate") ?? defaultStartDate.toISOString().split("T")[0];
+    const endDate = url.searchParams.get("endDate") ?? defaultEndDate.toISOString().split("T")[0];;
     const formFilter = url.searchParams.get("form") ?? "";
     const filterQuery = filter.length > 0 ? `%${filter.toUpperCase()}%` : "";
-    let pages = Number(url.searchParams.get("pages") ?? 0);
-
-    if (pages % 10 == 0) {
-        pages = Math.floor(pages) / 10;
-    } else {
-        pages = (Math.floor(pages) / 10) + 1;
-    }
+    const pages = Number(url.searchParams.get("pages") ?? 0);
 
     const form = await superValidate(zod(userRequestSchema));
 
@@ -40,31 +40,37 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         .range(pages * 10, (pages + 1) * 10)
         .limit(10)
     );
+    let totalCountQuery = supabase.from("request_db")
+        .select(
+            `id, status, user_id, form_id, request_code,
+            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url, completion_file_url
+            `, { count: "exact" }
+        ).order("created_at", { ascending: true })
+        .eq("major_id", user.majorId);
     if (filter.length > 0) {
         query = query.or(`created_by.ilike.${filterQuery},request_code.ilike.${filterQuery}`)
+        totalCountQuery = totalCountQuery.or(`created_by.ilike.${filterQuery},request_code.ilike.${filterQuery}`)
     }
     if (status.length > 0) {
         query = query.eq(`status`, status)
+        totalCountQuery = totalCountQuery.eq(`status`, status)
     }
     if (startDate) {
-        query = query.lte("created_at", new Date(endDate).toISOString()).gte("created_at", new Date(startDate).toISOString())
+        const newEndDate = new Date(endDate);
+        newEndDate.setDate(newEndDate.getDate()+1);        
+        query = query.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString())
+        totalCountQuery = totalCountQuery.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString());
     }
     if (formFilter.length > 0) {
         query = query.eq("form_id", formFilter);
-    }
-
-    const totalCountResponse = await supabase.from("request_db")
-        .select(
-            `id, status, user_id, form_id, request_code,
-            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url
-            `, {count:"exact"}
-        ).order("created_at", { ascending: true })
-        .eq("major_id", user.majorId);
-    if((totalCountResponse).error){
-        throw fail(400, {message:"Error Fetch"});
+        totalCountQuery = totalCountQuery.eq("form_id", formFilter);
     }
 
     const requestDbDataFromDb = (await query).data;
+    const totalCountFromDb = (await totalCountQuery);
+    if ((totalCountFromDb).error) {
+        throw fail(400, { message: "Error Fetch" });
+    }
     let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));
     if (user.roleId == 3 || !user.roleId) {
         requestDbData = [];
@@ -75,7 +81,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         user,
         formSelection,
         requestDbData,
-        totalCount:totalCountResponse.count
+        totalCount: totalCountFromDb.count
     };
 }
 
@@ -159,6 +165,8 @@ export const actions = {
         if (error || errorInsertRequest) {
             return message(form, "Please Check Again");
         }
+
+        // jika ada error ketika insert, update pakai data sebelumnya
 
         const updateSequenceDbResponse = await supabase.from("sequence_db").update({
             current_number: currentNumber

@@ -1,21 +1,26 @@
 <script lang="ts">
-	import { goto, preloadData, pushState, replaceState } from '$app/navigation';
+	import { goto, preloadData, pushState } from '$app/navigation';
 	import { navigating, page } from '$app/state';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
+	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Command from '$lib/components/ui/command/index.js';
 	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
+	import * as Pagination from '$lib/components/ui/pagination/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
+	import { cn } from '$lib/utils';
 	import { ArrowLeft } from 'lucide-svelte';
-	import { Stretch } from 'svelte-loading-spinners';
-	import { requestEnumColor } from '../../../home/request-user-schema';
-	import type { PageData } from './$types';
-	import RequestDetailPage from './[requestId]/+page.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
+	import Check from 'lucide-svelte/icons/check';
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
+	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
+	import { Stretch } from 'svelte-loading-spinners';
 	import { MediaQuery } from 'svelte/reactivity';
+	import { requestDbStatusCombobox, requestEnumColor } from '../../../home/request-user-schema';
+	import type { PageData } from './$types';
+	import RequestDetailPage from './[requestId]/+page.svelte';
+	import { tick } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -24,7 +29,6 @@
 	const perPage = $derived(isDesktop.current ? 6 : 6);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 	const fetchPreloadData = async (requestId: number) => {
-		console.log(page.url.pathname);
 		const url = `${page.url.pathname}/${requestId}`;
 		const result = await preloadData(url);
 
@@ -38,14 +42,27 @@
 	let pagesFilter: number = $state(0);
 	$effect.root(() => {
 		const pagesParam = page.url.searchParams.get('pages') ?? 0;
-
 		pagesFilter = Number(pagesParam);
 	});
 
-	const filterHandler = () => {
-		goto(`${page.url.pathname}?pages=${pagesFilter}`);
-	};
 	let requestCode = $state('');
+	let triggerRef = $state<HTMLButtonElement>(null!);
+	let open = $state(false);
+	let statusValue = $state('');
+	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
+
+	function closeAndFocusTrigger() {
+		open = false;
+		tick().then(() => {
+			triggerRef.focus();
+		});
+	}
+
+	const filterHandler = () => {
+		goto(`${page.url.pathname}?pages=${pagesFilter}&status=${statusValue}`, {
+			invalidateAll: true
+		});
+	};
 </script>
 
 <button
@@ -62,7 +79,57 @@
 		<Stretch color="#314986" />
 	</div>
 {/if}
-<div class="w-full p-10">
+<div class="w-full pl-10">
+	<div class="flex items-center gap-5 pb-5">
+		<Popover.Root bind:open>
+			<Popover.Trigger bind:ref={triggerRef}>
+				{#snippet child({ props })}
+					<Button
+						variant="outline"
+						class="justify-between max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
+						{...props}
+						role="combobox"
+						aria-expanded={open}
+					>
+						{selectedValue || 'Choose Status'}
+						<ChevronsUpDown class="opacity-50" />
+					</Button>
+				{/snippet}
+			</Popover.Trigger>
+			<Popover.Content class="w-[200px] p-0">
+				<Command.Root>
+					<Command.Input placeholder="Choose Status..." />
+					<Command.List>
+						<Command.Group>
+							{#each requestDbStatusCombobox as status}
+								<Command.Item
+									value={status.value}
+									onSelect={() => {
+										if (statusValue && statusValue == status.value) {
+											statusValue = '';
+										} else {
+											statusValue = status.value;
+										}
+
+										closeAndFocusTrigger();
+									}}
+								>
+									<Check class={cn(statusValue !== status.value && 'text-transparent')} />
+									{status.label}
+								</Command.Item>
+							{/each}
+						</Command.Group>
+					</Command.List>
+				</Command.Root>
+			</Popover.Content>
+		</Popover.Root>
+		<button
+			class="rounded-md bg-uphButton p-3 text-white"
+			onclick={() => {
+				filterHandler();
+			}}>Filter</button
+		>
+	</div>
 	<div
 		class="grid overflow-y-scroll sm:grid-cols-1 sm:gap-36 md:grid-cols-2 md:gap-24 lg:grid-cols-3 lg:gap-10"
 	>
@@ -105,9 +172,7 @@
 			</div>
 		{/each}
 
-		<Sheet.Root
-			open={page.state.preloadedData != null}
-		>
+		<Sheet.Root open={page.state.preloadedData != null}>
 			<Sheet.Content side="right">
 				<Sheet.Header>
 					<Sheet.Title>Process Details</Sheet.Title>
@@ -117,7 +182,7 @@
 		</Sheet.Root>
 	</div>
 	<div class="sticky bottom-0 mt-3 rounded-md bg-white pb-5 pt-10">
-		<Pagination.Root count={count ?? 0} {perPage} {siblingCount}>
+		<Pagination.Root count={data.data.totalCount ?? 0} {perPage} {siblingCount}>
 			{#snippet children({ pages })}
 				<Pagination.Content>
 					<Pagination.Item>

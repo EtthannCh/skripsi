@@ -4,8 +4,8 @@
 	import '../app.css';
 
 	let { children, data } = $props();
-
 </script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <Toaster richColors position="top-right"></Toaster>
 

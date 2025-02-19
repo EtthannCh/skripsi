@@ -110,6 +110,7 @@ export const requestDbSchema = z.object({
     }),
     form_url: z.string(),
     request_code: z.string(),
+    completion_file_url: z.string(),
 })
 export type RequestDbSchema = z.infer<typeof requestDbSchema>;
 

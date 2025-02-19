@@ -55,12 +55,9 @@
 
 	let calenderValue = $state({
 		start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
-		end: new CalendarDate(
-			currentDate.getFullYear(),
-			currentDate.getMonth(),
-			currentDate.getDate()
-		).add({ days: 1 })
+		end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
 	});
+
 	let startValue: DateValue | undefined = $state(undefined);
 
 	let { data }: { data: PageData } = $props();
@@ -236,28 +233,30 @@
 	let pageFilter = $state(0);
 
 	$effect.root(() => {
+		let date = new Date();
 		const searchParam = page.url.searchParams.get('filter') ?? '';
 		const statusParam = page.url.searchParams.get('status') ?? '';
-		const startDateParam = page.url.searchParams.get('startDate') ?? new Date();
-		const endDateParam = page.url.searchParams.get('endDate') ?? new Date();
+		const startDateParam =
+			page.url.searchParams.get('startDate') ?? new Date(date.getFullYear(), date.getMonth(), 1);
+		const endDateParam =
+			page.url.searchParams.get('endDate') ?? new Date(date.getFullYear(), date.getMonth() + 1, 0);
 		const formTypeParam = page.url.searchParams.get('form') ?? '';
 		const pagesParam = page.url.searchParams.get('pages') ?? 0;
 
 		const startDate = new Date(startDateParam);
 		const endDate = new Date(endDateParam);
-		
-		
+
 		filter = searchParam;
 		statusValue = statusParam;
 		calenderValue.start = new CalendarDate(
 			startDate.getFullYear(),
-			startDate.getMonth(),
+			startDate.getMonth()+1,
 			startDate.getDate()
 		);
 		calenderValue.end = new CalendarDate(
 			endDate.getFullYear(),
-			endDate.getMonth(),
-			endDate.getDate()
+			endDate.getMonth()+1,
+			endDate.getDate()+1
 		);
 		formValue = formTypeParam;
 		pageFilter = Number(pagesParam);
@@ -273,10 +272,10 @@
 		);
 	};
 	const isDesktop = new MediaQuery('(min-width: 768px)');
-
-	const count = data.requestDbData.length;
 	const perPage = $derived(isDesktop.current ? 10 : 5);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
+
+
 </script>
 
 {#if user.roleId == 3 && user.roleId}
@@ -339,7 +338,7 @@
 								<Form.Label>Jenis Form</Form.Label>
 								<Select.Root type="single" name="formId" bind:value={$formData.formId}>
 									<Select.Trigger>
-										{formSelection.find((v) => v.value == $formData.formId)?.label ?? 'Pilih Form'}
+										{formSelection.find((v) => v.value == $formData.formId)?.label.replace('_', '-') ?? 'Pilih Form'}
 									</Select.Trigger>
 									<Select.Content>
 										<Select.Group>
@@ -486,7 +485,7 @@
 								role="combobox"
 								aria-expanded={open}
 							>
-								{selectedFormValue || 'Choose Form Type'}
+								{selectedFormValue?.replace('_', '-') || 'Choose Form Type'}
 								<ChevronsUpDown class="opacity-50" />
 							</Button>
 						{/snippet}
@@ -535,10 +534,8 @@
 					statusValue = '';
 					formValue = '';
 					calenderValue = {
-						start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1),
-						end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth(), 1).add({
-							days: 20
-						})
+						start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth()+1, 1),
+						end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth()+1, currentDate.getDate())
 					};
 					pageFilter = 0;
 					filterHandler();
@@ -591,7 +588,7 @@
 		</div>
 	</div>
 	<div class="sticky bottom-0 pb-16">
-		<Pagination.Root count={data.totalCount??0} {perPage} {siblingCount}>
+		<Pagination.Root count={data.totalCount ?? 0} {perPage} {siblingCount}>
 			{#snippet children({ pages })}
 				<Pagination.Content>
 					<Pagination.Item>
@@ -614,7 +611,7 @@
 							<Pagination.Item>
 								<Pagination.Link
 									{page}
-									isActive={pageFilter+1 === page.value}
+									isActive={pageFilter + 1 === page.value}
 									onclick={() => {
 										pageFilter = Number(page.value) - 1;
 										filterHandler();

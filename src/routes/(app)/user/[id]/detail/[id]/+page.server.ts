@@ -18,15 +18,15 @@ export const load: PageServerLoad = async ({ url }) => {
     const requestDataFromDb = await supabase.from("request_db").select("*").eq("id", requestFormId);
     const requestHistoryDataFromDb = await supabase.from("request_history_db").select("*").eq("request_id", requestFormId);
 
-    if (userDataFromDb.error) {
+    if (userDataFromDb.error || userDataFromDb == undefined) {
         console.log(userDataFromDb.error);
         return fail(400, { message: "Invalid User Data" })
     }
-    if (requestDataFromDb.error) {
+    if (requestDataFromDb.error || requestDataFromDb == undefined) {
         console.log(requestDataFromDb.error);
         return fail(400, { message: "Invalid Request Data" })
     }
-    if (requestHistoryDataFromDb.error) {
+    if (requestHistoryDataFromDb.error || requestHistoryDataFromDb == undefined) {
         console.log(requestHistoryDataFromDb.error);
         return fail(400, { message: "Invalid Request History Data" })
     }
@@ -79,8 +79,17 @@ export const actions = {
         }
 
         let fileUrl: string | File = "";
-        if (form.data.approvalFile) {
-            const file = form.data.approvalFile as File;
+        let reason : string = "";
+        let approveFileOrReject: File | undefined = undefined;
+        if (form.data.approvalFile || form.data.rejectFile) {
+            if (form.data.approvalFile) {
+                approveFileOrReject = form.data.approvalFile;
+                reason = "";
+            } else {
+                approveFileOrReject = form.data.rejectFile;
+                reason = form.data.reason;
+            }
+            const file = approveFileOrReject as File;
             const buffer = Buffer.from(await file.arrayBuffer());
             const fileName = `${form.data.requestId}-${currentStatus}-${new Date().toISOString()}`.toString();
             const { error } = await supabase.storage.from("request_form_files")
@@ -96,7 +105,7 @@ export const actions = {
             status: currentStatus,
             last_updated_by_id: user.userId,
             last_updated_by: user.username,
-            reason: form.data.reason,
+            reason: reason,
             completion_file_url: fileUrl
         }).eq("id", form.data.requestId);
         if (errorInsertRequest) {
