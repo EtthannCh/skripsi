@@ -4,7 +4,7 @@ import { fail } from '@sveltejs/kit';
 import bcrypt from 'bcryptjs';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { UserCookiesSchema, UserDbSchema } from "../home/request-user-schema";
+import type { UserCookiesSchema, UserDbSchema } from "../(app)/home/request-user-schema";
 import { loginSchema } from "./login-schema";
 
 export const load = async () => {

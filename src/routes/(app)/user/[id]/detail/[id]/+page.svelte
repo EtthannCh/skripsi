@@ -67,6 +67,15 @@
 	$effect.root(() => {
 		$formData.requestId = data.requestData?.id;
 	});
+	let isMobile = $state(false);
+	let windowWidth = $state(0);
+	$effect(() => {
+		if (windowWidth > 1000) {
+			isMobile = false;
+		} else {
+			isMobile = true;
+		}
+	});
 </script>
 
 <button
@@ -83,7 +92,7 @@
 		<Stretch color="#314986" />
 	</div>
 {/if}
-
+<svelte:window bind:innerWidth={windowWidth} />
 <!-- {#if data.user?.roleId == 3} -->
 <div class="mx-10 my-10 rounded-md border-2 bg-uph p-5 md:h-[600px] lg:h-[570px]">
 	<div class="mb-10">
@@ -109,14 +118,18 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
-	<div class="flex items-center justify-between gap-10">
-		<img
-			src={uphLogo}
-			alt="logo_uph"
-			class="rounded-full sm:hidden md:hidden lg:block lg:w-[300px]"
-		/>
+	<div
+		class="request-card flex items-center justify-between gap-10 sm:flex-col md:flex-col md:overflow-x-scroll lg:flex-row lg:overflow-x-scroll"
+	>
+		{#if !isMobile}
+			<img
+				src={uphLogo}
+				alt="logo_uph"
+				class="rounded-full sm:hidden md:hidden lg:block lg:w-[300px]"
+			/>
+		{/if}
 
-		<div class="w-full overflow-x-scroll md:h-[200px] lg:h-[400px]">
+		<div class="w-full md:h-[550px] lg:h-[400px]">
 			<Card.Root>
 				<Card.Header>
 					<Card.Title>Applicant's Detail</Card.Title>
@@ -339,17 +352,21 @@
 							</Label>
 						{/each}
 						{#if data.requestData.status == 'REJECTED'}
-							<div class="flex flex-col items-start justify-between gap-5">
+							<div
+								class={`flex flex-col items-start justify-${data.requestData.completion_file_url ? 'between' : 'center'} gap-5`}
+							>
 								<div class="flex flex-col">
 									<span class="text-xl text-red-600">{'REJECTED'}</span>
 								</div>
-								<span class="mt-3">
-									<a
-										class="lg:w-[250px]"
-										href={data.requestData.completion_file_url}
-										target="_blank"><FileText /></a
-									>
-								</span>
+								{#if data.requestData.completion_file_url}
+									<span class="mt-3">
+										<a
+											class="lg:w-[250px]"
+											href={data.requestData.completion_file_url}
+											target="_blank"><FileText /></a
+										>
+									</span>
+								{/if}
 							</div>
 						{/if}
 					{/if}
@@ -358,4 +375,11 @@
 		</Card.Content>
 	</Card.Root>
 </div>
+
 <!-- {/if} -->
+
+<style>
+	.request-card::-webkit-scrollbar {
+		height: 0px;
+	}
+</style>

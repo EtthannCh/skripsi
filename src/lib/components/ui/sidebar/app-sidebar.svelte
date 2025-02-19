@@ -30,7 +30,7 @@
 	};
 </script>
 
-<Sidebar.Root class="bg-uph text-white">
+<Sidebar.Root class="bg-uph text-white h-full">
 	<Sidebar.Content>
 		<Sidebar.Group>
 			<Sidebar.GroupLabel class="text-xl my-5 flex gap-3"

@@ -30,7 +30,6 @@ export const load = async ({ cookies, url }) => {
     const userRequestFromDb: UserRequestSchema[] = JSON.parse(JSON.stringify(userRequest.data));
     const requestIdArray = userRequestFromDb.map((v) => v.id);
 
-
     const userRequestHistoryResponse = await supabase.from("request_history_db").select(
         `id, request_id, created_by, created_by_id, created_at, file_url`
     ).in("request_id", requestIdArray).order("request_id", { ascending: true });
