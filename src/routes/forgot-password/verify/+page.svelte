@@ -23,10 +23,10 @@
 </script>
 
 <div
-	class="flex min-h-screen flex-col items-center justify-center gap-10 rounded-md bg-gradient-to-br from-cyan-500 to-blue-800 text-white"
+	class="flex min-h-screen flex-col items-center justify-center gap-10 rounded-md bg-uph text-white"
 >
-	<Label class="text-lg font-bold">Gunakan Kode yang diberikan untuk Registrasi</Label>
-	<span class="text-md">Kode yang diberikan tidak valid dalam waktu 5 MENIT</span>
+	<Label class="text-lg font-bold">Use the Given Code to Reset Password</Label>
+	<span class="text-md">Given Code is <span class="text-red-600">INVALID</span> after 5 MINUTES</span>
 	<form
 		class="flex flex-col items-center gap-5"
 		action="?/verify"
@@ -66,15 +66,15 @@
 			value="verify"
 			class={`rounded-md bg-black px-5 py-3 ${timer > 0 ? 'bg-gray-500 text-gray-300' : ''}`}
 			disabled={timer > 0}
-			type="submit">Verify {timer > 0 ? timer + ' Detik' : ''}</button
+			type="submit">Verify {timer > 0 ? timer + ' Seconds' : ''}</button
 		>
 		<button
 			name="action"
 			value="reverify"
 			class={`rounded-md bg-black px-5 py-3 ${timer > 0 ? 'bg-gray-500 text-gray-300' : ''}`}
 			disabled={timer > 0}
-			type="submit">Kirim Kode Ulang {timer > 0 ? timer + ' Detik' : ''}</button
+			type="submit">Resend Code {timer > 0 ? timer + ' Seconds' : ''}</button
 		>
 	</form>
-	<span class="text-md">Kode dikirimkan ke alamat e-mail : {data.userCookies.email}</span>
+	<span class="text-md">Code is Sent to : {data.userCookies.email}</span>
 </div>

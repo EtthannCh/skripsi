@@ -25,7 +25,6 @@
 	let { data }: { data: PageData } = $props();
 
 	const isDesktop = new MediaQuery('(min-width: 768px)');
-	const count = data.data.totalCount;
 	const perPage = $derived(isDesktop.current ? 6 : 6);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 	const fetchPreloadData = async (requestId: number) => {
@@ -173,7 +172,12 @@
 		{/each}
 
 		<Sheet.Root open={page.state.preloadedData != null}>
-			<Sheet.Content side="right">
+			<Sheet.Content
+				side="right"
+				onInteractOutside={() => {
+					window.history.back();
+				}}
+			>
 				<Sheet.Header>
 					<Sheet.Title>Process Details</Sheet.Title>
 				</Sheet.Header>
