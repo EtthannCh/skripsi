@@ -129,6 +129,7 @@ export const sequenceSchema = z.object({
     reset_condition: z.string(),
     created_at: z.string(),
     format: z.string(),
+    current_year: z.string(),
 })
 
 export type SequenceSchema = z.infer<typeof sequenceSchema>;

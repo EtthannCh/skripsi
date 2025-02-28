@@ -214,7 +214,7 @@
 																accept="application/pdf"
 																bind:files={$file}
 																name="approvalFile"
-																disabled={$rejectFile.length != 0 &&
+																disabled={($rejectFile.length != 0 || $formData.reason != '') &&
 																	data.requestData.status == 'PROCESSING'}
 															/>
 														</div>
@@ -222,7 +222,8 @@
 												{/if}
 												<Card.Footer>
 													<Button
-														disabled={($file.length == 0 &&
+														disabled={(($file.length == 0 ||
+															($rejectFile.length != 0 && $formData.reason != '')) &&
 															data.requestData.status == 'PROCESSING') ||
 															(data.requestData.status == 'ONGOING' &&
 																($rejectFile.length != 0 || $formData.reason != '')) ||
@@ -271,10 +272,12 @@
 												</Card.Content>
 												<Card.Footer>
 													<Button
-														disabled={(($rejectFile.length == 0 || $formData.reason == '') &&
+														disabled={($rejectFile.length == 0 &&
+															$formData.reason == '' &&
 															data.requestData.status == 'ONGOING') ||
 															(data.requestData.status == 'PROCESSING' &&
-																($file.length != 0 || $rejectFile.length == 0))}
+																($file.length != 0 ||
+																	($rejectFile.length == 0 && $formData.reason == '')))}
 														type="submit"
 														onclick={() => {
 															$formData.process = 'REJECT';

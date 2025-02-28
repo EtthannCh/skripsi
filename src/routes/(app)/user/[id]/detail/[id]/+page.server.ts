@@ -1,6 +1,6 @@
 import { sessionManager } from '$lib/server/sessionManager';
 import { supabase } from '$lib/supabaseClient.js';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
 import { message, superValidate, type SuperValidated } from 'sveltekit-superforms/server';
 import type { RequestDbSchema, UserCookiesSchema } from '../../../../home/request-user-schema';
@@ -44,7 +44,11 @@ export const load: PageServerLoad = async ({ url }) => {
 
 export const actions = {
     submit: async ({ request, cookies }) => {
+        if (!cookies) {
+            throw redirect(304, "/login");
+        }
         const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
+
         const form = await superValidate(request, zod(approveRejectSchema));
         if (!form.valid) {
             return message(form, { type: "failure", message: "Invalid Form" })
@@ -79,7 +83,7 @@ export const actions = {
         }
 
         let fileUrl: string | File = "";
-        let reason : string = "";
+        let reason: string = "";
         let approveFileOrReject: File | undefined = undefined;
         if (form.data.approvalFile || form.data.rejectFile) {
             if (form.data.approvalFile) {

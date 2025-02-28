@@ -14,12 +14,12 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 
     const date = new Date();
     const defaultStartDate = new Date(date.getFullYear(), date.getMonth(), 1);
-    const defaultEndDate = new Date(date.getFullYear(), date.getMonth()+1, 0);
-    defaultStartDate.setDate(defaultStartDate.getDate()+1);
-    defaultEndDate.setDate(defaultEndDate.getDate()+1)
+    const defaultEndDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    defaultStartDate.setDate(defaultStartDate.getDate() + 1);
+    defaultEndDate.setDate(defaultEndDate.getDate() + 1)
     const filter = url.searchParams.get("filter") ?? "";
     const status = url.searchParams.get("status") ?? "";
-    
+
     const startDate = url.searchParams.get("startDate") ?? defaultStartDate.toISOString().split("T")[0];
     const endDate = url.searchParams.get("endDate") ?? defaultEndDate.toISOString().split("T")[0];;
     const formFilter = url.searchParams.get("form") ?? "";
@@ -57,7 +57,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
     }
     if (startDate) {
         const newEndDate = new Date(endDate);
-        newEndDate.setDate(newEndDate.getDate()+1);        
+        newEndDate.setDate(newEndDate.getDate() + 1);
         query = query.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString())
         totalCountQuery = totalCountQuery.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString());
     }
@@ -87,6 +87,9 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 
 export const actions = {
     submit: async ({ request, cookies }) => {
+        if (!cookies) {
+            throw redirect(304, "/login");
+        }
         const form = await superValidate(request, zod(userRequestSchema));
         if (!form.valid) {
             return message(form, { type: "failure", message: "Invalid Form" });
@@ -144,12 +147,20 @@ export const actions = {
             return message(form, (sequenceDbResponse.error as Error).message);
         }
         const sequence: SequenceSchema = sequenceDbResponse.data[0];
-        const currentNumber: string = sequence.current_number + 1;
+
+        let currentNumber: string = sequence.current_number + 1;
+        let currentYear = sequence.current_year;
+        const year = new Date().getFullYear();
+
+        if (Number(currentYear) != year) {
+            currentNumber = "1";
+            currentYear = year.toString();
+        }
+
         const format = sequence.format;
         const numberFormat = format.slice(1, -1).split('/')[1]
         const newNumberFormat = (numberFormat.slice(currentNumber.toString().length) + currentNumber).replaceAll('#', '0');
-        const year = new Date().getFullYear();
-        const newFormat = `${majorDbData.code}/${newNumberFormat}/MDN/${year}`
+        const newFormat = `${majorDbData.code}/${newNumberFormat}/MDN/${currentYear}`
 
         const { error: errorInsertRequest } = await supabase.from("request_db").insert({
             status: "PENDING",
@@ -163,13 +174,17 @@ export const actions = {
             request_code: newFormat
         })
         if (error || errorInsertRequest) {
-            return message(form, "Please Check Again");
+            console.log(errorInsertRequest);
+
+            return message(form, { message: "Please Check Again", type: "failure" });
         }
 
         // jika ada error ketika insert, update pakai data sebelumnya
 
+
         const updateSequenceDbResponse = await supabase.from("sequence_db").update({
-            current_number: currentNumber
+            current_number: currentNumber,
+            current_year: currentYear,
         }).eq("major_id", userCookies.majorId)
         if (updateSequenceDbResponse.error) {
             return message(form, { type: "failure", message: "Sequence Error" });
