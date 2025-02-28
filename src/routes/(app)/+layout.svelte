@@ -4,8 +4,10 @@
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import AppSidebar from '$lib/components/ui/sidebar/app-sidebar.svelte';
-	import { HouseIcon, InboxIcon, Menu, X } from 'lucide-svelte';
+	import { ChevronUp, HouseIcon, InboxIcon, Menu, X } from 'lucide-svelte';
 	import type { UserCookiesSchema } from './home/request-user-schema';
+	import * as DropdownMenu from '../../lib/components/ui/dropdown-menu';
+	import { goto } from '$app/navigation';
 
 	let { children, data } = $props();
 	const user: UserCookiesSchema = data.user;
@@ -20,6 +22,10 @@
 	});
 
 	let openSidebar = $state(false);
+	const logout = async () => {
+		const res = await fetch('/logout', { method: 'POST' });
+		if (res.ok) goto('/', { invalidateAll: true });
+	};
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -48,7 +54,7 @@
 		</main>
 	</Sidebar.Provider>
 {:else}
-	<main class="w-full h-full bg-gray-100">
+	<main class="h-full w-full bg-gray-100">
 		<Sheet.Root>
 			<Sheet.Trigger class={`${buttonVariants({ variant: 'outline' })} mx-10 my-3`}
 				>Open Sidebar</Sheet.Trigger
@@ -62,23 +68,46 @@
 				</Sheet.Header>
 				<div class="grid gap-4 py-4">
 					<div class="grid grid-cols-4 items-center gap-4">
-						<HouseIcon/>
+						<HouseIcon />
 						<a href="/home">Home</a>
 					</div>
 					<div class="grid grid-cols-4 items-center gap-4">
-						<InboxIcon/>
+						<InboxIcon />
 						<a href="#">Inbox</a>
 					</div>
 				</div>
 				<Sheet.Footer>
-					<span class="flex flex-col gap-1 overflow-x-scroll">
-						<span>
-							{`${user.username.toUpperCase()} ( ${data.majorDb.code.toUpperCase()} )`}
-						</span>
-						<span class="text-sm">
-							{user.email}
-						</span>
-					</span>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							{#snippet child({ props })}
+								<Sidebar.MenuButton
+									{...props}
+									class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-[50px]"
+								>
+									<span class="flex flex-col gap-1">
+										<span>
+											{`${user.username.toUpperCase()} ( ${data.majorDb.code.toUpperCase()} )`}
+										</span>
+										<span class="text-sm">
+											{user.email}
+										</span>
+									</span>
+
+									<ChevronUp class="ml-auto" />
+								</Sidebar.MenuButton>
+							{/snippet}
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content side="top" class="w-[--bits-dropdown-menu-anchor-width]">
+							{#if user.roleId == 3}
+								<DropdownMenu.Item>
+									<span><a href={`/user/request/${user.id}`}>My Request</a></span>
+								</DropdownMenu.Item>
+							{/if}
+							<DropdownMenu.Item onclick={logout}>
+								<span>Log Out</span>
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
 				</Sheet.Footer>
 			</Sheet.Content>
 		</Sheet.Root>
