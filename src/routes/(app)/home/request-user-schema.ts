@@ -71,10 +71,6 @@ export const requestDbStatusCombobox = [
         value: "PENDING",
     },
     {
-        label: "Approved",
-        value: "APPROVED",
-    },
-    {
         label: "Rejected",
         value: "REJECTED",
     },

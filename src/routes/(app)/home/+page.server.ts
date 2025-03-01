@@ -5,6 +5,8 @@ import { zod } from "sveltekit-superforms/adapters";
 import type { PageServerLoad } from "./$types";
 import { userRequestSchema, type FormSchema, type MajorDbSchema, type RequestDbSchema, type SequenceSchema, type UserCookiesSchema } from "./request-user-schema";
 import { sessionManager } from "$lib/server/sessionManager";
+import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from "$env/static/private";
+import nodemailer from "nodemailer";
 
 export const load: PageServerLoad = async ({ cookies, url }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
@@ -189,7 +191,37 @@ export const actions = {
         if (updateSequenceDbResponse.error) {
             return message(form, { type: "failure", message: "Sequence Error" });
         }
+
+        if (userCookies.roleId == 3) {
+            sendEmail("kelvinrogue6@gmail.com", "A Request has been Received", `Form Request for student with Email : ${userCookies.email}.. Please Check Academic Service Website to Process Request`)
+        }
+
         return message(form, "Form Uploaded Successfully");
     }
 
 } satisfies Actions;
+
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: GOOGLE_EMAIL,
+        pass: GOOGLE_PASSWORD
+    }
+})
+
+const sendEmail = async (to: string, subject: string, text: string) => {
+    const mailOptions = {
+        from: GOOGLE_EMAIL,
+        to,
+        subject,
+        text
+    }
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Email Sent", info.response);
+    } catch (error) {
+        console.log(error);
+    }
+}
