@@ -102,7 +102,7 @@ export const actions = {
         const formName = form.data.formFile?.name.slice(0, - 4);
 
         if (formName?.split("-").length != 4) {
-            return fail(400, { data: form, message: "Invalid File Name... Please Make Sure Again" })
+            return fail(400, { message: "Invalid File Name... Please Make Sure Again" })
         }
 
         const userCookies: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;

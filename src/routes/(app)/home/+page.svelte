@@ -250,13 +250,13 @@
 		statusValue = statusParam;
 		calenderValue.start = new CalendarDate(
 			startDate.getFullYear(),
-			startDate.getMonth()+1,
+			startDate.getMonth() + 1,
 			startDate.getDate()
 		);
 		calenderValue.end = new CalendarDate(
 			endDate.getFullYear(),
-			endDate.getMonth()+1,
-			endDate.getDate()+1
+			endDate.getMonth() + 1,
+			endDate.getDate() + 1
 		);
 		formValue = formTypeParam;
 		pageFilter = Number(pagesParam);
@@ -271,11 +271,9 @@
 			}
 		);
 	};
-	const isDesktop = new MediaQuery('(min-width: 768px)');
+	const isDesktop = new MediaQuery('(min-width: 414px)');
 	const perPage = $derived(isDesktop.current ? 10 : 5);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
-
-
 </script>
 
 {#if user.roleId == 3 && user.roleId}
@@ -338,7 +336,9 @@
 								<Form.Label>Jenis Form</Form.Label>
 								<Select.Root type="single" name="formId" bind:value={$formData.formId}>
 									<Select.Trigger>
-										{formSelection.find((v) => v.value == $formData.formId)?.label.replace('_', '-') ?? 'Pilih Form'}
+										{formSelection
+											.find((v) => v.value == $formData.formId)
+											?.label.replace('_', '-') ?? 'Pilih Form'}
 									</Select.Trigger>
 									<Select.Content>
 										<Select.Group>
@@ -534,8 +534,12 @@
 					statusValue = '';
 					formValue = '';
 					calenderValue = {
-						start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth()+1, 1),
-						end: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth()+1, currentDate.getDate())
+						start: new CalendarDate(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+						end: new CalendarDate(
+							currentDate.getFullYear(),
+							currentDate.getMonth() + 1,
+							currentDate.getDate()
+						)
 					};
 					pageFilter = 0;
 					filterHandler();

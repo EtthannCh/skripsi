@@ -1,13 +1,10 @@
 <script lang="ts">
-	import Calendar from 'lucide-svelte/icons/calendar';
+	import uphLogo from '$lib/assets/images/uph_logo.jpg';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { ChevronUp } from 'lucide-svelte';
 	import House from 'lucide-svelte/icons/house';
 	import Inbox from 'lucide-svelte/icons/inbox';
-	import Search from 'lucide-svelte/icons/search';
-	import Settings from 'lucide-svelte/icons/settings';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as DropdownMenu from '../dropdown-menu';
-	import { ChevronUp } from 'lucide-svelte';
-	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 
 	import { goto } from '$app/navigation';
 	import type { MajorDbSchema, UserCookiesSchema } from '../../../../routes/(app)/home/request-user-schema';

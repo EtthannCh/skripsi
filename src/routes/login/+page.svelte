@@ -27,13 +27,22 @@
 			}
 		}
 	});
-
+	let isMobile = $state(false);
+	let windowWidth = $state(0);
+	$effect(() => {
+		if (windowWidth > 1000) {
+			isMobile = false;
+		} else {
+			isMobile = true;
+		}
+	});
 	const { form: formData, enhance } = form;
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} />
 <div class="flex min-h-screen flex-col items-center justify-center bg-uph text-white">
 	<h1 class="my-5 text-[36px]">LOGIN</h1>
-	<div class="flex items-center justify-center gap-10">
+	<div class={`flex ${isMobile ? "flex-col" : "flex-row"} items-center justify-center gap-10`}>
 		<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
 		<form method="POST" use:enhance action="?/login">
 			<Form.Field {form} name="email">
@@ -59,7 +68,7 @@
 						></span>
 					</a></span
 				>
-				<span class="w-full flex items-center justify-center"
+				<span class="flex w-full items-center justify-center"
 					><a href="/forgot-password" class="group relative text-white no-underline">
 						Forgot Password
 						<span

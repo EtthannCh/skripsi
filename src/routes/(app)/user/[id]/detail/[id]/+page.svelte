@@ -137,7 +137,7 @@
 				</Card.Header>
 				<Separator />
 				<Card.Content>
-					<div class="flex h-[250px] flex-row justify-between gap-5 lg:w-[800px]">
+					<div class={`flex h-[250px] flex-row justify-between gap-5 lg:w-[800px] ${isMobile ? "overflow-scroll" : ""}`}>
 						<div class="flex flex-col gap-5 lg:w-[450px]">
 							<Label class="text-lg">
 								<div class="flex items-center justify-between">
@@ -179,7 +179,7 @@
 								</Label>
 							{/if}
 						</div>
-						<div class="lg:w-[300px]">
+						<div class={`lg:w-[300px] ${isMobile? "w-[400px]":""}`}>
 							<form action="?/submit" method="post" enctype="multipart/form-data">
 								<input type="hidden" name="status" value={data.requestData?.status} />
 								<input type="hidden" name="requestId" bind:value={$formData.requestId} />
@@ -297,7 +297,7 @@
 		</div>
 	</div>
 </div>
-<div class=" mx-10 md:h-[300px]">
+<div class=" mx-10">
 	<Card.Root>
 		<Card.Header>
 			<Card.Title>Process</Card.Title>
@@ -324,7 +324,7 @@
 						</span>
 					</div>
 				</Label>
-				<div class="flex justify-between gap-6">
+				<div class={`flex justify-between ${isMobile ? "flex-col" : "flex-row"} gap-10`}>
 					{#if data.requetsHistoryData}
 						{#each data.requetsHistoryData as historyData, idx}
 							<Label class="text-lg ">

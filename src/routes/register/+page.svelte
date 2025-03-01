@@ -26,65 +26,72 @@
 			}
 		}
 	});
-
+	let isMobile = $state(false);
+	let windowWidth = $state(0);
+	$effect(() => {
+		if (windowWidth > 1000) {
+			isMobile = false;
+		} else {
+			isMobile = true;
+		}
+	});
 	const { form: formData, enhance } = form;
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} />
 <div class="flex min-h-screen flex-col items-center justify-center bg-uph text-white">
 	<h1 class="my-5 text-[36px]">REGISTER</h1>
-	<div class="w-[750px]">
-		<div class="flex items-center justify-center gap-10">
-			<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
-			<form method="POST" use:enhance action="?/register">
-				<Form.Field {form} name="username">
-					<Form.Control let:attrs>
-						<Form.Label>Username</Form.Label>
-						<Input {...attrs} bind:value={$formData.username} class="text-black" />
-					</Form.Control>
-					<Form.FieldErrors />
-				</Form.Field>
-				<Form.Field {form} name="email">
-					<Form.Control let:attrs>
-						<Form.Label>Email</Form.Label>
-						<Input {...attrs} bind:value={$formData.email} class="text-black" />
-					</Form.Control>
-					<Form.FieldErrors />
-				</Form.Field>
-				<Form.Field {form} name="password">
-					<Form.Control let:attrs>
-						<Form.Label>Password</Form.Label>
-						<Input {...attrs} bind:value={$formData.password} type="password" class="text-black" />
-					</Form.Control>
-					<Form.FieldErrors />
-				</Form.Field>
-				<Form.Field {form} name="confirmPassword">
-					<Form.Control let:attrs>
-						<Form.Label>Confirm Password</Form.Label>
-						<Input
-							{...attrs}
-							bind:value={$formData.confirmPassword}
-							type="password"
-							class="text-black"
-						/>
-					</Form.Control>
-					<Form.FieldErrors />
-				</Form.Field>
+	<div class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10`}>
+		<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
+		<form method="POST" use:enhance action="?/register">
+			<Form.Field {form} name="username">
+				<Form.Control let:attrs>
+					<Form.Label>Username</Form.Label>
+					<Input {...attrs} bind:value={$formData.username} class="text-black" />
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+			<Form.Field {form} name="email">
+				<Form.Control let:attrs>
+					<Form.Label>Email</Form.Label>
+					<Input {...attrs} bind:value={$formData.email} class="text-black" />
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+			<Form.Field {form} name="password">
+				<Form.Control let:attrs>
+					<Form.Label>Password</Form.Label>
+					<Input {...attrs} bind:value={$formData.password} type="password" class="text-black" />
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+			<Form.Field {form} name="confirmPassword">
+				<Form.Control let:attrs>
+					<Form.Label>Confirm Password</Form.Label>
+					<Input
+						{...attrs}
+						bind:value={$formData.confirmPassword}
+						type="password"
+						class="text-black"
+					/>
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
 
-				<div class="my-5 flex flex-col">
-					<span
-						>Already has an Account? <a
-							href="../login"
-							class="group relative text-white no-underline"
-						>
-							Login
-							<span
-								class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
-							></span>
-						</a></span
+			<div class="my-5 flex flex-col">
+				<span
+					>Already has an Account? <a
+						href="../login"
+						class="group relative text-white no-underline"
 					>
-					<button class="my-3 rounded-md bg-uphButton p-2">Register</button>
-				</div>
-			</form>
-		</div>
+						Login
+						<span
+							class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
+						></span>
+					</a></span
+				>
+				<button class="my-3 rounded-md bg-uphButton p-2">Register</button>
+			</div>
+		</form>
 	</div>
 </div>
