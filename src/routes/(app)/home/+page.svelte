@@ -33,7 +33,7 @@
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import { tick } from 'svelte';
-	import { Stretch } from 'svelte-loading-spinners';
+	import { Stretch, SyncLoader } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
@@ -80,12 +80,12 @@
 
 	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
 	let selectedFormValue = $derived(formDbCombobox.find((f) => f.value === formValue)?.label);
-
+	let formLoading = $state(false);
+	
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
-			console.log(result);
-
+			formLoading = false;
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
 					position: 'top-right',
@@ -98,6 +98,9 @@
 					dismissable: true
 				});
 			}
+		},
+		onSubmit: ({}) => {
+			formLoading = true;
 		},
 		dataType: 'json'
 	});
@@ -212,7 +215,7 @@
 
 	let openDialog = $state(false);
 
-	const { form: formData, enhance, errors } = form;
+	const { form: formData, errors, enhance } = form;
 	const file = fileProxy(form, 'formFile');
 
 	let filter: string = $state('');
@@ -365,7 +368,7 @@
 								<Form.Label>{`Upload Form Permohonan (Max Size Allowed :  5mb)`}</Form.Label>
 								<span class="text-sm"
 									>(Penamaan File :
-									KodeForm_NIMPemohon_KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)_EmailPemohon.pdf)</span
+									KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon.pdf)</span
 								>
 								<span class="text-red-600"
 									>({'NOTE : Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan'
@@ -381,8 +384,15 @@
 						class="my-5 rounded-md bg-uphButton p-2 text-white"
 						onclick={() => {
 							submitPressed = true;
-						}}>Submit</button
+						}}
 					>
+						Submit</button
+					>
+					{#if formLoading}
+						<span>
+							<SyncLoader color="#007bff"/>
+						</span>
+					{/if}
 				</form>
 			</Accordion.Content>
 		</Accordion.Item>

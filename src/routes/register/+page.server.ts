@@ -46,16 +46,26 @@ export const actions: Actions = {
         else if (majorCode == "081") {
             majorId = 2;
         }
+        else if (majorCode == "011") {
+            majorId = 3
+        }
+        else if (majorCode == "012") {
+            majorId = 6
+        }
+        else if (majorCode == "013") {
+            majorId = 4
+        }
+        else if (majorCode == "051") {
+            majorId = 5
+        }
 
         if (emailType == "student") {
             roleId = 3;
         }
-        else if (emailType == "uph") {
-            roleId = 1;
-        }
         else {
-            roleId = 0;
+            roleId = 5
         }
+
         if (roleId == 0 || majorId == 0) {
             return fail(400, { data: form, message: "Invalid Input, Please Check Again" });
         }

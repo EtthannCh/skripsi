@@ -103,7 +103,7 @@ export const actions = {
         const buffer = Buffer.from(await file.arrayBuffer());
         const formName = form.data.formFile?.name.slice(0, - 4);
 
-        if (formName?.split("-").length != 4) {
+        if (formName?.split("-").length != 5) {
             return fail(400, { message: "Invalid File Name... Please Make Sure Again" })
         }
 
@@ -111,18 +111,19 @@ export const actions = {
         const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
 
         const splittedField: string[] = formName.split("-");
-        if (splittedField[0] != code) {
+        const formCode = splittedField[0] + "_" + splittedField[1];
+        if (formCode != code) {
             return fail(400, { message: "Form does not Match with Selected File.. Please Rename or Choose the Correct Form" })
         }
 
         if (
-            (!splittedField[1].startsWith("0308") || splittedField[1].length != 11) || (!splittedField[1].startsWith("0308") && splittedField[1].length != 11)
-            || splittedField[1] != userCookies.email.split("@")[0]
+            (!splittedField[2].startsWith("0308") || splittedField[2].length != 11) || (!splittedField[2].startsWith("0308") && splittedField[2].length != 11)
+            || splittedField[4].split("@")[0] != userCookies.email.split("@")[0]
         ) {
             return fail(400, { message: "Invalid Student Number" })
         }
 
-        const majorDataResponse = await supabase.from("major_db").select("*").eq("code", splittedField[2])
+        const majorDataResponse = await supabase.from("major_db").select("*").eq("code", splittedField[3])
         if (majorDataResponse.error || majorDataResponse.data.length == 0) {
             console.log(majorDataResponse.error);
             return fail(400, { message: "Major Not Found" });
@@ -131,7 +132,7 @@ export const actions = {
         if (majorDbData.id != userCookies.majorId) {
             return fail(400, { message: "Invalid Major... Please Check Again" });
         }
-        if (splittedField[3] != userCookies.email && userCookies.roleId == 3) {
+        if (splittedField[4] != userCookies.email && userCookies.roleId == 3) {
             return fail(400, { message: "Invalid Student Email.. Please Use your Student Account" });
         }
 
@@ -177,7 +178,6 @@ export const actions = {
         })
         if (error || errorInsertRequest) {
             console.log(errorInsertRequest);
-
             return message(form, { message: "Please Check Again", type: "failure" });
         }
 
@@ -189,6 +189,7 @@ export const actions = {
             current_year: currentYear,
         }).eq("major_id", userCookies.majorId)
         if (updateSequenceDbResponse.error) {
+            console.log(updateSequenceDbResponse.error);
             return message(form, { type: "failure", message: "Sequence Error" });
         }
 

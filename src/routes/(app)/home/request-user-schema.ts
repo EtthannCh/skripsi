@@ -23,7 +23,6 @@ export const userCookiesSchema = z.object({
 
 export type UserCookiesSchema = z.infer<typeof userCookiesSchema>;
 
-
 export const formSchema = z.object({
     id: z.number(),
     name: z.string(),

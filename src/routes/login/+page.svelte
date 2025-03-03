@@ -7,11 +7,15 @@
 	import { toast } from 'svelte-sonner';
 	import { goto, invalidateAll } from '$app/navigation';
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
+	import { SyncLoader } from 'svelte-loading-spinners';
 
 	let { data } = $props();
+	let loading = $state(false);
+
 	const form = superForm(data.form.data, {
 		validators: zodClient(loginSchema),
 		onResult: ({ result }) => {
+			loading = false;
 			if (result.type == 'success') {
 				toast.success('Login Successfully', {
 					position: 'top-right',
@@ -25,8 +29,12 @@
 					dismissable: true
 				});
 			}
+		},
+		onSubmit: () => {
+			loading = true;
 		}
 	});
+
 	let isMobile = $state(false);
 	let windowWidth = $state(0);
 	$effect(() => {
@@ -41,8 +49,13 @@
 
 <svelte:window bind:innerWidth={windowWidth} />
 <div class="flex min-h-screen flex-col items-center justify-center bg-uph text-white">
+	{#if loading}
+		<span class="h-10">
+			<SyncLoader color="#007bff" />
+		</span>
+	{/if}
 	<h1 class="my-5 text-[36px]">LOGIN</h1>
-	<div class={`flex ${isMobile ? "flex-col" : "flex-row"} items-center justify-center gap-10`}>
+	<div class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10`}>
 		<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
 		<form method="POST" use:enhance action="?/login">
 			<Form.Field {form} name="email">
@@ -76,7 +89,7 @@
 						></span>
 					</a></span
 				>
-				<button class="my-3 rounded-md bg-uphButton p-2">Login</button>
+				<button class="my-3 rounded-md bg-uphButton p-2"> Login </button>
 			</div>
 		</form>
 	</div>

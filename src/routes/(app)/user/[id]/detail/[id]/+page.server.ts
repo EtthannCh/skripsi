@@ -13,22 +13,23 @@ export const load: PageServerLoad = async ({ url }) => {
     const requestFormId: string = url.pathname.split("/")[4];
 
     const form: SuperValidated<ApproveRejectSchema> = await superValidate(zod(approveRejectSchema))
-
     const userDataFromDb = await supabase.from("user_credentials").select("id, username, email").eq("id", userPkey);
     const requestDataFromDb = await supabase.from("request_db").select("*").eq("id", requestFormId);
     const requestHistoryDataFromDb = await supabase.from("request_history_db").select("*").eq("request_id", requestFormId);
 
     if (userDataFromDb.error || userDataFromDb == undefined) {
         console.log(userDataFromDb.error);
-        return fail(400, { message: "Invalid User Data" })
+        throw fail(400, { message: "Invalid User Data" })
     }
+
     if (requestDataFromDb.error || requestDataFromDb == undefined) {
         console.log(requestDataFromDb.error);
-        return fail(400, { message: "Invalid Request Data" })
+        throw fail(400, { message: "Invalid Request Data" })
     }
+
     if (requestHistoryDataFromDb.error || requestHistoryDataFromDb == undefined) {
         console.log(requestHistoryDataFromDb.error);
-        return fail(400, { message: "Invalid Request History Data" })
+        throw fail(400, { message: "Invalid Request History Data" })
     }
 
     const userData: UserDetailSchema = userDataFromDb.data[0];
@@ -56,13 +57,13 @@ export const actions = {
 
         let currentStatus = "";
         if (form.data.status == "PENDING" && user.roleId != 1) {
-            throw fail(400, { message: "Permission not Allowed" })
+            return fail(400, { message: "Permission not Allowed" })
         }
         else if (form.data.status == "ONGOING" && user.roleId != 2) {
-            throw fail(400, { message: "Permission not Allowed" })
+            return fail(400, { message: "Permission not Allowed" })
         }
         else if (form.data.status == "APPROVED" && user.roleId != 4) {
-            throw fail(400, { message: "Permission not Allowed" })
+            return fail(400, { message: "Permission not Allowed" })
         }
 
         if (form.data.status == "PENDING" && user.roleId == 1) {

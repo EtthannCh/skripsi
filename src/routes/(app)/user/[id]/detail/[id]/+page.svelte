@@ -10,36 +10,15 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { ArrowLeft, FileText } from 'lucide-svelte';
-	import { Stretch } from 'svelte-loading-spinners';
+	import { Stretch, SyncLoader } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
-	import SuperDebug, { fileProxy, superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { fileProxy, superForm } from 'sveltekit-superforms';
+	import { zod, zodClient } from 'sveltekit-superforms/adapters';
 	import { requestDbStatusEnum, requestEnumColor } from '../../../../home/request-user-schema';
 	import type { PageData } from './$types';
 	import { approveRejectSchema } from './user-detail-schema';
 
 	let { data }: { data: PageData } = $props();
-
-	const handleActions = async (requestId: number, status: string, action: string) => {
-		const response = await fetch(page.url.pathname, {
-			method: 'post',
-			body: JSON.stringify({
-				status,
-				requestId,
-				action,
-				reason
-			}),
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-		if (response.status.toString() == '200') {
-			toast.success('Success', {
-				position: 'top-right',
-				dismissable: true
-			});
-		}
-	};
 
 	const processArray = [
 		'Date of Approval',
@@ -53,20 +32,41 @@
 		'(By Admin)',
 		'(To Student)'
 	];
+
+	let loading = $state(false);
+
 	const form = superForm(data.form, {
-		validators: zod(approveRejectSchema),
+		validators: zodClient(approveRejectSchema),
 		dataType: 'json',
-		onResult: () => {
+		onResult: ({ result }) => {
+			if (result.type == 'failure') {
+				toast.error(result.data?.message, {
+					position: 'top-right',
+					dismissable: true
+				});
+			} else if (result.type == 'success') {
+				toast.success(result.data?.form.message, {
+					position: 'top-right',
+					dismissable: true
+				});
+			}
+			loading = false;
 			goto(page.url.pathname, { invalidateAll: true });
+		},
+		onSubmit: () => {
+			loading = true;
 		}
 	});
-	const { form: formData } = form;
+
+	const { form: formData, enhance } = form;
 	let file = fileProxy(form, 'approvalFile', { empty: undefined });
 	let rejectFile = fileProxy(form, 'rejectFile', { empty: undefined });
-	let reason: string | undefined = $state('');
+
 	$effect.root(() => {
 		$formData.requestId = data.requestData?.id;
+		$formData.status = data.requestData?.status;
 	});
+
 	let isMobile = $state(false);
 	let windowWidth = $state(0);
 	$effect(() => {
@@ -94,12 +94,16 @@
 {/if}
 <svelte:window bind:innerWidth={windowWidth} />
 <!-- {#if data.user?.roleId == 3} -->
-<div class="mx-10 my-10 rounded-md border-2 bg-uph p-5 md:h-[600px] lg:h-[570px]">
+<div class="mx-10 my-10 rounded-md border-2 bg-uph p-5 md:h-[600px] lg:h-[600px]">
 	<div class="mb-10">
 		<Card.Root>
 			<Card.Content class="flex items-center justify-between">
 				<div class="flex flex-col gap-3">
-					<Card.Title>Request Detail</Card.Title>
+					<Card.Title
+						>Request Detail {#if loading}
+							<SyncLoader color="#007bff" />
+						{/if}</Card.Title
+					>
 					<Card.Description
 						>Request that are Submitted By {data.userData?.username} With Request ID :
 						<strong>{data.requestData?.id}</strong></Card.Description
@@ -137,7 +141,9 @@
 				</Card.Header>
 				<Separator />
 				<Card.Content>
-					<div class={`flex h-[250px] flex-row justify-between gap-5 lg:w-[800px] ${isMobile ? "overflow-scroll" : ""}`}>
+					<div
+						class={`flex h-[250px] flex-row justify-between gap-5 lg:w-[800px] ${isMobile ? 'overflow-scroll' : ''}`}
+					>
 						<div class="flex flex-col gap-5 lg:w-[450px]">
 							<Label class="text-lg">
 								<div class="flex items-center justify-between">
@@ -179,9 +185,9 @@
 								</Label>
 							{/if}
 						</div>
-						<div class={`lg:w-[300px] ${isMobile? "w-[400px]":""}`}>
-							<form action="?/submit" method="post" enctype="multipart/form-data">
-								<input type="hidden" name="status" value={data.requestData?.status} />
+						<div class={`lg:w-[300px] ${isMobile ? 'w-[400px]' : ''}`}>
+							<form action="?/submit" method="post" enctype="multipart/form-data" use:enhance>
+								<input type="hidden" name="status" bind:value={$formData.status} />
 								<input type="hidden" name="requestId" bind:value={$formData.requestId} />
 								<input type="hidden" name="process" bind:value={$formData.process} />
 								{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
@@ -324,7 +330,7 @@
 						</span>
 					</div>
 				</Label>
-				<div class={`flex justify-between ${isMobile ? "flex-col" : "flex-row"} gap-10`}>
+				<div class={`flex justify-between ${isMobile ? 'flex-col' : 'flex-row'} gap-10`}>
 					{#if data.requetsHistoryData}
 						{#each data.requetsHistoryData as historyData, idx}
 							<Label class="text-lg ">
