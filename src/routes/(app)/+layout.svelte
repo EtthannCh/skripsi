@@ -4,7 +4,7 @@
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import AppSidebar from '$lib/components/ui/sidebar/app-sidebar.svelte';
-	import { ChevronUp, HouseIcon, InboxIcon, Menu, X } from 'lucide-svelte';
+	import { ChevronUp, HouseIcon, InboxIcon, Menu, Users, X } from 'lucide-svelte';
 	import type { UserCookiesSchema } from './home/request-user-schema';
 	import * as DropdownMenu from '../../lib/components/ui/dropdown-menu';
 	import { goto } from '$app/navigation';
@@ -75,6 +75,12 @@
 						<InboxIcon />
 						<a href="#">Inbox</a>
 					</div>
+					{#if user.roleId == 6}
+					<div class="grid grid-cols-4 items-center gap-4">
+						<Users />
+						<a href="/user">Inbox</a>
+					</div>
+					{/if}
 				</div>
 				<Sheet.Footer>
 					<DropdownMenu.Root>
