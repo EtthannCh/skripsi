@@ -7,8 +7,10 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from './register-schema';
+	import { SyncLoader } from 'svelte-loading-spinners';
 
 	let { data } = $props();
+	let loading = $state(false);
 	const form = superForm(data.form.data, {
 		validators: zodClient(registerSchema),
 		onResult: ({ result }) => {
@@ -24,6 +26,10 @@
 					dismissable: true
 				});
 			}
+			loading = false;
+		},
+		onSubmit: () => {
+			loading = true;
 		}
 	});
 	let isMobile = $state(false);
@@ -40,6 +46,11 @@
 
 <svelte:window bind:innerWidth={windowWidth} />
 <div class="flex min-h-screen flex-col items-center justify-center bg-uph text-white">
+	{#if loading}
+		<span class="h-10">
+			<SyncLoader color="#007bff" />
+		</span>
+	{/if}
 	<h1 class="my-5 text-[36px]">REGISTER</h1>
 	<div class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10`}>
 		<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />

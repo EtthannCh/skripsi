@@ -13,7 +13,7 @@
 	import { Stretch, SyncLoader } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
-	import { zod, zodClient } from 'sveltekit-superforms/adapters';
+	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { requestDbStatusEnum, requestEnumColor } from '../../../../home/request-user-schema';
 	import type { PageData } from './$types';
 	import { approveRejectSchema } from './user-detail-schema';

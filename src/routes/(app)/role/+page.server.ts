@@ -1,6 +1,6 @@
 import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
-import { type Actions } from "@sveltejs/kit";
+import { redirect, type Actions } from "@sveltejs/kit";
 import { fail, message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { UserCookiesSchema } from "../home/request-user-schema";
@@ -9,9 +9,10 @@ import { updateRoleSchema, type EmailList, type RoleList } from "./change-role-s
 
 export const load: PageServerLoad = async () => {
 
-    const emailListResponse = await supabase.from("user_credentials").select("email, id").eq("role_id", "1");
+    const emailListResponse = await supabase.from("user_credentials").select("email, id, role_id, username")
+        .in("role_id", ["1", "2", "5"]);
     if (emailListResponse.error) {
-        throw fail(400, { message: "Invalid Data" })
+        throw redirect(304, "/error")
     }
 
     const roleListResponse = await supabase.from("role_db").select("id, name");

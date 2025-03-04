@@ -41,22 +41,22 @@ export const actions: Actions = {
         let majorId: number = 0;
         let roleId: number = 0;
         if (majorCode == "082") {
-            majorId = 1;
+            majorId = 1; // Informatics
         }
         else if (majorCode == "081") {
-            majorId = 2;
+            majorId = 2; // IS
         }
         else if (majorCode == "011") {
-            majorId = 3
+            majorId = 3 // MGT
         }
         else if (majorCode == "012") {
-            majorId = 6
+            majorId = 6 // ACC
         }
         else if (majorCode == "013") {
-            majorId = 4
+            majorId = 4 // HOS
         }
         else if (majorCode == "051") {
-            majorId = 5
+            majorId = 5 // LAW
         }
 
         if (emailType == "student") {
@@ -70,9 +70,13 @@ export const actions: Actions = {
             return fail(400, { data: form, message: "Invalid Input, Please Check Again" });
         }
 
+        if (roleId == 3 && NIM.length > 11) {
+            return fail(400, { data: form, message: "Please Enter a valid Student Number" });
+        }
+
         const pass = await bcrypt.hash(form.data.password, 15)
         const userRegistration: UserRegistration = {
-            email: form.data.email,
+            email: form.data.email.trim(),
             username: form.data.username,
             password: pass,
             otp: otp.toString(),

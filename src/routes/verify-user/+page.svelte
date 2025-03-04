@@ -73,8 +73,8 @@
 			value="reverify"
 			class={`rounded-md bg-black px-5 py-3 ${timer > 0 ? 'bg-gray-500 text-gray-300' : ''}`}
 			disabled={timer > 0}
-			type="submit">Kirim Kode Ulang {timer > 0 ? timer + ' Detik' : ''}</button
+			type="submit">Resend Code {timer > 0 ? timer + ' Detik' : ''}</button
 		>
 	</form>
-	<span class="text-md">Kode dikirimkan ke alamat e-mail : {data.userCookies.email}</span>
+	<span class="text-md">Code has been sent to this email address : {data.userCookies.email}</span>
 </div>

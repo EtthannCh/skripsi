@@ -1,7 +1,7 @@
 import { sessionManager } from "$lib/server/sessionManager.js";
 import { supabase } from "$lib/supabaseClient.js";
 import { fail } from "@sveltejs/kit";
-import type { MajorDbSchema, UserCookiesSchema } from "./home/request-user-schema.js";
+import type { MajorDbSchema, UserCookiesSchema } from "./(app)/home/request-user-schema";
 
 export const load = async ({ cookies }) => {
     const user = (await sessionManager.getSession(cookies))?.data;

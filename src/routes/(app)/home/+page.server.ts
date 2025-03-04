@@ -117,7 +117,7 @@ export const actions = {
         }
 
         if (
-            (!splittedField[2].startsWith("0308") || splittedField[2].length != 11) || (!splittedField[2].startsWith("0308") && splittedField[2].length != 11)
+            (!splittedField[2].startsWith("03") || splittedField[2].length != 11) || (!splittedField[2].startsWith("03") && splittedField[2].length != 11)
             || splittedField[4].split("@")[0] != userCookies.email.split("@")[0]
         ) {
             return fail(400, { message: "Invalid Student Number" })
@@ -132,7 +132,7 @@ export const actions = {
         if (majorDbData.id != userCookies.majorId) {
             return fail(400, { message: "Invalid Major... Please Check Again" });
         }
-        if (splittedField[4] != userCookies.email && userCookies.roleId == 3) {
+        if (splittedField[4].trim() != userCookies.email.trim() && userCookies.roleId == 3) {
             return fail(400, { message: "Invalid Student Email.. Please Use your Student Account" });
         }
 

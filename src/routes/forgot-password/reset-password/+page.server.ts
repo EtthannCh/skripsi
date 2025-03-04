@@ -1,11 +1,11 @@
 import { OtpSessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
-import { error, fail, redirect } from "@sveltejs/kit";
-import { superValidate } from "sveltekit-superforms";
+import { error, fail } from "@sveltejs/kit";
+import bcrypt from "bcryptjs";
+import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { Actions } from "./$types";
 import { resetPasswordSchema } from "./reset-password-schema";
-import bcrypt from "bcryptjs";
 
 export const load = async () => {
     const form = await superValidate(zod(resetPasswordSchema))
@@ -38,6 +38,6 @@ export const actions: Actions = {
             throw fail(400);
         }
 
-        return redirect(303, "/login")
+        return message(form, "Successfully Updated")
     }
 }

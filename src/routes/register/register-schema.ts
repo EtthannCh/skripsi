@@ -2,8 +2,7 @@ import { z } from "zod";
 
 export const registerSchema = z.object({
     username: z.string().min(3, { message: "Username min 3 Character" }),
-    email: z.string().min(8, {message:"Email Min 8 Character "}),
-    // .refine((e) => e.includes("uph.edu"), { message: "Not Campus Email" }),
+    email: z.string().min(8, { message: "Email Min 8 Character " }).refine((e) => e.includes("uph.edu"), { message: "Not Campus Email" }),
     password: z.string().min(8, { message: "Password Min 8 Character" }),
     confirmPassword: z.string().min(8, { message: "Password Min 8 Character" })
 }).superRefine((data, ctx) => {

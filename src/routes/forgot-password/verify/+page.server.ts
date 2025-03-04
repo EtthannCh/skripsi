@@ -7,7 +7,7 @@ import nodemailer from "nodemailer";
 export const load = async ({ cookies }) => {
     const userCookies: UserRegistration = (await OtpSessionManager.getSession(await cookies)).data;
     if (!userCookies) {
-        throw redirect(303, "/");
+        throw redirect(303, "/home");
     }
 
     return {
@@ -24,7 +24,10 @@ export const actions = {
             const otp1: number = Math.floor(Math.random() * (999999 - 100000) + 100000);
             await sessionManager.deleteSession(cookies);
             await sessionManager.deleteCookie(cookies);
-            const otpResponse = await OtpSessionManager.createSession(cookies, otp1, userCookies.email);
+            const otpResponse = await OtpSessionManager.createSession(cookies, {
+                otp: otp1,
+                email: userCookies.email
+            }, userCookies.email);
             if (otpResponse.error) {
                 console.log(otpResponse.message);
                 return fail(400);

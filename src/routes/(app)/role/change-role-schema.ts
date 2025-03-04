@@ -3,6 +3,8 @@ import { z } from "zod";
 export const emailList = z.object({
     id: z.number(),
     email: z.string(),
+    role_id: z.string(),
+    username: z.string()
 })
 
 export type EmailList = z.infer<typeof emailList>;

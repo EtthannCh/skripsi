@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
+	import * as Form from '$lib/components/ui/form';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { cn } from '$lib/utils.js';
 	import Check from 'lucide-svelte/icons/check';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import { tick } from 'svelte';
-	import SuperDebug, { superForm, message } from 'sveltekit-superforms';
+	import { SyncLoader } from 'svelte-loading-spinners';
+	import { toast } from 'svelte-sonner';
+	import { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import { updateRoleSchema } from './change-role-schema';
-	import { toast } from 'svelte-sonner';
-	import { SyncLoader } from 'svelte-loading-spinners';
-	import * as Form from '$lib/components/ui/form';
 
 	let { data }: { data: PageData } = $props();
 
@@ -27,10 +27,10 @@
 
 	const form = superForm(data.form, {
 		validators: zod(updateRoleSchema),
+		invalidateAll: true,
+		resetForm: true,
+		applyAction: true,
 		onResult: ({ result }) => {
-            console.log(result);
-            
-			formLoading = false;
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
 					position: 'top-right',
@@ -42,6 +42,10 @@
 					dismissable: true
 				});
 			}
+			selectedEmailRoleId = '';
+			value = '';
+			roleValue = '';
+			formLoading = false;
 		},
 		onSubmit: () => {
 			formLoading = true;
@@ -52,6 +56,14 @@
 	const selectedRoleValue = $derived(
 		data.roleList?.find((f) => f.id.toString() == roleValue)?.name
 	);
+	let selectedEmailRoleId = $state('');
+
+	function toTitleCase(str: string) {
+		return str.replace(
+			/\w\S*/g,
+			(text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+		);
+	}
 
 	function closeAndFocusTrigger() {
 		open = false;
@@ -76,13 +88,21 @@
 			<SyncLoader color="#007bff" />
 		</span>
 	{/if}
-	<form action="?/submit" method="post" use:enhance>
-        <input type="hidden" name="roleId" bind:value={$formData.roleId}>
-        <input type="hidden" name="email" bind:value={$formData.email}>
+	<form action="?/submit" method="post" use:enhance class="flex flex-col gap-5">
+		<h1 class="mb-5 text-center text-3xl">Change Role</h1>
+		<input type="hidden" name="roleId" bind:value={$formData.roleId} />
+		<input type="hidden" name="email" bind:value={$formData.email} />
 		<Form.Field {form} name="email">
 			<Form.Control let:attrs>
 				<div class="flex flex-col gap-5">
-					<Label>Choose Email</Label>
+					<Label class="text-xl"
+						>Choose Email <span class="text-lg"
+							>(Username : {toTitleCase(
+								data.emailList.find((v) => v.email == selectedValue)?.username ?? ''
+							)})</span
+						></Label
+					>
+
 					<Popover.Root bind:open>
 						<Popover.Trigger bind:ref={triggerRef}>
 							{#snippet child({ props })}
@@ -111,9 +131,11 @@
 													onSelect={() => {
 														if (value && value == email.id.toString()) {
 															value = '';
+															selectedEmailRoleId = '';
 														} else {
 															value = email.id.toString();
 															$formData.email = value;
+															selectedEmailRoleId = email.role_id;
 														}
 														closeAndFocusTrigger();
 													}}
@@ -135,7 +157,12 @@
 		<Form.Field {form} name="roleId">
 			<Form.Control let:attrs>
 				<div class="flex flex-col gap-5">
-					<Label>Select new Role For this User</Label>
+					<span
+						>Selected User Current Role : {data.roleList.find(
+							(v) => v.id == Number(selectedEmailRoleId)
+						)?.name}</span
+					>
+					<Label class="text-xl">Select new Role For this User</Label>
 					<Popover.Root bind:open={openRoleCombobox}>
 						<Popover.Trigger bind:ref={triggerRefRole}>
 							{#snippet child({ props })}
