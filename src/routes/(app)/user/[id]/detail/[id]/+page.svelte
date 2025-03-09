@@ -20,18 +20,8 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const processArray = [
-		'Date of Approval',
-		'Date of Process',
-		'Date of Completion',
-		'Date Delivered'
-	];
-	const processCaptionArray = [
-		'(By Head of Department)',
-		'(By Admin)',
-		'(By Admin)',
-		'(To Student)'
-	];
+	const processArray = ['Date of Approval', 'Date of Process', 'Date of Completion'];
+	const processCaptionArray = ['(By Head of Department)', '(By Admin)', '(By Admin)'];
 
 	let loading = $state(false);
 
@@ -39,6 +29,8 @@
 		validators: zodClient(approveRejectSchema),
 		dataType: 'json',
 		onResult: ({ result }) => {
+			console.log(result);
+
 			if (result.type == 'failure') {
 				toast.error(result.data?.message, {
 					position: 'top-right',
@@ -81,17 +73,14 @@
 <button
 	class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
 	onclick={() => {
+		loading = true;
 		goto('/home');
 	}}
 >
 	<ArrowLeft />
 	<span>Back</span>
 </button>
-{#if navigating.to}
-	<div class="mx-10 mb-4 h-10">
-		<Stretch color="#314986" />
-	</div>
-{/if}
+
 <svelte:window bind:innerWidth={windowWidth} />
 <!-- {#if data.user?.roleId == 3} -->
 <div class="mx-10 my-10 rounded-md border-2 bg-uph p-5 md:h-[600px] lg:h-[600px]">
@@ -99,11 +88,7 @@
 		<Card.Root>
 			<Card.Content class="flex items-center justify-between">
 				<div class="flex flex-col gap-3">
-					<Card.Title
-						>Request Detail {#if loading}
-							<SyncLoader color="#007bff" />
-						{/if}</Card.Title
-					>
+					<Card.Title>Request Detail</Card.Title>
 					<Card.Description
 						>Request that are Submitted By {data.userData?.username} With Request ID :
 						<strong>{data.requestData?.id}</strong></Card.Description
@@ -186,116 +171,125 @@
 							{/if}
 						</div>
 						<div class={`lg:w-[300px] ${isMobile ? 'w-[400px]' : ''}`}>
-							<form action="?/submit" method="post" enctype="multipart/form-data" use:enhance>
-								<input type="hidden" name="status" bind:value={$formData.status} />
-								<input type="hidden" name="requestId" bind:value={$formData.requestId} />
-								<input type="hidden" name="process" bind:value={$formData.process} />
-								{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
-									<Tabs.Root value="account" class="flex flex-col justify-between">
-										<Tabs.List class="grid w-full grid-cols-2">
-											<Tabs.Trigger value="approve"
-												><strong class="text-black">
-													{#if data.requestData.status == 'ONGOING'}
-														<span>Process</span>
-													{:else if data.requestData.status == 'PROCESSING'}
-														<span>Complete Process</span>
-													{:else}
-														<span>Aprove</span>
+							{#if loading}
+								<div class="mx-10 mb-4 flex h-10 flex-col gap-3">
+									<span>Loading</span>
+									<Stretch color="#314986" />
+								</div>
+							{:else}
+								<form action="?/submit" method="post" enctype="multipart/form-data" use:enhance>
+									<input type="hidden" name="status" bind:value={$formData.status} />
+									<input type="hidden" name="requestId" bind:value={$formData.requestId} />
+									<input type="hidden" name="process" bind:value={$formData.process} />
+									{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
+										<Tabs.Root value="account" class="flex flex-col justify-between">
+											<Tabs.List class="grid w-full grid-cols-2">
+												<Tabs.Trigger value="approve"
+													><strong class="text-black">
+														{#if data.requestData.status == 'ONGOING'}
+															<span>Process</span>
+														{:else if data.requestData.status == 'PROCESSING'}
+															<span>Complete Process</span>
+														{:else}
+															<span>Aprove</span>
+														{/if}
+													</strong></Tabs.Trigger
+												>
+												<Tabs.Trigger value="reject"
+													><strong class="text-black">Reject</strong></Tabs.Trigger
+												>
+											</Tabs.List>
+											<Tabs.Content value="approve">
+												<Card.Root>
+													{#if data.requestData.status != 'ONGOING' && data.requestData.status != 'PENDING'}
+														<Card.Content class="space-y-2">
+															<div class="space-y-1">
+																<Label for="approvalFile">Approval Form</Label>
+																<input
+																	id="approvalFile"
+																	type="file"
+																	accept="application/pdf"
+																	bind:files={$file}
+																	name="approvalFile"
+																	disabled={($rejectFile.length != 0 || $formData.reason != '') &&
+																		data.requestData.status == 'PROCESSING'}
+																/>
+															</div>
+														</Card.Content>
 													{/if}
-												</strong></Tabs.Trigger
-											>
-											<Tabs.Trigger value="reject"
-												><strong class="text-black">Reject</strong></Tabs.Trigger
-											>
-										</Tabs.List>
-										<Tabs.Content value="approve">
-											<Card.Root>
-												{#if data.requestData.status != 'ONGOING' && data.requestData.status != 'PENDING'}
+													<Card.Footer>
+														<Button
+															disabled={(($file.length == 0 ||
+																($rejectFile.length != 0 && $formData.reason != '')) &&
+																data.requestData.status == 'PROCESSING') ||
+																(data.requestData.status == 'ONGOING' &&
+																	($rejectFile.length != 0 || $formData.reason != '')) ||
+																(data.requestData.status == 'PENDING' &&
+																	($rejectFile.length != 0 || $formData.reason != '')) ||
+																loading}
+															type="submit"
+															>{#if data.requestData.status == 'ONGOING'}
+																<span>Process</span>
+															{:else if data.requestData.status == 'PROCESSING'}
+																<span>Complete</span>
+															{:else}
+																<span>Aprove</span>
+															{/if}
+															Application
+														</Button>
+													</Card.Footer>
+												</Card.Root>
+											</Tabs.Content>
+											<!-- {#if data.requestData.status == 'PROCESSING'} -->
+											<Tabs.Content value="reject">
+												<Card.Root>
 													<Card.Content class="space-y-2">
 														<div class="space-y-1">
-															<Label for="approvalFile">Approval Form</Label>
+															<Label for="reason">Reason</Label>
+															<Input
+																id="reason"
+																type="text"
+																placeholder="Reason of Rejection"
+																bind:value={$formData.reason}
+																name="reason"
+																disabled={$file.length != 0 &&
+																	data.requestData.status == 'PROCESSING'}
+															/>
+														</div>
+														<div class="space-y-1">
+															<Label for="reason">Rejection File</Label>
 															<input
-																id="approvalFile"
+																id="rejectFile"
+																name="rejectFile"
 																type="file"
-																accept="application/pdf"
-																bind:files={$file}
-																name="approvalFile"
-																disabled={($rejectFile.length != 0 || $formData.reason != '') &&
+																bind:files={$rejectFile}
+																disabled={$file.length != 0 &&
 																	data.requestData.status == 'PROCESSING'}
 															/>
 														</div>
 													</Card.Content>
-												{/if}
-												<Card.Footer>
-													<Button
-														disabled={(($file.length == 0 ||
-															($rejectFile.length != 0 && $formData.reason != '')) &&
-															data.requestData.status == 'PROCESSING') ||
-															(data.requestData.status == 'ONGOING' &&
-																($rejectFile.length != 0 || $formData.reason != '')) ||
-															(data.requestData.status == 'PENDING' &&
-																($rejectFile.length != 0 || $formData.reason != ''))}
-														type="submit"
-														>{#if data.requestData.status == 'ONGOING'}
-															<span>Process</span>
-														{:else if data.requestData.status == 'PROCESSING'}
-															<span>Complete</span>
-														{:else}
-															<span>Aprove</span>
-														{/if}
-														Application
-													</Button>
-												</Card.Footer>
-											</Card.Root>
-										</Tabs.Content>
-										<!-- {#if data.requestData.status == 'PROCESSING'} -->
-										<Tabs.Content value="reject">
-											<Card.Root>
-												<Card.Content class="space-y-2">
-													<div class="space-y-1">
-														<Label for="reason">Reason</Label>
-														<Input
-															id="reason"
-															type="text"
-															placeholder="Reason of Rejection"
-															bind:value={$formData.reason}
-															name="reason"
-															disabled={$file.length != 0 &&
-																data.requestData.status == 'PROCESSING'}
-														/>
-													</div>
-													<div class="space-y-1">
-														<Label for="reason">Rejection File</Label>
-														<input
-															id="rejectFile"
-															name="rejectFile"
-															type="file"
-															bind:files={$rejectFile}
-															disabled={$file.length != 0 &&
-																data.requestData.status == 'PROCESSING'}
-														/>
-													</div>
-												</Card.Content>
-												<Card.Footer>
-													<Button
-														disabled={($rejectFile.length == 0 &&
-															$formData.reason == '' &&
-															data.requestData.status == 'ONGOING') ||
-															(data.requestData.status == 'PROCESSING' &&
-																($file.length != 0 ||
-																	($rejectFile.length == 0 && $formData.reason == '')))}
-														type="submit"
-														onclick={() => {
-															$formData.process = 'REJECT';
-														}}>Reject Application</Button
-													>
-												</Card.Footer>
-											</Card.Root>
-										</Tabs.Content>
-										<!-- {/if} -->
-									</Tabs.Root>
-								{/if}
-							</form>
+													<Card.Footer>
+														<Button
+															disabled={($rejectFile.length == 0 &&
+																$formData.reason == '' &&
+																data.requestData.status == 'ONGOING') ||
+																(data.requestData.status == 'PROCESSING' &&
+																	($file.length != 0 ||
+																		($rejectFile.length == 0 && $formData.reason == ''))) ||
+																loading}
+															type="submit"
+															onclick={() => {
+																$formData.process = 'REJECT';
+															}}>Reject Application</Button
+														>
+													</Card.Footer>
+												</Card.Root>
+											</Tabs.Content>
+											<!-- {/if} -->
+										</Tabs.Root>
+									{/if}
+								</form>
+							{/if}
 						</div>
 					</div>
 				</Card.Content>
@@ -303,7 +297,7 @@
 		</div>
 	</div>
 </div>
-<div class=" mx-10">
+<div class="mx-10 mb-10">
 	<Card.Root>
 		<Card.Header>
 			<Card.Title>Process</Card.Title>

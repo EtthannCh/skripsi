@@ -4,7 +4,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
-	import { superForm } from 'sveltekit-superforms';
+	import { superForm, message } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from './register-schema';
 	import { SyncLoader } from 'svelte-loading-spinners';
@@ -21,7 +21,7 @@
 				});
 				return goto('/verify-user', { invalidateAll: true });
 			} else if (result.type == 'failure') {
-				toast.error('Credentials Invalid', {
+				toast.error(result.data?.message, {
 					position: 'top-right',
 					dismissable: true
 				});

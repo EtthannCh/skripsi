@@ -32,48 +32,54 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 
     const formDbData = await supabase.from("form_db").select("*");
     const formSelection: FormSchema[] = JSON.parse(JSON.stringify(formDbData.data));
-    let query = (supabase.from("request_db")
-        .select(
-            `id, status, user_id, form_id, request_code,
-            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url
-            `
-        ).order("created_at", { ascending: true })
-        .eq("major_id", user.majorId)
-        .range(pages * 10, (pages + 1) * 10)
-        .limit(10)
-    );
-    let totalCountQuery = supabase.from("request_db")
-        .select(
-            `id, status, user_id, form_id, request_code,
-            reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url, completion_file_url
-            `, { count: "exact" }
-        ).order("created_at", { ascending: true })
-        .eq("major_id", user.majorId);
-    if (filter.length > 0) {
-        query = query.or(`created_by.ilike.${filterQuery},request_code.ilike.${filterQuery}`)
-        totalCountQuery = totalCountQuery.or(`created_by.ilike.${filterQuery},request_code.ilike.${filterQuery}`)
-    }
-    if (status.length > 0) {
-        query = query.eq(`status`, status)
-        totalCountQuery = totalCountQuery.eq(`status`, status)
-    }
-    if (startDate) {
-        const newEndDate = new Date(endDate);
-        newEndDate.setDate(newEndDate.getDate() + 1);
-        query = query.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString())
-        totalCountQuery = totalCountQuery.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString());
-    }
-    if (formFilter.length > 0) {
-        query = query.eq("form_id", formFilter);
-        totalCountQuery = totalCountQuery.eq("form_id", formFilter);
-    }
 
-    const requestDbDataFromDb = (await query).data;
-    const totalCountFromDb = (await totalCountQuery);
-    if ((totalCountFromDb).error) {
-        throw fail(400, { message: "Error Fetch" });
+    let requestDbData: RequestDbSchema[] = [];
+    let totalCount = 0;
+    if ([1, 2, 6].includes(user.roleId)) {
+        let query = (supabase.from("request_db")
+            .select(
+                `id, status, user_id, form_id, request_code,
+                reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url
+                `
+            ).order("created_at", { ascending: true })
+            .eq("major_id", user.majorId)
+            .range(pages * 10, (pages + 1) * 10)
+            .limit(10)
+        );
+        let totalCountQuery = supabase.from("request_db")
+            .select(
+                `id, status, user_id, form_id, request_code,
+                reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url, completion_file_url
+                `, { count: "exact" }
+            ).order("created_at", { ascending: true })
+            .eq("major_id", user.majorId);
+        if (filter.length > 0) {
+            query = query.or(`created_by.ilike.${filterQuery},request_code.ilike.${filterQuery}`)
+            totalCountQuery = totalCountQuery.or(`created_by.ilike.${filterQuery},request_code.ilike.${filterQuery}`)
+        }
+        if (status.length > 0) {
+            query = query.eq(`status`, status)
+            totalCountQuery = totalCountQuery.eq(`status`, status)
+        }
+        if (startDate) {
+            const newEndDate = new Date(endDate);
+            newEndDate.setDate(newEndDate.getDate() + 1);
+            query = query.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString())
+            totalCountQuery = totalCountQuery.lte("created_at", newEndDate.toISOString()).gte("created_at", new Date(startDate).toISOString());
+        }
+        if (formFilter.length > 0) {
+            query = query.eq("form_id", formFilter);
+            totalCountQuery = totalCountQuery.eq("form_id", formFilter);
+        }
+
+        const requestDbDataFromDb = (await query).data;
+        const totalCountFromDb = (await totalCountQuery);
+        if ((totalCountFromDb).error) {
+            throw fail(400, { message: "Error Fetch" });
+        }
+        requestDbData = JSON.parse(JSON.stringify(requestDbDataFromDb));
+        totalCount = Number(totalCountFromDb.count);
     }
-    let requestDbData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestDbDataFromDb));
     if (user.roleId == 3 || !user.roleId) {
         requestDbData = [];
     };
@@ -83,7 +89,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         user,
         formSelection,
         requestDbData,
-        totalCount: totalCountFromDb.count
+        totalCount: totalCount
     };
 }
 
@@ -147,6 +153,7 @@ export const actions = {
 
         const sequenceDbResponse = await supabase.from("sequence_db").select("*").eq("major_id", userCookies.majorId);
         if (sequenceDbResponse.error) {
+            console.log(sequenceDbResponse.error);
             return message(form, (sequenceDbResponse.error as Error).message);
         }
         const sequence: SequenceSchema = sequenceDbResponse.data[0];

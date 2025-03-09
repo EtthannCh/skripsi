@@ -8,7 +8,7 @@ export async function handle({ event, resolve }) {
         console.log(userResponse.message);
     }
     const user: UserCookiesSchema = userResponse.data;
-    if ((!user && (event.url.pathname.startsWith("/path") || event.url.pathname.startsWith("/user") || event.url.pathname.startsWith("/role")))) {
+    if ((!user && (event.url.pathname.startsWith("/home") || event.url.pathname.startsWith("/user") || event.url.pathname.startsWith("/role")))) {
         throw redirect(303, "/login");
     }
     if (user && (event.url.pathname.startsWith("/login") || event.url.pathname.startsWith("/register") || event.url.pathname === "/")) {

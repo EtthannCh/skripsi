@@ -64,6 +64,7 @@ export const actions: Actions = {
         }
         else {
             roleId = 5
+            majorId= 7;
         }
 
         if (roleId == 0 || majorId == 0) {

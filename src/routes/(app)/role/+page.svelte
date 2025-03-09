@@ -14,15 +14,22 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import { updateRoleSchema } from './change-role-schema';
+	import Separator from '$lib/components/ui/separator/separator.svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	let open = $state(false);
 	let openRoleCombobox = $state(false);
+	let openMajorCombobox = $state(false);
+
 	let value = $state('');
 	let roleValue = $state('');
+	let majorValue = $state('');
+
 	let triggerRef = $state<HTMLButtonElement>(null!);
 	let triggerRefRole = $state<HTMLButtonElement>(null!);
+	let triggerRefMajor = $state<HTMLButtonElement>(null!);
+
 	let formLoading = $state(false);
 
 	const form = superForm(data.form, {
@@ -43,8 +50,10 @@
 				});
 			}
 			selectedEmailRoleId = '';
+			selectedEmailMajorId = '';
 			value = '';
 			roleValue = '';
+			majorValue = '';
 			formLoading = false;
 		},
 		onSubmit: () => {
@@ -56,7 +65,12 @@
 	const selectedRoleValue = $derived(
 		data.roleList?.find((f) => f.id.toString() == roleValue)?.name
 	);
+	const selectedMajorValue = $derived(
+		data.majorList?.find((v) => v.id.toString() == majorValue)?.name
+	);
+
 	let selectedEmailRoleId = $state('');
+	let selectedEmailMajorId = $state('');
 
 	function toTitleCase(str: string) {
 		return str.replace(
@@ -79,6 +93,13 @@
 		});
 	}
 
+	function closeAndFocusTriggerMajor() {
+		openMajorCombobox = false;
+		tick().then(() => {
+			triggerRefMajor.focus();
+		});
+	}
+
 	const { form: formData, enhance } = form;
 </script>
 
@@ -92,6 +113,7 @@
 		<h1 class="mb-5 text-center text-3xl">Change Role</h1>
 		<input type="hidden" name="roleId" bind:value={$formData.roleId} />
 		<input type="hidden" name="email" bind:value={$formData.email} />
+		<input type="hidden" name="majorId" bind:value={$formData.majorId} />
 		<Form.Field {form} name="email">
 			<Form.Control let:attrs>
 				<div class="flex flex-col gap-5">
@@ -132,10 +154,13 @@
 														if (value && value == email.id.toString()) {
 															value = '';
 															selectedEmailRoleId = '';
+															selectedEmailMajorId = '';
 														} else {
 															value = email.id.toString();
 															$formData.email = value;
 															selectedEmailRoleId = email.role_id;
+															selectedEmailMajorId = email.major_id;
+															console.log(email.major_id);
 														}
 														closeAndFocusTrigger();
 													}}
@@ -154,15 +179,16 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
+		<Separator class="bg-black"></Separator>
 		<Form.Field {form} name="roleId">
 			<Form.Control let:attrs>
 				<div class="flex flex-col gap-5">
+					<Label class="text-xl">Select new Role For this User</Label>
 					<span
 						>Selected User Current Role : {data.roleList.find(
 							(v) => v.id == Number(selectedEmailRoleId)
 						)?.name}</span
 					>
-					<Label class="text-xl">Select new Role For this User</Label>
 					<Popover.Root bind:open={openRoleCombobox}>
 						<Popover.Trigger bind:ref={triggerRefRole}>
 							{#snippet child({ props })}
@@ -212,6 +238,65 @@
 					</Popover.Root>
 				</div>
 			</Form.Control>
+		</Form.Field>
+		<Separator class="bg-black"></Separator>
+		<Form.Field {form} name="majorId">
+			<Form.Control let:attrs>
+				<div class="flex flex-col gap-5">
+					<Label class="text-xl">Choose Major</Label>
+					<span
+						>Selected User Current Major : {data.majorList.find(
+							(v) => v.id == Number(selectedEmailMajorId)
+						)?.name}</span
+					>
+					<Popover.Root bind:open={openMajorCombobox}>
+						<Popover.Trigger bind:ref={triggerRefMajor}>
+							{#snippet child({ props })}
+								<Button
+									variant="outline"
+									class="w-full justify-between"
+									{...props}
+									role="combobox"
+									aria-expanded={open}
+								>
+									{selectedMajorValue || 'Select Major...'}
+									<ChevronsUpDown class="opacity-50" />
+								</Button>
+							{/snippet}
+						</Popover.Trigger>
+						<Popover.Content class="w-[200px] p-0">
+							<Command.Root>
+								<Command.Input placeholder="Search Major..." />
+								<Command.List>
+									<Command.Empty>No Major Found</Command.Empty>
+									<Command.Group>
+										{#if data.majorList}
+											{#each data.majorList as major}
+												<Command.Item
+													value={major.id.toString()}
+													onSelect={() => {
+														if (majorValue && majorValue == major.id.toString()) {
+															majorValue = '';
+														} else {
+															majorValue = major.id.toString();
+															$formData.majorId = majorValue;
+														}
+														closeAndFocusTriggerMajor();
+													}}
+												>
+													<Check class={cn(value !== major.id.toString() && 'text-transparent')} />
+													{major.name}
+												</Command.Item>
+											{/each}
+										{/if}
+									</Command.Group>
+								</Command.List>
+							</Command.Root>
+						</Popover.Content>
+					</Popover.Root>
+				</div>
+			</Form.Control>
+			<Form.FieldErrors />
 		</Form.Field>
 		<button class="my-5 rounded-md bg-uphButton p-2 text-white" type="submit"> Submit</button>
 	</form>

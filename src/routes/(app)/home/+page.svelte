@@ -9,7 +9,6 @@
 	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
 	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label/index.js';
@@ -81,7 +80,7 @@
 	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
 	let selectedFormValue = $derived(formDbCombobox.find((f) => f.value === formValue)?.label);
 	let formLoading = $state(false);
-	
+
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
@@ -380,18 +379,19 @@
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
-					<button
-						class="my-5 rounded-md bg-uphButton p-2 text-white"
-						onclick={() => {
-							submitPressed = true;
-						}}
-					>
-						Submit</button
-					>
 					{#if formLoading}
 						<span>
-							<SyncLoader color="#007bff"/>
+							<SyncLoader color="#007bff" />
 						</span>
+					{:else}
+						<button
+							class="my-5 rounded-md bg-uphButton p-2 text-white"
+							onclick={() => {
+								submitPressed = true;
+							}}
+						>
+							Submit</button
+						>
 					{/if}
 				</form>
 			</Accordion.Content>
@@ -557,9 +557,7 @@
 				>Reset
 			</button>
 			{#if navigating.to}
-				<div class="mb-4 h-10">
-					<Stretch color="#314986" />
-				</div>
+				<Stretch color="#314986" />
 			{/if}
 		</div>
 		<div class="overflow-x-auto px-5">
@@ -652,15 +650,3 @@
 		</Pagination.Root>
 	</div>
 {/if}
-
-<Dialog.Root bind:open={openDialog}>
-	<Dialog.Content class="sm:max-w-[425px]">
-		<Dialog.Header>
-			<Dialog.Title>Confirmation Dialog</Dialog.Title>
-			<Dialog.Description>Are you sure</Dialog.Description>
-		</Dialog.Header>
-		<Dialog.Footer>
-			<Button type="submit">Save changes</Button>
-		</Dialog.Footer>
-	</Dialog.Content>
-</Dialog.Root>

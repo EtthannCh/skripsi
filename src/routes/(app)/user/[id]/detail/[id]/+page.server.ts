@@ -55,32 +55,39 @@ export const actions = {
             return message(form, { type: "failure", message: "Invalid Form" })
         }
 
+        const requestDataFromDb = await supabase.from("request_db").select("*").eq("id", form.data.requestId);
+        if (requestDataFromDb.error || requestDataFromDb == undefined) {
+            console.log(requestDataFromDb.error);
+            return fail(400, { message: "Server Error... Please Refresh" })
+        }
+
+        const requestData: RequestDbSchema = requestDataFromDb.data[0];
+
         let currentStatus = "";
         if (form.data.status == "PENDING" && user.roleId != 1) {
-            return fail(400, { message: "Permission not Allowed" })
+            return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
         else if (form.data.status == "ONGOING" && user.roleId != 2) {
-            return fail(400, { message: "Permission not Allowed" })
+            return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
         else if (form.data.status == "APPROVED" && user.roleId != 4) {
-            return fail(400, { message: "Permission not Allowed" })
+            return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
 
-        if (form.data.status == "PENDING" && user.roleId == 1) {
+        if (form.data.status == "PENDING" && user.roleId == 1 && requestData.status == "PENDING") {
             currentStatus = "ONGOING";
         }
-        else if (form.data.status == "ONGOING" && user.roleId == 2) {
+        else if (form.data.process == "REJECT" && user.roleId == 2 && (requestData.status == "PROCESSING" || requestData.status == "ONGOING")) {
+            currentStatus = "REJECTED";
+        }
+        else if (form.data.status == "ONGOING" && user.roleId == 2 && requestData.status == "ONGOING") {
             currentStatus = "PROCESSING";
         }
-        else if (form.data.status == "PROCESSING" && user.roleId == 2) {
+        else if (form.data.status == "PROCESSING" && user.roleId == 2 && requestData.status == "PROCESSING") {
             currentStatus = "COMPLETED";
         }
-        else if (form.data.status == "REJECTED") {
-            currentStatus = "REJECTED"
-        }
-
-        if (form.data.process == "REJECT") {
-            currentStatus = "REJECTED";
+        else {
+            return fail(400, { message: "Please Refresh to Retrieve Latest Data" });
         }
 
         let fileUrl: string | File = "";
@@ -94,6 +101,7 @@ export const actions = {
                 approveFileOrReject = form.data.rejectFile;
                 reason = form.data.reason;
             }
+
             const file = approveFileOrReject as File;
             const buffer = Buffer.from(await file.arrayBuffer());
             const fileName = `${form.data.requestId}-${currentStatus}-${new Date().toISOString()}`.toString();
@@ -101,8 +109,10 @@ export const actions = {
                 .upload(fileName, buffer, { contentType: "application/pdf" });
 
             if (error) {
-                return message(form, (error as Error).message)
+                console.log(error);
+                return fail(400, { message: "Server Error... Please Refresh and Try Again" })
             }
+
             fileUrl = supabase.storage.from("request_form_files").getPublicUrl(fileName).data.publicUrl;
 
         }
@@ -115,20 +125,22 @@ export const actions = {
         }).eq("id", form.data.requestId);
         if (errorInsertRequest) {
             console.log(errorInsertRequest.message);
-            throw fail(400, { message: "Failed to Update Request Status" })
+            return fail(400, { message: "Server Error... Please Refresh and Try Again" })
         }
 
-        const insertRequestHistoryDb = await supabase.from("request_history_db").insert({
-            request_id: form.data.requestId,
-            created_by_id: user.userId,
-            created_by: user.username,
-            file_url: fileUrl
-        })
-        if (insertRequestHistoryDb.error) {
-            console.log(insertRequestHistoryDb.error);
-            throw fail(400, { message: "Failed Insert to Request History Database" });
+        if (form.data.status == requestData.status) {
+            const insertRequestHistoryDb = await supabase.from("request_history_db").insert({
+                request_id: form.data.requestId,
+                created_by_id: user.userId,
+                created_by: user.username,
+                file_url: fileUrl
+            })
+            if (insertRequestHistoryDb.error) {
+                console.log(insertRequestHistoryDb.error);
+                return fail(400, { message: "Server Error... Please Refresh and Try Again" })
+            }
         }
 
-        return message(form, { type: "success", message: "Form Updated Successfully" });
+        return message(form, "Form Updated Successfully" );
     }
 }
