@@ -74,11 +74,17 @@ export const actions = {
             return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
 
-        if (form.data.status == "PENDING" && user.roleId == 1 && requestData.status == "PENDING") {
-            currentStatus = "ONGOING";
-        }
-        else if (form.data.process == "REJECT" && user.roleId == 2 && (requestData.status == "PROCESSING" || requestData.status == "ONGOING")) {
+        // perlu cek ketika reject dan status masih pending
+        if (form.data.process == "REJECT" && user.roleId == 2 &&
+            (requestData.status == "PROCESSING" ||
+                requestData.status == "ONGOING")) {
             currentStatus = "REJECTED";
+        }
+        else if (form.data.status == requestData.status && user.roleId == 1 && form.data.process == "REJECT") {
+            currentStatus = "REJECTED";
+        }
+        else if (form.data.status == "PENDING" && user.roleId == 1 && requestData.status == "PENDING") {
+            currentStatus = "ONGOING";
         }
         else if (form.data.status == "ONGOING" && user.roleId == 2 && requestData.status == "ONGOING") {
             currentStatus = "PROCESSING";
@@ -141,6 +147,6 @@ export const actions = {
             }
         }
 
-        return message(form, "Form Updated Successfully" );
+        return message(form, "Form Updated Successfully");
     }
 }

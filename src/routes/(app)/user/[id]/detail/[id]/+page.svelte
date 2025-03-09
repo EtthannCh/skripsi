@@ -91,7 +91,7 @@
 					<Card.Title>Request Detail</Card.Title>
 					<Card.Description
 						>Request that are Submitted By {data.userData?.username} With Request ID :
-						<strong>{data.requestData?.id}</strong></Card.Description
+						<strong>{data.requestData?.request_code}</strong></Card.Description
 					>
 				</div>
 				<div class="flex justify-between">
@@ -276,7 +276,9 @@
 																(data.requestData.status == 'PROCESSING' &&
 																	($file.length != 0 ||
 																		($rejectFile.length == 0 && $formData.reason == ''))) ||
-																loading}
+																loading ||
+																(data.requestData.status == 'PENDING' &&
+																	($rejectFile.length == 0 && $formData.reason == ''))}
 															type="submit"
 															onclick={() => {
 																$formData.process = 'REJECT';
