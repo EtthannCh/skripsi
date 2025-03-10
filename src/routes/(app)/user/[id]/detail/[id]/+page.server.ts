@@ -74,7 +74,6 @@ export const actions = {
             return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
 
-        // perlu cek ketika reject dan status masih pending
         if (form.data.process == "REJECT" && user.roleId == 2 &&
             (requestData.status == "PROCESSING" ||
                 requestData.status == "ONGOING")) {

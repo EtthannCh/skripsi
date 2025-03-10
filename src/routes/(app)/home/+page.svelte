@@ -46,6 +46,7 @@
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';
+	import exportExcel from '$lib/excelExport';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -534,11 +535,11 @@
 				onclick={() => {
 					filterHandler();
 				}}
-				class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
+				class="flex h-10 items-center rounded-md bg-black p-3 text-white"
 				>Filter</button
 			>
 			<button
-				class="flex h-10 items-center rounded-md bg-black p-3 text-white transition-all ease-in-out hover:bg-blue-600 hover:text-white"
+				class="flex h-10 items-center rounded-md bg-black p-3 text-white"
 				onclick={() => {
 					filter = '';
 					statusValue = '';
@@ -555,6 +556,14 @@
 					filterHandler();
 				}}
 				>Reset
+			</button>
+			<button
+				class="rounded-md bg-black p-3 text-white"
+				onclick={() => {
+					exportExcel(table, 'Request Form Table');
+				}}
+			>
+				Export Excel
 			</button>
 			{#if navigating.to}
 				<Stretch color="#314986" />

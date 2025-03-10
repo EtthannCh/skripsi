@@ -71,6 +71,12 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
             query = query.eq("form_id", formFilter);
             totalCountQuery = totalCountQuery.eq("form_id", formFilter);
         }
+        if (user.roleId == 1) {
+            query = query.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
+        }
+        else if (user.roleId == 2) {
+            query = query.in("status", ["ONGOING", "PROCESSING", "COMPLETED", "REJECTED"])
+        }
 
         const requestDbDataFromDb = (await query).data;
         const totalCountFromDb = (await totalCountQuery);
