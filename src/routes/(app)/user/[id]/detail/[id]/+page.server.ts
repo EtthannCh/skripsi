@@ -96,7 +96,7 @@ export const actions = {
         }
 
         let fileUrl: string | File = "";
-        let reason: string = "";
+        let reason: string = form.data.reason;
         let approveFileOrReject: File | undefined = undefined;
         if (form.data.approvalFile || form.data.rejectFile) {
             if (form.data.approvalFile) {
@@ -104,7 +104,6 @@ export const actions = {
                 reason = "";
             } else {
                 approveFileOrReject = form.data.rejectFile;
-                reason = form.data.reason;
             }
 
             const file = approveFileOrReject as File;
