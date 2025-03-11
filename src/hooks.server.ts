@@ -7,7 +7,9 @@ export async function handle({ event, resolve }) {
     if (userResponse.error) {
         console.log(userResponse.message);
     }
+
     const user: UserCookiesSchema = userResponse.data;
+
     if ((!user && (event.url.pathname.startsWith("/home") || event.url.pathname.startsWith("/user") || event.url.pathname.startsWith("/role")))) {
         throw redirect(303, "/login");
     }

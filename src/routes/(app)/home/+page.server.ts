@@ -1,12 +1,12 @@
+import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from "$env/static/private";
+import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
+import nodemailer from "nodemailer";
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { PageServerLoad } from "./$types";
 import { userRequestSchema, type FormSchema, type MajorDbSchema, type RequestDbSchema, type SequenceSchema, type UserCookiesSchema } from "./request-user-schema";
-import { sessionManager } from "$lib/server/sessionManager";
-import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from "$env/static/private";
-import nodemailer from "nodemailer";
 
 export const load: PageServerLoad = async ({ cookies, url }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
