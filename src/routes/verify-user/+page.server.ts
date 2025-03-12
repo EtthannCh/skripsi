@@ -3,6 +3,9 @@ import { OtpSessionManager, sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail, redirect } from "@sveltejs/kit";
 import nodemailer from "nodemailer";
+import { superValidate } from "sveltekit-superforms";
+import { zod } from "sveltekit-superforms/adapters";
+import { otpInputSchema } from "../forgot-password/forgot-password-schema";
 import type { UserRegistration } from "../register/register-schema";
 
 export const load = async ({ cookies }) => {
@@ -11,24 +14,28 @@ export const load = async ({ cookies }) => {
         throw redirect(303, "/");
     }
 
+    const form = await superValidate(zod(otpInputSchema));
+
     return {
-        userCookies
+        userCookies,
+        form
     }
 }
 
 export const actions = {
     verify: async ({ cookies, request }) => {
-        if (!cookies.get("otpSession")) {
-            throw redirect(304, "/");
-        }
-        const data = await request.formData();
-
-        const otp = data.get("otp");
-        const reverify = data.get("action");
-
-
         const userCookies: UserRegistration = (await OtpSessionManager.getSession(await cookies)).data;
-        if (reverify == "reverify") {
+        
+        const form = await superValidate(request, zod(otpInputSchema));
+        if (!form.valid) {
+            return fail(400, { data: form, message: "Please Input Valid OTP (6 Number)!" })
+        }
+
+        if (!userCookies) {
+            return fail(400, { data: form, message: "OTP Session Timeout... Please Try Again" });
+        }
+
+        if (form.data.process == "reverify") {
             const otp1: number = Math.floor(Math.random() * (999999 - 100000) + 100000);
             await sessionManager.deleteSession(cookies);
             await sessionManager.deleteCookie(cookies);
@@ -50,9 +57,10 @@ export const actions = {
             sendEmail("kelvinrogue6@gmail.com", "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp1}`);
             throw redirect(304, "/verify-user")
         }
-        if (otp != userCookies.otp) {
-            return fail(400, { message: "Invalid OTP" });
+        if (form.data.otp != userCookies.otp) {
+            return fail(400, { message: "Invalid OTP!!! Please Check Your Email and Try Again" });
         }
+
         const { error } = await supabase.from("user_credentials")
             .insert({
                 username: userCookies.username,
