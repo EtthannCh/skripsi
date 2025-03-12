@@ -20,11 +20,6 @@
 			icon: House
 		},
 		{
-			title: 'Inbox',
-			url: '#',
-			icon: Inbox
-		},
-		{
 			title: 'Role',
 			url: '/role',
 			icon: Users,
@@ -45,7 +40,7 @@
 			>
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
-					{#each items.slice(0, 2) as item (item.title)}
+					{#each items.slice(0, 1) as item (item.title)}
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}

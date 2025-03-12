@@ -77,21 +77,30 @@
 				</Form.Field>
 				<div class="my-5 flex flex-col">
 					<span
-						>No Account? <a href="../register" class="group relative text-white no-underline">
-							Register Here
-							<span
-								class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
-							></span>
-						</a></span
-					>
-					<span class="flex w-full items-center justify-center"
-						><a href="/forgot-password" class="group relative text-white no-underline">
-							Forgot Password
-							<span
-								class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
-							></span>
-						</a></span
-					>
+						>No Account?
+						{#if loading}
+							<span class="group relative text-white no-underline">Register Here</span>
+						{:else}
+							<a href="../register" class="group relative text-white no-underline">
+								Register Here
+								<span
+									class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
+								></span>
+							</a>
+						{/if}
+					</span>
+					<span class="flex w-full items-center justify-center">
+						{#if loading}
+							<span class="group relative text-white no-underline">Forgot Password</span>
+						{:else}
+							<a href="/forgot-password" class="group relative text-white no-underline">
+								Forgot Password
+								<span
+									class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
+								></span>
+							</a>
+						{/if}
+					</span>
 					<button class="my-3 rounded-md bg-uphButton p-2" disabled={loading}> Login </button>
 				</div>
 			</form>

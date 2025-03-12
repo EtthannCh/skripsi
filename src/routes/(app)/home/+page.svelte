@@ -398,7 +398,7 @@
 			</Accordion.Content>
 		</Accordion.Item>
 	</Accordion.Root>
-{:else}
+{:else if user.roleId == 2 || user.roleId == 1}
 	<div>
 		<div class="flex items-center justify-center">
 			<h1>Hi, {toTitleCase(user.username)}</h1>
@@ -657,5 +657,9 @@
 				</Pagination.Content>
 			{/snippet}
 		</Pagination.Root>
+	</div>
+{:else}
+	<div class="flex flex-col min-h-screen justify-center items-center">
+		<span class="text-3xl">Hi, {user.username}</span>
 	</div>
 {/if}

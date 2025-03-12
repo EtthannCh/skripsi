@@ -46,6 +46,7 @@ export const actions = {
                 return fail(400);
             }
 
+            //TODO: ganti email dengan email user
             sendEmail("kelvinrogue6@gmail.com", "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp1}`);
             throw redirect(304, "/verify-user")
         }

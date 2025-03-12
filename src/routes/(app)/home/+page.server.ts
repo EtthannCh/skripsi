@@ -108,10 +108,12 @@ export const actions = {
         if (!form.valid) {
             return message(form, { type: "failure", message: "Invalid Form" });
         }
+
         const file = form.data.formFile as File;
         if (!file) {
             return fail(400, { data: form, message: "Please Check again uploaded File" })
         }
+
         const buffer = Buffer.from(await file.arrayBuffer());
         const formName = form.data.formFile?.name.slice(0, - 4);
 
@@ -121,6 +123,14 @@ export const actions = {
 
         const userCookies: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
         const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
+
+        const findKaprodiResponse = await supabase.from("user_credentials").select("email")
+            .eq("major_id", userCookies.majorId)
+            .eq("role_id", 1);
+        if(findKaprodiResponse.error){
+            return fail(400, {message:"Head of Department not Found... Please Contact Administrator"});
+        }
+        const kaprodi = findKaprodiResponse.data[0].email; // TODO: pake const ini
 
         const splittedField: string[] = formName.split("-");
         const formCode = splittedField[0] + "_" + splittedField[1];
@@ -194,9 +204,6 @@ export const actions = {
             return message(form, { message: "Please Check Again", type: "failure" });
         }
 
-        // jika ada error ketika insert, update pakai data sebelumnya
-
-
         const updateSequenceDbResponse = await supabase.from("sequence_db").update({
             current_number: currentNumber,
             current_year: currentYear,
@@ -206,6 +213,8 @@ export const actions = {
             return message(form, { type: "failure", message: "Sequence Error" });
         }
 
+
+        // TODO: send email ke kaprodi
         if (userCookies.roleId == 3) {
             sendEmail("kelvinrogue6@gmail.com", "A Request has been Received", `Form Request for student with Email : ${userCookies.email}.. Please Check Academic Service Website to Process Request`)
         }

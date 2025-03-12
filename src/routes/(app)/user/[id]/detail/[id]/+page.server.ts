@@ -7,6 +7,8 @@ import type { RequestDbSchema, UserCookiesSchema } from '../../../../home/reques
 import type { PageServerLoad } from './$types.js';
 import type { ApproveRejectSchema, RequestHistorySchema, UserDetailSchema } from './user-detail-schema';
 import { approveRejectSchema } from './user-detail-schema';
+import nodemailer from "nodemailer";
+import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from "$env/static/private";
 
 export const load: PageServerLoad = async ({ url }) => {
     const userPkey: string = url.pathname.split("/")[2];
@@ -74,25 +76,52 @@ export const actions = {
             return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
 
+        let nextRoleId = 0;
+        let emailSubject = "";
+        let emailBody = "";
+
         if (form.data.process == "REJECT" && user.roleId == 2 &&
             (requestData.status == "PROCESSING" ||
                 requestData.status == "ONGOING")) {
+            nextRoleId = 3;
             currentStatus = "REJECTED";
+            emailSubject = `Your Request with Number ${requestData.request_code} has Been Rejected.`;
+            emailBody = "Please Check Again at Academic Service Website.";
         }
         else if (form.data.status == requestData.status && user.roleId == 1 && form.data.process == "REJECT") {
+            nextRoleId = 3;
             currentStatus = "REJECTED";
+            emailSubject = `Your Request with Number ${requestData.request_code} has Been Rejected.`;
+            emailBody = "Please Check Again at Academic Service Website.";
         }
         else if (form.data.status == "PENDING" && user.roleId == 1 && requestData.status == "PENDING") {
+            nextRoleId = 2;
             currentStatus = "ONGOING";
+            emailSubject = "This Request has Been Approved.";
+            emailBody = `Request with Number ${requestData.request_code} Has Been Approved... Please Proceed to the Next Step`;
         }
         else if (form.data.status == "ONGOING" && user.roleId == 2 && requestData.status == "ONGOING") {
             currentStatus = "PROCESSING";
         }
         else if (form.data.status == "PROCESSING" && user.roleId == 2 && requestData.status == "PROCESSING") {
             currentStatus = "COMPLETED";
+            emailSubject = `Your Request with Number ${requestData.request_code} Has Been Processed`;
+            emailBody = "Please Open Academic Service Website to View Your Request.";
         }
         else {
             return fail(400, { message: "Please Refresh to Retrieve Latest Data" });
+        }
+
+        let nextEmailResponse = supabase.from("user_credentials").select("email");
+        if (nextRoleId == 2) {
+            nextEmailResponse = nextEmailResponse.eq("role_id", nextRoleId).eq("major_id", user.majorId);
+        } else if (nextRoleId == 3) {
+            nextEmailResponse = nextEmailResponse.eq("id", user.id);
+        }
+
+        const nextEmail = await nextEmailResponse;
+        if (nextEmail.error) {
+            return fail(400, { message: "Failed to fetch Data... Please Try Again" });
         }
 
         let fileUrl: string | File = "";
@@ -120,19 +149,25 @@ export const actions = {
             fileUrl = supabase.storage.from("request_form_files").getPublicUrl(fileName).data.publicUrl;
 
         }
-        const { error: errorInsertRequest } = await supabase.from("request_db").update({
-            status: currentStatus,
-            last_updated_by_id: user.userId,
-            last_updated_by: user.username,
-            reason: reason,
-            completion_file_url: fileUrl
-        }).eq("id", form.data.requestId);
-        if (errorInsertRequest) {
-            console.log(errorInsertRequest.message);
-            return fail(400, { message: "Server Error... Please Refresh and Try Again" })
-        }
 
         if (form.data.status == requestData.status) {
+            const { error: errorInsertRequest } = await supabase.from("request_db").update({
+                status: currentStatus,
+                last_updated_by_id: user.userId,
+                last_updated_by: user.username,
+                reason: reason,
+                completion_file_url: fileUrl
+            }).eq("id", form.data.requestId);
+            if (errorInsertRequest) {
+                console.log(errorInsertRequest.message);
+                return fail(400, { message: "Server Error... Please Refresh and Try Again" })
+            }
+        } else {
+            return fail(400, { message: "Please Refresh to Retrieve Latest Data" })
+        }
+
+
+        if (form.data.status == requestData.status && currentStatus != "REJECTED") {
             const insertRequestHistoryDb = await supabase.from("request_history_db").insert({
                 request_id: form.data.requestId,
                 created_by_id: user.userId,
@@ -145,6 +180,35 @@ export const actions = {
             }
         }
 
+        if (currentStatus == "REJECTED" || currentStatus == "COMPLETED" || currentStatus == "ONGOING") {
+            sendEmail("kelvinrogue6@gmail.com", emailSubject, emailBody);
+        }
         return message(form, "Form Updated Successfully");
+    }
+}
+
+
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: GOOGLE_EMAIL,
+        pass: GOOGLE_PASSWORD
+    }
+})
+
+const sendEmail = async (to: string, subject: string, text: string) => {
+    const mailOptions = {
+        from: GOOGLE_EMAIL,
+        to,
+        subject,
+        text
+    }
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Email Sent", info.response);
+    } catch (error) {
+        console.log(error);
     }
 }

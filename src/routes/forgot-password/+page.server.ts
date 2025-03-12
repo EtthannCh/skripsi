@@ -30,6 +30,8 @@ export const actions: Actions = {
             console.log(otpResponse.message);
             return fail(400, { data: form });
         }
+
+        // ganti email dengan email dari form
         sendEmail("kelvinrogue6@gmail.com", "Reset Password OTP Code", `Complete Your Reset Password Process. \n OTP : ${otp}`);
         return redirect(303, "/forgot-password/verify")
     }

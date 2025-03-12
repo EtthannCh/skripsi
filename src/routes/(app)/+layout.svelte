@@ -71,15 +71,11 @@
 						<HouseIcon />
 						<a href="/home">Home</a>
 					</div>
-					<div class="grid grid-cols-4 items-center gap-4">
-						<InboxIcon />
-						<a href="#">Inbox</a>
-					</div>
 					{#if user.roleId == 6}
-					<div class="grid grid-cols-4 items-center gap-4">
-						<Users />
-						<a href="/user">Inbox</a>
-					</div>
+						<div class="grid grid-cols-4 items-center gap-4">
+							<Users />
+							<a href="/user">Role</a>
+						</div>
 					{/if}
 				</div>
 				<Sheet.Footer>

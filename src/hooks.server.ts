@@ -13,6 +13,7 @@ export async function handle({ event, resolve }) {
     if ((!user && (event.url.pathname.startsWith("/home") || event.url.pathname.startsWith("/user") || event.url.pathname.startsWith("/role")))) {
         throw redirect(303, "/login");
     }
+
     if (user && (event.url.pathname.startsWith("/login") || event.url.pathname.startsWith("/register") || event.url.pathname === "/")) {
         throw redirect(303, "/home")
     }

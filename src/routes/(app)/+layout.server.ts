@@ -14,6 +14,7 @@ export const load = async ({ cookies }) => {
 
     const majorDb: MajorDbSchema = majorDbResponse.data[0];
     return {
-        majorDb
+        majorDb,
+        user
     }
 }
