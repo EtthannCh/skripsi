@@ -14,7 +14,6 @@ export const load: PageServerLoad = async ({ url }) => {
     const userPkey: string = url.pathname.split("/")[2];
     const requestFormId: string = url.pathname.split("/")[4];
 
-    const form: SuperValidated<ApproveRejectSchema> = await superValidate(zod(approveRejectSchema))
     const userDataFromDb = await supabase.from("user_credentials").select("id, username, email").eq("id", userPkey);
     const requestDataFromDb = await supabase.from("request_db").select("*").eq("id", requestFormId);
     const requestHistoryDataFromDb = await supabase.from("request_history_db").select("*").eq("request_id", requestFormId);
@@ -29,6 +28,7 @@ export const load: PageServerLoad = async ({ url }) => {
         throw fail(400, { message: "Invalid Request Data" })
     }
 
+
     if (requestHistoryDataFromDb.error || requestHistoryDataFromDb == undefined) {
         console.log(requestHistoryDataFromDb.error);
         throw fail(400, { message: "Invalid Request History Data" })
@@ -37,6 +37,8 @@ export const load: PageServerLoad = async ({ url }) => {
     const userData: UserDetailSchema = userDataFromDb.data[0];
     const requestData: RequestDbSchema = requestDataFromDb.data[0];
     const requetsHistoryData: RequestHistorySchema[] = requestHistoryDataFromDb.data;
+
+    const form: SuperValidated<ApproveRejectSchema> = await superValidate({ requestId: requestData.id, status: requestData.status }, zod(approveRejectSchema))
     return {
         userData,
         requestData,
@@ -150,34 +152,22 @@ export const actions = {
 
         }
 
-        if (form.data.status == requestData.status) {
-            const { error: errorInsertRequest } = await supabase.from("request_db").update({
-                status: currentStatus,
-                last_updated_by_id: user.userId,
-                last_updated_by: user.username,
-                reason: reason,
-                completion_file_url: fileUrl
-            }).eq("id", form.data.requestId);
-            if (errorInsertRequest) {
-                console.log(errorInsertRequest.message);
-                return fail(400, { message: "Server Error... Please Refresh and Try Again" })
-            }
-        } else {
-            return fail(400, { message: "Please Refresh to Retrieve Latest Data" })
-        }
+        const { data, error } = await supabase.rpc("update_request_with_history", {
+            request_id_param: form.data.requestId,
+            status_param: currentStatus,
+            last_updated_by_id_param: user.userId,
+            last_updated_by_param: user.username,
+            reason_param: reason,
+            completion_file_url_param: fileUrl,
+            created_by_id_param: user.userId,
+            created_by_param: user.username
+        });
 
+        if (error || !data) {
+            console.log(error);
 
-        if (form.data.status == requestData.status && currentStatus != "REJECTED") {
-            const insertRequestHistoryDb = await supabase.from("request_history_db").insert({
-                request_id: form.data.requestId,
-                created_by_id: user.userId,
-                created_by: user.username,
-                file_url: fileUrl
-            })
-            if (insertRequestHistoryDb.error) {
-                console.log(insertRequestHistoryDb.error);
-                return fail(400, { message: "Server Error... Please Refresh and Try Again" })
-            }
+            console.error("Transaction failed:", error?.message);
+            return fail(400, { message: "Server Error... Please Refresh and Try Again" });
         }
 
         if (currentStatus == "REJECTED" || currentStatus == "COMPLETED" || currentStatus == "ONGOING") {

@@ -75,7 +75,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
             query = query.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
         }
         else if (user.roleId == 2) {
-            query = query.in("status", ["ONGOING", "PROCESSING", "COMPLETED", "REJECTED"])
+            query = query.in("status", ["PENDING","ONGOING", "PROCESSING", "COMPLETED", "REJECTED"])
         }
 
         const requestDbDataFromDb = (await query).data;
@@ -127,8 +127,8 @@ export const actions = {
         const findKaprodiResponse = await supabase.from("user_credentials").select("email")
             .eq("major_id", userCookies.majorId)
             .eq("role_id", 1);
-        if(findKaprodiResponse.error){
-            return fail(400, {message:"Head of Department not Found... Please Contact Administrator"});
+        if (findKaprodiResponse.error) {
+            return fail(400, { message: "Head of Department not Found... Please Contact Administrator" });
         }
         const kaprodi = findKaprodiResponse.data[0].email; // TODO: pake const ini
 
@@ -221,7 +221,22 @@ export const actions = {
 
         return message(form, "Form Uploaded Successfully");
     }
-
+    // export: async ({ request }) => {
+    //     const form = await request.formData();
+    //     const filter: string = form.get("filter")?.toString() ?? "";
+    //     const startDate: string = form.get("startDate")?.toString() ?? "";
+    //     const endDate: string = form.get("endDate")?.toString() ?? "";
+    //     const status: string = form.get("status")?.toString() ?? "";
+    //     const formCode: string = form.get("form")?.toString() ?? "";
+    //     const exportExcelFilter: ExportToExcel = {
+    //         filter,
+    //         startDate,
+    //         endDate,
+    //         status,
+    //         form: formCode
+    //     }
+    //     exportExcel(exportExcelFilter, "no");
+    // }
 } satisfies Actions;
 
 const transporter = nodemailer.createTransport({
@@ -248,3 +263,37 @@ const sendEmail = async (to: string, subject: string, text: string) => {
         console.log(error);
     }
 }
+
+// export default async function exportExcel(filter: ExportToExcel, fileName: string) {
+//     const wb = new Workbook.Workbook();
+//     const ws = wb.addWorksheet("Request Sheet 1");
+
+//     const lastHeaderGroup = table.getHeaderGroups().at(-1);
+//     if (!lastHeaderGroup) {
+//         console.error("No header groups found", table.getHeaderGroups())
+//         return;
+//     }
+
+//     ws.columns = lastHeaderGroup.headers
+//         .filter((h) => h.column.getIsVisible())
+//         .map((header) => {
+//             return {
+//                 header: header.column.columnDef.header as string,
+//                 key: header.id,
+//                 width: 20
+//             }
+//         })
+
+//     table.getCoreRowModel().rows.forEach((row) => {
+//         const cells = row.getVisibleCells();
+//         const values = cells.map((cell) => cell.getValue() ?? "");
+//         ws.addRow(values);
+//     })
+
+//     ws.getRow(1).eachCell((cell) => {
+//         cell.font = { bold: true }
+//     })
+
+//     const buf = await wb.xlsx.writeBuffer();
+//     saveAs(new Blob([buf]), `${fileName}.xlsx`);
+// }

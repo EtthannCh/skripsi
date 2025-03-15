@@ -1,4 +1,4 @@
-import { supabase } from "$lib/supabaseClient";
+import { supabase } from "$lib/supabaseClient.js";
 import { fail } from "@sveltejs/kit";
 import type { RequestHistorySchema } from "../../../[id]/detail/[id]/user-detail-schema.js";
 

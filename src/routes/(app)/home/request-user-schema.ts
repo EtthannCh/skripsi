@@ -128,3 +128,22 @@ export const sequenceSchema = z.object({
 })
 
 export type SequenceSchema = z.infer<typeof sequenceSchema>;
+
+export const excelTableSchema = z.object({
+    request_id: z.number(),
+    request_code: z.string(),
+    status: z.string(),
+    nim: z.string(),
+    username: z.string(),
+    email: z.string(),
+    form_code: z.string(),
+    form_name: z.string(),
+    pending: z.string(),
+    ongoing: z.string(),
+    processing: z.string(),
+    completed: z.string(),
+    uploaded_file_url: z.string(),
+    completion_file_url: z.string()
+})
+
+export type ExcelTableSchema = z.infer<typeof excelTableSchema>;

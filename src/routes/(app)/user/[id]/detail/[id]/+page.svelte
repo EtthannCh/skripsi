@@ -54,11 +54,6 @@
 	let file = fileProxy(form, 'approvalFile', { empty: undefined });
 	let rejectFile = fileProxy(form, 'rejectFile', { empty: undefined });
 
-	$effect.root(() => {
-		$formData.requestId = data.requestData?.id;
-		$formData.status = data.requestData?.status;
-	});
-
 	let isMobile = $state(false);
 	let windowWidth = $state(0);
 	$effect(() => {
@@ -178,8 +173,6 @@
 								</div>
 							{:else}
 								<form action="?/submit" method="post" enctype="multipart/form-data" use:enhance>
-									<input type="hidden" name="status" bind:value={$formData.status} />
-									<input type="hidden" name="requestId" bind:value={$formData.requestId} />
 									<input type="hidden" name="process" bind:value={$formData.process} />
 									{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
 										<Tabs.Root value="account" class="flex flex-col justify-between">

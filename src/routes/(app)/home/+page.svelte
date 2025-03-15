@@ -17,6 +17,7 @@
 	import { RangeCalendar } from '$lib/components/ui/range-calendar/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
+	import exportExcel from '$lib/excelExport';
 	import { cn } from '$lib/utils.js';
 	import {
 		CalendarDate,
@@ -43,10 +44,10 @@
 		requestDbStatusEnum,
 		requestEnumColor,
 		userRequestSchema,
+		type ExcelTableSchema,
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';
-	import exportExcel from '$lib/excelExport';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -213,8 +214,6 @@
 
 	const table = createSvelteTable(options);
 
-	let openDialog = $state(false);
-
 	const { form: formData, errors, enhance } = form;
 	const file = fileProxy(form, 'formFile');
 
@@ -277,6 +276,10 @@
 	const isDesktop = new MediaQuery('(min-width: 414px)');
 	const perPage = $derived(isDesktop.current ? 10 : 5);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
+
+	const exportToExcelFunction = async () => {
+		goto(`/home/export-excel?filter=${filter}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}&status=${statusValue}`);
+	};
 </script>
 
 {#if user.roleId == 3 && user.roleId}
@@ -535,8 +538,7 @@
 				onclick={() => {
 					filterHandler();
 				}}
-				class="flex h-10 items-center rounded-md bg-black p-3 text-white"
-				>Filter</button
+				class="flex h-10 items-center rounded-md bg-black p-3 text-white">Filter</button
 			>
 			<button
 				class="flex h-10 items-center rounded-md bg-black p-3 text-white"
@@ -557,12 +559,7 @@
 				}}
 				>Reset
 			</button>
-			<button
-				class="rounded-md bg-black p-3 text-white"
-				onclick={() => {
-					exportExcel(table, 'Request Form Table');
-				}}
-			>
+			<button class="rounded-md bg-black p-3 text-white" onclick={exportToExcelFunction}>
 				Export Excel
 			</button>
 			{#if navigating.to}
@@ -659,7 +656,7 @@
 		</Pagination.Root>
 	</div>
 {:else}
-	<div class="flex flex-col min-h-screen justify-center items-center">
+	<div class="flex min-h-screen flex-col items-center justify-center">
 		<span class="text-3xl">Hi, {user.username}</span>
 	</div>
 {/if}
