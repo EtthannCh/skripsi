@@ -3,11 +3,11 @@
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
+	import { SyncLoader } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
-	import { superForm, message } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from './register-schema';
-	import { SyncLoader } from 'svelte-loading-spinners';
 
 	let { data } = $props();
 	let loading = $state(false);
@@ -41,6 +41,7 @@
 			isMobile = true;
 		}
 	});
+
 	const { form: formData, enhance } = form;
 </script>
 

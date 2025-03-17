@@ -18,7 +18,7 @@
 				});
 				goto('/home');
 			} else if(result.type == "failure"){
-				toast.error('Invalid Email', {
+				toast.error("Invalid Email", {
 					position: 'top-center',
 					dismissable: true
 				});
@@ -50,6 +50,7 @@
 					class="w-[250px]"
 					bind:value={$formData.email}
 				/>
+				<Form.FieldErrors/>
 			</Form.Control>
 		</Form.Field>
 		<button

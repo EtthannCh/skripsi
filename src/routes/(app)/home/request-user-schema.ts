@@ -143,7 +143,8 @@ export const excelTableSchema = z.object({
     processing: z.string(),
     completed: z.string(),
     uploaded_file_url: z.string(),
-    completion_file_url: z.string()
+    completion_file_url: z.string(),
+    reason: z.string(),
 })
 
 export type ExcelTableSchema = z.infer<typeof excelTableSchema>;

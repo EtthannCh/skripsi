@@ -1,15 +1,16 @@
 <script lang="ts">
-	import { FlexRender } from '$lib/components/ui/data-table';
-	import { createSvelteTable } from '$lib/components/ui/data-table';
+	import { goto } from '$app/navigation';
+	import { createSvelteTable, FlexRender, renderComponent } from '$lib/components/ui/data-table';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import exportExcel from '$lib/excelExport';
 	import { type ColumnDef, type TableOptions } from '@tanstack/svelte-table';
 	import { getCoreRowModel } from '@tanstack/table-core';
-	import type { ExcelTableSchema } from '../request-user-schema';
-	import type { PageData } from './$types';
-	import { goto } from '$app/navigation';
 	import { ArrowLeft } from 'lucide-svelte';
 	import { Stretch } from 'svelte-loading-spinners';
+	import type { ExcelTableSchema } from '../request-user-schema';
+	import type { PageData } from './$types';
+	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
+	import { page } from '$app/state';
 
 	let { data }: { data: PageData } = $props();
 
@@ -89,14 +90,40 @@
 		{
 			accessorKey: 'uploaded_file_url',
 			accessorFn: (row) => row.uploaded_file_url,
-			cell: ({ row }) => row.original.uploaded_file_url,
+			cell: ({ row }) => {
+				if (row.original.uploaded_file_url != 'NONE') {
+					return renderComponent(DataTableLink, {
+						label: "Student's PDF Link",
+						url: row.original.uploaded_file_url,
+						blank: true
+					});
+				} else {
+					return row.original.uploaded_file_url;
+				}
+			},
 			header: 'Uploaded File URL'
 		},
 		{
 			accessorKey: 'completion_file_url',
 			accessorFn: (row) => row.completion_file_url,
-			cell: ({ row }) => row.original.completion_file_url,
+			cell: ({ row }) => {
+				if (row.original.completion_file_url != 'NONE') {
+					return renderComponent(DataTableLink, {
+						label: 'PDF Link',
+						url: row.original.completion_file_url,
+						blank: true
+					});
+				} else {
+					return row.original.completion_file_url;
+				}
+			},
 			header: 'Completion File URL'
+		},
+		{
+			accessorKey: 'reason',
+			accessorFn: (row) => row.reason,
+			cell: ({ row }) => row.original.reason,
+			header: 'Reason'
 		}
 	];
 
@@ -113,23 +140,26 @@
 </script>
 
 <div class="flex flex-col">
-	<div class="flex flex-row items-center justify-center">
-		<button
-			class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
-			onclick={() => {
-				loading = true;
-				goto('/home');
-			}}
-		>
-			<ArrowLeft />
-			<span>Back</span>
-		</button>
-		{#if data.exportTableData.length > 0}
+	<div class="flex flex-col items-center justify-center">
+		<span class="p-5 bg-white rounded-md">From (YYYY/MM/DD): ({page.url.searchParams.get('startDate')}) to : ({page.url.searchParams.get("endDate")})</span>
+		<div class="flex flex-row items-center justify-center">
 			<button
-				class="flex h-10 items-center rounded-md bg-black p-3 text-white"
-				onclick={exportToExcel}>Export to Excel</button
+				class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
+				onclick={() => {
+					loading = true;
+					goto('/home');
+				}}
 			>
-		{/if}
+				<ArrowLeft />
+				<span>Back</span>
+			</button>
+			{#if data.exportTableData.length > 0}
+				<button
+					class="flex h-10 items-center rounded-md bg-black p-3 text-white"
+					onclick={exportToExcel}>Export to Excel</button
+				>
+			{/if}
+		</div>
 		{#if loading}
 			<div class="mx-10 mb-4 flex h-10 flex-col gap-3">
 				<span>Loading</span>
@@ -137,6 +167,7 @@
 			</div>
 		{/if}
 	</div>
+
 	<div class="overflow-x-auto px-5">
 		<div
 			class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1100px] overflow-y-scroll rounded-md border-2"

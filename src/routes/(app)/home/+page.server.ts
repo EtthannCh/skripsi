@@ -75,7 +75,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
             query = query.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
         }
         else if (user.roleId == 2) {
-            query = query.in("status", ["PENDING","ONGOING", "PROCESSING", "COMPLETED", "REJECTED"])
+            query = query.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"])
         }
 
         const requestDbDataFromDb = (await query).data;
@@ -115,22 +115,15 @@ export const actions = {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const formName = form.data.formFile?.name.slice(0, - 4);
+        const formName = form.data.formFile?.name.slice(0, - 4) ?? "";
 
-        if (formName?.split("-").length != 5) {
-            return fail(400, { message: "Invalid File Name... Please Make Sure Again" })
-        }
+        const regex = /^[a-zA-Z]{2,3}-\d{2,3}-\d{11}-[a-zA-Z]{2,3}-\d{11}@student.uph.edu$/;
+        if (!regex.test(formName)) {
+            return fail(400, { message: "Invalid Name Format" });
+        };
 
         const userCookies: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
         const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
-
-        const findKaprodiResponse = await supabase.from("user_credentials").select("email")
-            .eq("major_id", userCookies.majorId)
-            .eq("role_id", 1);
-        if (findKaprodiResponse.error) {
-            return fail(400, { message: "Head of Department not Found... Please Contact Administrator" });
-        }
-        const kaprodi = findKaprodiResponse.data[0].email; // TODO: pake const ini
 
         const splittedField: string[] = formName.split("-");
         const formCode = splittedField[0] + "_" + splittedField[1];
@@ -157,6 +150,14 @@ export const actions = {
         if (splittedField[4].trim() != userCookies.email.trim() && userCookies.roleId == 3) {
             return fail(400, { message: "Invalid Student Email.. Please Use your Student Account" });
         }
+
+        const findKaprodiResponse = await supabase.from("user_credentials").select("email")
+            .eq("major_id", userCookies.majorId)
+            .eq("role_id", 1);
+        if (findKaprodiResponse.error || findKaprodiResponse.data.length == 0) {
+            return fail(400, { message: "Head of Department not Found... Please Contact Administrator" });
+        }
+        const kaprodi = findKaprodiResponse.data[0].email; // TODO: pake const ini
 
         const fileName = `${code}-${form.data.formId}-${userCookies.username}-${userCookies.userId}-${(new Date().toISOString())}`.toString();
         const { error } = await supabase.storage.from("request_form_files")
@@ -213,7 +214,6 @@ export const actions = {
             return message(form, { type: "failure", message: "Sequence Error" });
         }
 
-
         // TODO: send email ke kaprodi
         if (userCookies.roleId == 3) {
             sendEmail("kelvinrogue6@gmail.com", "A Request has been Received", `Form Request for student with Email : ${userCookies.email}.. Please Check Academic Service Website to Process Request`)
@@ -221,22 +221,6 @@ export const actions = {
 
         return message(form, "Form Uploaded Successfully");
     }
-    // export: async ({ request }) => {
-    //     const form = await request.formData();
-    //     const filter: string = form.get("filter")?.toString() ?? "";
-    //     const startDate: string = form.get("startDate")?.toString() ?? "";
-    //     const endDate: string = form.get("endDate")?.toString() ?? "";
-    //     const status: string = form.get("status")?.toString() ?? "";
-    //     const formCode: string = form.get("form")?.toString() ?? "";
-    //     const exportExcelFilter: ExportToExcel = {
-    //         filter,
-    //         startDate,
-    //         endDate,
-    //         status,
-    //         form: formCode
-    //     }
-    //     exportExcel(exportExcelFilter, "no");
-    // }
 } satisfies Actions;
 
 const transporter = nodemailer.createTransport({

@@ -19,13 +19,9 @@ export const load = async () => {
 
 export const actions: Actions = {
     register: async ({ request, cookies }) => {
-        const reqForm = await request.formData();
-        const form = await superValidate(reqForm, zod(registerSchema));
+        const form = await superValidate(request, zod(registerSchema));
         if (!form.valid) {
-            return fail(400, {
-                data: form,
-                message: "Invalid Form"
-            })
+            return message(form, {message:"Invalid Form"})
         }
 
         const userDbResponse = await supabase.from("user_credentials").select("*").eq("email", form.data.email);
@@ -64,7 +60,7 @@ export const actions: Actions = {
         }
         else {
             roleId = 5
-            majorId= 7;
+            majorId = 7;
         }
 
         if (roleId == 0 || majorId == 0) {

@@ -17,7 +17,6 @@
 	import { RangeCalendar } from '$lib/components/ui/range-calendar/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
-	import exportExcel from '$lib/excelExport';
 	import { cn } from '$lib/utils.js';
 	import {
 		CalendarDate,
@@ -44,7 +43,6 @@
 		requestDbStatusEnum,
 		requestEnumColor,
 		userRequestSchema,
-		type ExcelTableSchema,
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';

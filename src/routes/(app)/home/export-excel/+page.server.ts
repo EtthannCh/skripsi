@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ url }) => {
     let query = supabase.rpc("export_to_excel_table", {
         start_date: startDate,
         end_date: endDate
-    });
+    }).limit(10);
     if (filter.length > 0) {
         query = query.or(`created_by.ilike.${filter},request_code.ilike.${filter}`);
     }
