@@ -118,7 +118,7 @@ export const actions = {
         const formName = form.data.formFile?.name.slice(0, - 4) ?? "";
 
         const regex = /^[a-zA-Z]{2,3}-\d{2,3}-\d{11}-[a-zA-Z]{2,3}-\d{11}@student.uph.edu$/;
-        if (!regex.test(formName)) {
+        if (!regex.test(formName.trim())) {
             return fail(400, { message: "Invalid Name Format" });
         };
 
