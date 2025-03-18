@@ -153,14 +153,14 @@ export const actions = {
         }
 
         const { data, error } = await supabase.rpc("update_request_with_history", {
-            request_id_param: form.data.requestId,
-            status_param: currentStatus,
+            completion_file_url_param: fileUrl,
+            created_by_id_param: user.userId,
+            created_by_param: user.username,
             last_updated_by_id_param: user.userId,
             last_updated_by_param: user.username,
             reason_param: reason,
-            completion_file_url_param: fileUrl,
-            created_by_id_param: user.userId,
-            created_by_param: user.username
+            request_id_param: form.data.requestId,
+            status_param: currentStatus
         });
 
         if (error || !data) {

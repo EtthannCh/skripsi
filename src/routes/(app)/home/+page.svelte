@@ -276,10 +276,9 @@
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 
 	const exportToExcelFunction = async () => {
-		goto(`/home/export-excel?filter=${filter}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}&status=${statusValue}`);
+		goto(`/home/export-excel?filter=${filter}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}&status=${statusValue}&major=${user.majorId}`);
 	};
 </script>
-
 {#if user.roleId == 3 && user.roleId}
 	<Accordion.Root
 		type="single"
