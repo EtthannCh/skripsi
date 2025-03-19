@@ -21,20 +21,26 @@
 					>{processArray[2]}{data.userRequestHistory[data.userRequestHistory.length - 1]
 						.created_by}</span
 				>
-				{#if data.userApprovalOrRejectFileUrl.completion_file_url != null && (data.userApprovalOrRejectFileUrl.status == 'COMPLETED' || data.userApprovalOrRejectFileUrl.status == 'REJECTED')}
-					<a
-						class="flex items-center gap-5 lg:w-[250px]"
-						href={data.userApprovalOrRejectFileUrl.completion_file_url}
-						target="_blank"
-						>{data.userApprovalOrRejectFileUrl.status == 'COMPLETED'
-							? 'Approval File : '
-							: data.userApprovalOrRejectFileUrl.status == 'REJECTED'
-								? 'Need to Make Changes'
-								: ''}
-						<FileText /></a
-					>
+				{#if (data.userApprovalOrRejectFileUrl.completion_file_url != '' || data.userApprovalOrRejectFileUrl.reason != '') && (data.userApprovalOrRejectFileUrl.status == 'COMPLETED' || data.userApprovalOrRejectFileUrl.status == 'REJECTED')}
+					{#if data.userApprovalOrRejectFileUrl.completion_file_url != ''}
+						<a
+							class="flex items-center gap-5 lg:w-[250px]"
+							href={data.userApprovalOrRejectFileUrl.completion_file_url}
+							target="_blank"
+							>{data.userApprovalOrRejectFileUrl.status == 'COMPLETED'
+								? 'Approval File : '
+								: data.userApprovalOrRejectFileUrl.status == 'REJECTED'
+									? 'Need to Make Changes : '
+									: ''}
+							<FileText />
+						</a>
+					{/if}
 				{:else}
 					<span>Still In Process</span>
+				{/if}
+				{#if data.userApprovalOrRejectFileUrl.reason != ''}
+					<span class="text-red-600">Reject Reason : {data.userApprovalOrRejectFileUrl.reason}</span
+					>
 				{/if}
 			</div>
 		{/if}

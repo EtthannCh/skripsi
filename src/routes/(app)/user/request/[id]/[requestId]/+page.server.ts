@@ -9,7 +9,7 @@ export const load = async ({ params }) => {
         console.log(userRequestHistoryResponse.error);
         throw fail(400);
     }
-    const userApprovalOrRejectFileResponse = await supabase.from("request_db").select("completion_file_url,status").eq("id", id);
+    const userApprovalOrRejectFileResponse = await supabase.from("request_db").select("completion_file_url, reason, status").eq("id", id);
     if(userApprovalOrRejectFileResponse.error){
         throw fail(400, {message:"Error Fetch"})
     }
