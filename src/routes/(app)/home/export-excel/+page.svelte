@@ -66,26 +66,58 @@
 		{
 			accessorKey: 'pending',
 			accessorFn: (row) => row.pending,
-			cell: ({ row }) => row.original.pending,
-			header: 'Pending'
+			cell: ({ row }) =>
+				new Date(row.original.pending).toLocaleDateString('id-ID', {
+					day: '2-digit',
+					month: 'long',
+					year: '2-digit'
+				}) +
+				' ' +
+				new Date(row.original.pending).toLocaleTimeString(),
+			header: 'Pending',
+			size: 200
 		},
 		{
 			accessorKey: 'ongoing',
 			accessorFn: (row) => row.ongoing,
-			cell: ({ row }) => row.original.ongoing,
-			header: 'Ongoing'
+			cell: ({ row }) =>
+				new Date(row.original.ongoing).toLocaleDateString('id-ID', {
+					day: '2-digit',
+					month: 'long',
+					year: '2-digit'
+				}) +
+				' ' +
+				new Date(row.original.ongoing).toLocaleTimeString(),
+			header: 'Ongoing',
+			size: 200
 		},
 		{
 			accessorKey: 'processing',
 			accessorFn: (row) => row.processing,
-			cell: ({ row }) => row.original.processing,
-			header: 'Processing'
+			cell: ({ row }) =>
+				new Date(row.original.processing).toLocaleDateString('id-ID', {
+					day: '2-digit',
+					month: 'long',
+					year: '2-digit'
+				}) +
+				' ' +
+				new Date(row.original.processing).toLocaleTimeString(),
+			header: 'Processing',
+			size: 200
 		},
 		{
 			accessorKey: 'completed',
 			accessorFn: (row) => row.completed,
-			cell: ({ row }) => row.original.completed,
-			header: 'Completed'
+			cell: ({ row }) =>
+				new Date(row.original.completed).toLocaleDateString('id-ID', {
+					day: '2-digit',
+					month: 'long',
+					year: '2-digit'
+				}) +
+				' ' +
+				new Date(row.original.completed).toLocaleTimeString(),
+			header: 'Completed',
+			size: 200
 		},
 		{
 			accessorKey: 'uploaded_file_url',
@@ -141,7 +173,11 @@
 
 <div class="flex flex-col">
 	<div class="flex flex-col items-center justify-center">
-		<span class="p-5 bg-white rounded-md">From (YYYY/MM/DD): ({page.url.searchParams.get('startDate')}) to : ({page.url.searchParams.get("endDate")})</span>
+		<span class="rounded-md bg-white p-5"
+			>From (YYYY/MM/DD): ({page.url.searchParams.get('startDate')}) to : ({page.url.searchParams.get(
+				'endDate'
+			)})</span
+		>
 		<div class="flex flex-row items-center justify-center">
 			<button
 				class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
@@ -170,7 +206,7 @@
 
 	<div class="overflow-x-auto px-5">
 		<div
-			class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1100px] overflow-y-scroll rounded-md border-2"
+			class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1200px] overflow-y-scroll rounded-md border-2"
 		>
 			<Table.Root>
 				<Table.Header class="bg-uph">
