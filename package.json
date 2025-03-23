@@ -60,16 +60,15 @@
 		"bcrypt": "^5.1.1",
 		"bcryptjs": "^2.4.3",
 		"dotenv": "^16.4.7",
-		"emailjs": "^4.0.3",
 		"exceljs": "^4.4.0",
 		"file-saver": "^2.0.5",
 		"ioredis": "^5.4.2",
 		"nodemailer": "^6.9.16",
 		"pg": "^8.13.1",
+		"resend": "^4.1.2",
 		"shadcn-svelte": "^0.14.0",
 		"svelte-headless-table": "^0.18.3",
 		"svelte-loading-spinners": "^0.3.6",
-		"svelte-pdf-simple": "^2.0.0",
 		"ts-node": "^10.9.2"
 	}
 }
