@@ -1,8 +1,8 @@
-import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from "$env/static/private";
+import { RESEND_API_KEY } from "$env/static/private";
 import { OtpSessionManager, sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail, redirect } from "@sveltejs/kit";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { otpInputSchema } from "../forgot-password/forgot-password-schema";
@@ -25,7 +25,7 @@ export const load = async ({ cookies }) => {
 export const actions = {
     verify: async ({ cookies, request }) => {
         const userCookies: UserRegistration = (await OtpSessionManager.getSession(await cookies)).data;
-        
+
         const form = await superValidate(request, zod(otpInputSchema));
         if (!form.valid) {
             return fail(400, { data: form, message: "Please Input Valid OTP (6 Number)!" })
@@ -54,7 +54,14 @@ export const actions = {
             }
 
             //TODO: ganti email dengan email user
-            sendEmail("kelvinrogue6@gmail.com", "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp1}`);
+            const resend = new Resend(RESEND_API_KEY);
+            const response = await resend.emails.send({
+                from: "no-reply@uph-academic-services.web.id",
+                to: "kelvinrogue6@gmail.com",
+                subject: "Confirm Registration",
+                html: `<p>Complete your Registration with Given Code. \n OTP : ${otp1}</p>`
+            })
+            console.log(response.error);
             throw redirect(304, "/verify-user")
         }
         if (form.data.otp != userCookies.otp) {
@@ -80,27 +87,4 @@ export const actions = {
         throw redirect(303, "/login")
     }
 }
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: GOOGLE_EMAIL,
-        pass: GOOGLE_PASSWORD
-    }
-})
 
-const sendEmail = async (to: string, subject: string, text: string) => {
-    const mailOptions = {
-        from: GOOGLE_EMAIL,
-        to,
-        subject,
-        text
-    }
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email Sent", info.response);
-    } catch (error) {
-        console.log(error);
-    }
-}

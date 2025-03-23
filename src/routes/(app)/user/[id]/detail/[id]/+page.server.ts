@@ -1,14 +1,14 @@
+import { RESEND_API_KEY } from "$env/static/private";
 import { sessionManager } from '$lib/server/sessionManager';
 import { supabase } from '$lib/supabaseClient.js';
 import { fail, redirect } from '@sveltejs/kit';
+import { Resend } from 'resend';
 import { zod } from 'sveltekit-superforms/adapters';
 import { message, superValidate, type SuperValidated } from 'sveltekit-superforms/server';
 import type { RequestDbSchema, UserCookiesSchema } from '../../../../home/request-user-schema';
 import type { PageServerLoad } from './$types.js';
 import type { ApproveRejectSchema, RequestHistorySchema, UserDetailSchema } from './user-detail-schema';
 import { approveRejectSchema } from './user-detail-schema';
-import nodemailer from "nodemailer";
-import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from "$env/static/private";
 
 export const load: PageServerLoad = async ({ url }) => {
     const userPkey: string = url.pathname.split("/")[2];
@@ -171,34 +171,15 @@ export const actions = {
         }
 
         if (currentStatus == "REJECTED" || currentStatus == "COMPLETED" || currentStatus == "ONGOING") {
-            sendEmail("kelvinrogue6@gmail.com", emailSubject, emailBody);
+            const resend = new Resend(RESEND_API_KEY);
+            const response = await resend.emails.send({
+                from: "no-reply@uph-academic-services.web.id",
+                to: "kelvinrogue6@gmail.com",
+                subject: emailSubject,
+                html: `<p>${emailBody}</p>`
+            })
+            console.log(response.error);
         }
         return message(form, "Form Updated Successfully");
-    }
-}
-
-
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: GOOGLE_EMAIL,
-        pass: GOOGLE_PASSWORD
-    }
-})
-
-const sendEmail = async (to: string, subject: string, text: string) => {
-    const mailOptions = {
-        from: GOOGLE_EMAIL,
-        to,
-        subject,
-        text
-    }
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email Sent", info.response);
-    } catch (error) {
-        console.log(error);
     }
 }

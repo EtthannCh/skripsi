@@ -1,14 +1,14 @@
-import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from '$env/static/private';
+import { RESEND_API_KEY } from '$env/static/private';
 import { OtpSessionManager } from '$lib/server/sessionManager';
 import { supabase } from '$lib/supabaseClient';
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
 import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
+import { Resend } from 'resend';
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { registerSchema, type UserRegistration } from "./register-schema";
 import type { UserDbSchema } from '../(app)/home/request-user-schema';
+import { registerSchema, type UserRegistration } from "./register-schema";
 
 export const load = async () => {
     const form = await superValidate(zod(registerSchema))
@@ -86,32 +86,15 @@ export const actions: Actions = {
             return fail(400, { data: form });
         }
 
-        sendEmail("kelvinrogue6@gmail.com", "Confirm Registration", `Complete your Registration with Given Code. \n OTP : ${otp}`);
+        const resend = new Resend(RESEND_API_KEY);
+        const response = await resend.emails.send({
+            from: "no-reply@uph-academic-services.web.id",
+            to: "kelvinrogue6@gmail.com",
+            subject: "Confirm Registration",
+            html: `<p>Complete your Registration with Given Code. \n OTP : ${otp}</p>`
+        })
+        console.log(response.error);
+
         return message(form, "Complete Your Registration");
     }
 } satisfies Actions;
-
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: GOOGLE_EMAIL,
-        pass: GOOGLE_PASSWORD
-    }
-})
-
-const sendEmail = async (to: string, subject: string, text: string) => {
-    const mailOptions = {
-        from: GOOGLE_EMAIL,
-        to,
-        subject,
-        text
-    }
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email Sent", info.response);
-    } catch (error) {
-        console.log(error);
-    }
-}

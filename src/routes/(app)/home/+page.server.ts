@@ -1,8 +1,8 @@
-import { GOOGLE_EMAIL, GOOGLE_PASSWORD } from "$env/static/private";
+import { RESEND_API_KEY } from "$env/static/private";
 import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { PageServerLoad } from "./$types";
@@ -216,68 +216,17 @@ export const actions = {
 
         // TODO: send email ke kaprodi
         if (userCookies.roleId == 3) {
-            sendEmail("kelvinrogue6@gmail.com", "A Request has been Received", `Form Request for student with Email : ${userCookies.email}.. Please Check Academic Service Website to Process Request`)
+            const resend = new Resend(RESEND_API_KEY);
+            const response = await resend.emails.send({
+                from: "no-reply@uph-academic-services.web.id",
+                to: "kelvinrogue6@gmail.com",
+                subject: "A Request has been Received",
+                html: `<p>Form Request for student with Email : ${userCookies.email}.. Please Check Academic Service Website to Process Request</p>`
+            })
+            console.log(response.error);
+
         }
 
         return message(form, "Form Uploaded Successfully");
     }
 } satisfies Actions;
-
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: GOOGLE_EMAIL,
-        pass: GOOGLE_PASSWORD
-    }
-})
-
-const sendEmail = async (to: string, subject: string, text: string) => {
-    const mailOptions = {
-        from: GOOGLE_EMAIL,
-        to,
-        subject,
-        text
-    }
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email Sent", info.response);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-// export default async function exportExcel(filter: ExportToExcel, fileName: string) {
-//     const wb = new Workbook.Workbook();
-//     const ws = wb.addWorksheet("Request Sheet 1");
-
-//     const lastHeaderGroup = table.getHeaderGroups().at(-1);
-//     if (!lastHeaderGroup) {
-//         console.error("No header groups found", table.getHeaderGroups())
-//         return;
-//     }
-
-//     ws.columns = lastHeaderGroup.headers
-//         .filter((h) => h.column.getIsVisible())
-//         .map((header) => {
-//             return {
-//                 header: header.column.columnDef.header as string,
-//                 key: header.id,
-//                 width: 20
-//             }
-//         })
-
-//     table.getCoreRowModel().rows.forEach((row) => {
-//         const cells = row.getVisibleCells();
-//         const values = cells.map((cell) => cell.getValue() ?? "");
-//         ws.addRow(values);
-//     })
-
-//     ws.getRow(1).eachCell((cell) => {
-//         cell.font = { bold: true }
-//     })
-
-//     const buf = await wb.xlsx.writeBuffer();
-//     saveAs(new Blob([buf]), `${fileName}.xlsx`);
-// }
