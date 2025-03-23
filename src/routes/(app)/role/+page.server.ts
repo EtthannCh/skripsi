@@ -15,7 +15,8 @@ export const load: PageServerLoad = async () => {
         throw redirect(304, "/error")
     }
 
-    const roleListResponse = await supabase.from("role_db").select("id, name").order("name", { ascending: true });
+    const roleListResponse = await supabase.from("role_db").select("id, name")
+        .in("id", ["1", "2", "5"]).order("name", { ascending: true });
     if (roleListResponse.error) {
         throw fail(400, { message: "Invalid Data" })
     }
@@ -51,6 +52,19 @@ export const actions = {
         const userCookies: UserCookiesSchema = (await sessionManager.getSession(cookies)).data;
         if (userCookies.roleId != 6) {
             return fail(400, { data: form, message: "Invalid Role" })
+        }
+
+        if (["1", "2"].includes(form.data.roleId)) {
+            const existingUser = await supabase.from("user_credentials").select("id")
+                .eq("major_id", form.data.majorId)
+                .eq("role_id", form.data.roleId)
+            if (existingUser.error) {
+                return fail(400, { data: form, message: "Server Error... Please try again later" })
+            }
+
+            if (existingUser.data.length > 0) {
+                return fail(400, { data: form, message: "User with Selected Major / Role Already exists" })
+            }
         }
 
         const { error } = await supabase.from("user_credentials").update({

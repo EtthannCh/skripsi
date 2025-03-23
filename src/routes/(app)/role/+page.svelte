@@ -35,8 +35,6 @@
 	const form = superForm(data.form, {
 		validators: zod(updateRoleSchema),
 		invalidateAll: true,
-		resetForm: true,
-		applyAction: true,
 		onResult: ({ result }) => {
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
@@ -45,6 +43,11 @@
 				});
 			} else if (result.type == 'failure') {
 				toast.error(result.data?.message, {
+					position: 'top-right',
+					dismissable: true
+				});
+			} else {
+				toast.error('Invalid Form', {
 					position: 'top-right',
 					dismissable: true
 				});

@@ -3,7 +3,7 @@ import Workbook from 'exceljs';
 import saveAs from "file-saver";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function exportExcel(table: Table<any> , fileName: string) {
+export default async function exportExcel(table: Table<any>, fileName: string) {
     const wb = new Workbook.Workbook();
     const ws = wb.addWorksheet("Request Sheet 1");
 
@@ -22,17 +22,17 @@ export default async function exportExcel(table: Table<any> , fileName: string) 
             }
         })
 
-    table.getCoreRowModel().rows.forEach((row) => {        
+    table.getCoreRowModel().rows.forEach((row) => {
         const cells = row.getVisibleCells();
         const values = cells.map((cell) => cell.getValue() ?? "");
         ws.addRow(values);
     })
 
     ws.getRow(1).eachCell((cell) => {
-        cell.font = { bold: true }        
+        cell.font = { bold: true }
     })
 
     const buf = await wb.xlsx.writeBuffer();
-    
+
     saveAs(new Blob([buf]), `${fileName}.xlsx`);
 }

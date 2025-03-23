@@ -18,9 +18,9 @@ export const roleList = z.object({
 export type RoleList = z.infer<typeof roleList>;
 
 export const updateRoleSchema = z.object({
-    email: z.string(),
-    roleId: z.string(),
-    majorId: z.string()
+    email: z.string().min(1, "Email Empty"),
+    roleId: z.string().min(1, "Role Empty"),
+    majorId: z.string().min(1, "Major Empty")
 })
 
 export type UpdateRoleSchema = z.infer<typeof updateRoleSchema>;
