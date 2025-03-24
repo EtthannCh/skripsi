@@ -83,7 +83,7 @@ export const actions = {
         let emailBody = "";
 
         if (form.data.process == "REJECT" && user.roleId == 2 &&
-            (requestData.status == requestData.status )) {
+            (form.data.status == requestData.status )) {
             nextRoleId = 3;
             currentStatus = "REJECTED";
             emailSubject = `Your Request with Number ${requestData.request_code} has Been Rejected.`;
