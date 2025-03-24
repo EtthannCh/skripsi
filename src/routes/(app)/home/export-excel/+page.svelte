@@ -160,7 +160,7 @@
 	];
 
 	const optionsExcelTable: TableOptions<ExcelTableSchema> = {
-		data: data.exportTableData,
+		data: data.exportTableData ?? [],
 		columns: defaultColumnsExcel,
 		getCoreRowModel: getCoreRowModel()
 	};
@@ -172,12 +172,25 @@
 </script>
 
 <div class="flex flex-col">
-	<div class="flex flex-col items-center justify-center">
-		<span class="rounded-md bg-white p-5"
-			>From (YYYY/MM/DD): ({page.url.searchParams.get('startDate')}) to : ({page.url.searchParams.get(
-				'endDate'
-			)})</span
-		>
+	<div class="flex flex-col items-center justify-center gap-5">
+		<div class="flex flex-row gap-5">
+			<span class="rounded-md bg-white p-5"
+				>From (YYYY/MM/DD): ({page.url.searchParams.get('startDate')}) to : ({page.url.searchParams.get(
+					'endDate'
+				)})</span
+			>
+			<span class="rounded-md bg-white p-5">Filter : {page.url.searchParams.get('filter')}</span>
+		</div>
+		<div class="flex flex-row gap-5">
+			{#if page.url.searchParams.get('status')}
+				<span class="rounded-md bg-white p-5">{page.url.searchParams.get('status')}</span>
+			{:else}
+				<span class="rounded-md bg-white p-5">No Status Selected</span>
+			{/if}
+			<span class="rounded-md bg-white p-5"
+				>{data.formList.find((v) => v.id == Number(page.url.searchParams.get('form') ?? 0))?.name} ({data.formList.find((v) => v.id == Number(page.url.searchParams.get('form') ?? 0))?.code})</span
+			>
+		</div>
 		<div class="flex flex-row items-center justify-center">
 			<button
 				class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
@@ -189,7 +202,7 @@
 				<ArrowLeft />
 				<span>Back</span>
 			</button>
-			{#if data.exportTableData.length > 0}
+			{#if data.exportTableData != undefined && data.exportTableData.length > 0}
 				<button
 					class="flex h-10 items-center rounded-md bg-black p-3 text-white"
 					onclick={exportToExcel}>Export to Excel</button
@@ -204,42 +217,48 @@
 		{/if}
 	</div>
 
-	<div class="overflow-x-auto px-5">
-		<div
-			class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1200px] overflow-y-scroll rounded-md border-2"
-		>
-			<Table.Root>
-				<Table.Header class="bg-uph">
-					{#each excelTable.getHeaderGroups() as headerGroup}
-						<Table.Row>
-							{#each headerGroup.headers as header}
-								<Table.Head
-									class="border-x-[1px] border-y-[1px] border-black p-5 text-white"
-									style="width: {header.column.getSize()}px"
-								>
-									{#if !header.isPlaceholder}
-										<FlexRender
-											content={header.column.columnDef.header}
-											context={header.getContext()}
-										/>
-									{/if}
-								</Table.Head>
-							{/each}
-						</Table.Row>
-					{/each}
-				</Table.Header>
-				<Table.Body>
-					{#each excelTable.getRowModel().rows as row}
-						<Table.Row data-state={row.getIsSelected() && 'selected'}>
-							{#each row.getVisibleCells() as cell (cell.id)}
-								<Table.Cell class="border-x-[1px] border-y-[1px] border-black">
-									<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-								</Table.Cell>
-							{/each}
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
+	{#if data.exportTableData != undefined}
+		<div class="overflow-x-auto px-5">
+			<div
+				class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1200px] overflow-y-scroll rounded-md border-2"
+			>
+				<Table.Root>
+					<Table.Header class="bg-uph">
+						{#each excelTable.getHeaderGroups() as headerGroup}
+							<Table.Row>
+								{#each headerGroup.headers as header}
+									<Table.Head
+										class="border-x-[1px] border-y-[1px] border-black p-5 text-white"
+										style="width: {header.column.getSize()}px"
+									>
+										{#if !header.isPlaceholder}
+											<FlexRender
+												content={header.column.columnDef.header}
+												context={header.getContext()}
+											/>
+										{/if}
+									</Table.Head>
+								{/each}
+							</Table.Row>
+						{/each}
+					</Table.Header>
+					<Table.Body>
+						{#each excelTable.getRowModel().rows as row}
+							<Table.Row data-state={row.getIsSelected() && 'selected'}>
+								{#each row.getVisibleCells() as cell (cell.id)}
+									<Table.Cell class="border-x-[1px] border-y-[1px] border-black">
+										<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+									</Table.Cell>
+								{/each}
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
+			</div>
 		</div>
-	</div>
+	{:else}
+		<div class="flex flex-col items-center justify-center">
+			<span>No Data Found</span>
+		</div>
+	{/if}
 </div>
