@@ -32,7 +32,7 @@
 {#if !isMobile}
 	<Sidebar.Provider data-sveltekit-reload bind:open={openSidebar}>
 		<AppSidebar {user} majorData={data.majorDb} />
-		<main class="w-full bg-gray-100">
+		<main class="w-full bg-gray-200">
 			<div class="flex items-center sm:hidden md:hidden lg:block">
 				{#if openSidebar}
 					<X

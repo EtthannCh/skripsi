@@ -46,6 +46,7 @@
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';
+	import { slide } from 'svelte/transition';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -276,131 +277,151 @@
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 
 	const exportToExcelFunction = async () => {
-		goto(`/home/export-excel?filter=${filter}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}&status=${statusValue}&major=${user.majorId}`);
+		goto(
+			`/home/export-excel?filter=${filter}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}&status=${statusValue}&major=${user.majorId}`
+		);
 	};
+
+	let isMobile = $state(false);
+	let windowWidth = $state(0);
+	$effect(() => {
+		if (windowWidth > 1010) {
+			isMobile = false;
+		} else {
+			isMobile = true;
+		}
+	});
 </script>
+
+<svelte:window bind:innerWidth={windowWidth}></svelte:window>
 {#if user.roleId == 3 && user.roleId}
-	<Accordion.Root
-		type="single"
-		class="mx-auto my-auto flex w-[700px] flex-col justify-center sm:max-w-[30%] md:max-w-[50%] lg:max-w-[100%] "
+	<div
+		class={`mx-auto mb-10 flex min-h-screen flex-col rounded-md bg-white py-5 ${isMobile? 'w-auto' : 'w-[1300px]'}`}
 	>
-		<Accordion.Item value="item-1">
-			<Accordion.Trigger class="text-2xl">Pengambilan Form</Accordion.Trigger>
-			<Accordion.Content class="scroll-none max-h-[550px] overflow-y-scroll">
-				{#each data.formSelection as form}
-					<Card.Root class="my-5 flex w-full items-center justify-between">
-						<Card.Header class="px-5 py-0">
-							<Card.Title>{form.name}</Card.Title>
-							<Card.Description>{form.description ?? 'Tidak Ada Penjelasan'}</Card.Description>
-						</Card.Header>
-						<Card.Content class="grid gap-4">
-							<div class="flex flex-col items-center justify-center gap-0.5 text-right">
-								<Label>{form.code.replace('_', '-')}</Label>
-								<span
-									><a
-										href={`${form.form_url}`}
-										target="_blank"
-										class="group relative text-[#18272F] no-underline"
+		<Accordion.Root
+			type="single"
+			class={`mx-auto my-auto flex ${isMobile? 'w-[400px]' : 'w-[600px]'} flex-col justify-center`}
+		>
+			<Accordion.Item value="item-1">
+				<Accordion.Trigger class="text-2xl">Pengambilan Form</Accordion.Trigger>
+				<Accordion.Content class="scroll-none max-h-[550px] overflow-y-scroll">
+					{#each data.formSelection as form}
+						<Card.Root class="my-5 flex w-full items-center justify-between">
+							<Card.Header class="px-5 py-0">
+								<Card.Title>{form.name}</Card.Title>
+								<Card.Description>{form.description ?? 'Tidak Ada Penjelasan'}</Card.Description>
+							</Card.Header>
+							<Card.Content class="grid gap-4">
+								<div class="flex flex-col items-center justify-center gap-0.5 text-right">
+									<Label>{form.code.replace('_', '-')}</Label>
+									<span
+										><a
+											href={`${form.form_url}`}
+											target="_blank"
+											class="group relative text-[#18272F] no-underline"
+										>
+											View PDF
+											<span
+												class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-[#18272F] transition-transform group-hover:origin-left group-hover:scale-x-100"
+											></span>
+										</a></span
 									>
-										View PDF
-										<span
-											class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-[#18272F] transition-transform group-hover:origin-left group-hover:scale-x-100"
-										></span>
-									</a></span
-								>
+								</div>
+							</Card.Content>
+						</Card.Root>
+					{/each}
+				</Accordion.Content>
+			</Accordion.Item>
+			<Accordion.Item value="item-2">
+				<Accordion.Trigger class="text-2xl">Pengajuan Form</Accordion.Trigger>
+				<Accordion.Content>
+					<form action="?/submit" enctype="multipart/form-data" method="post" use:enhance>
+						<Form.Field {form} name="userId">
+							<Form.Control let:attrs>
+								<Input bind:value={user.userId} type="hidden" />
+							</Form.Control>
+						</Form.Field>
+						<div class="flex flex-col gap-5">
+							<div>
+								<Label>User Name</Label>
+								<Input value={user.username} disabled />
 							</div>
-						</Card.Content>
-					</Card.Root>
-				{/each}
-			</Accordion.Content>
-		</Accordion.Item>
-		<Accordion.Item value="item-2">
-			<Accordion.Trigger class="text-2xl">Pengajuan Form</Accordion.Trigger>
-			<Accordion.Content>
-				<form action="?/submit" enctype="multipart/form-data" method="post" use:enhance>
-					<Form.Field {form} name="userId">
-						<Form.Control let:attrs>
-							<Input bind:value={user.userId} type="hidden" />
-						</Form.Control>
-					</Form.Field>
-					<div class="flex flex-col gap-5">
-						<div>
-							<Label>User Name</Label>
-							<Input value={user.username} disabled />
+							<div>
+								<Label>User Email</Label>
+								<Input value={user.email} disabled />
+							</div>
 						</div>
-						<div>
-							<Label>User Email</Label>
-							<Input value={user.email} disabled />
-						</div>
-					</div>
-					<Form.Field {form} name="formId">
-						<Form.Control let:attrs>
-							<div class="my-5 flex w-full flex-col gap-5">
-								<Form.Label>Jenis Form</Form.Label>
-								<Select.Root type="single" name="formId" bind:value={$formData.formId}>
-									<Select.Trigger>
-										{formSelection
-											.find((v) => v.value == $formData.formId)
-											?.label.replace('_', '-') ?? 'Pilih Form'}
-									</Select.Trigger>
-									<Select.Content>
-										<Select.Group>
-											{#each formSelection as form}
-												<Select.Item value={form.value} label={form.label}
-													>{form.label.replace('_', '-')} ({data.formSelection.find(
-														(v) => v.id == Number(form.value)
-													)?.name})</Select.Item
-												>
-											{/each}
-										</Select.Group>
-									</Select.Content>
-									{#if $formData.formId == '' && submitPressed}
-										<span class="text-red-700">Belum Memilih Jenis Form</span>
-									{/if}
-								</Select.Root>
-							</div>
-						</Form.Control>
-						<Form.FieldErrors />
-					</Form.Field>
-					<Form.Field {form} name="formFile">
-						<Form.Control let:attrs>
-							<div class="flex flex-col gap-5">
-								<Form.Label>{`Upload Form Permohonan (Max Size Allowed :  5mb)`}</Form.Label>
-								<span class="text-sm"
-									>(Penamaan File :
-									KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon.pdf)</span
-								>
-								<span class="text-red-600"
-									>({'NOTE : Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan'
-										.toString()
-										.toUpperCase()})</span
-								>
-								<input accept="application/pdf" type="file" bind:files={$file} />
-							</div>
-						</Form.Control>
-						<Form.FieldErrors />
-					</Form.Field>
-					{#if formLoading}
-						<span>
-							<SyncLoader color="#007bff" />
-						</span>
-					{:else}
-						<button
-							class="my-5 rounded-md bg-uphButton p-2 text-white"
-							onclick={() => {
-								submitPressed = true;
-							}}
-						>
-							Submit</button
-						>
-					{/if}
-				</form>
-			</Accordion.Content>
-		</Accordion.Item>
-	</Accordion.Root>
+						<Form.Field {form} name="formId">
+							<Form.Control let:attrs>
+								<div class="my-5 flex w-full flex-col gap-5">
+									<Form.Label>Jenis Form</Form.Label>
+									<Select.Root type="single" name="formId" bind:value={$formData.formId}>
+										<Select.Trigger>
+											{formSelection
+												.find((v) => v.value == $formData.formId)
+												?.label.replace('_', '-') ?? 'Pilih Form'}
+										</Select.Trigger>
+										<Select.Content>
+											<Select.Group>
+												{#each formSelection as form}
+													<Select.Item value={form.value} label={form.label}
+														>{form.label.replace('_', '-')} ({data.formSelection.find(
+															(v) => v.id == Number(form.value)
+														)?.name})</Select.Item
+													>
+												{/each}
+											</Select.Group>
+										</Select.Content>
+										{#if $formData.formId == '' && submitPressed}
+											<span class="text-red-700">Belum Memilih Jenis Form</span>
+										{/if}
+									</Select.Root>
+								</div>
+							</Form.Control>
+							<Form.FieldErrors />
+						</Form.Field>
+						<Form.Field {form} name="formFile">
+							<Form.Control let:attrs>
+								<div class="flex flex-col gap-5">
+									<Form.Label>{`Upload Form Permohonan (Max Size Allowed :  5mb)`}</Form.Label>
+									<span class="text-sm"
+										>(Penamaan File :
+										KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon.pdf)</span
+									>
+									<span class="text-red-600"
+										>({'NOTE : Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan'
+											.toString()
+											.toUpperCase()})</span
+									>
+									<input accept="application/pdf" type="file" bind:files={$file} />
+								</div>
+							</Form.Control>
+							<Form.FieldErrors />
+						</Form.Field>
+						{#if formLoading}
+							<span>
+								<SyncLoader color="#007bff" />
+							</span>
+						{:else}
+							<button
+								class="my-5 rounded-md bg-uphButton p-2 text-white"
+								onclick={() => {
+									submitPressed = true;
+								}}
+							>
+								Submit</button
+							>
+						{/if}
+					</form>
+				</Accordion.Content>
+			</Accordion.Item>
+		</Accordion.Root>
+	</div>
 {:else if user.roleId == 2 || user.roleId == 1}
-	<div>
-		<div class="flex items-center justify-center">
+	<div class="mx-auto flex w-[1300px] flex-col rounded-md bg-white py-5">
+		<div
+			class="mx-auto flex w-[150px] items-center justify-center rounded-full bg-uph py-2 text-white"
+		>
 			<h1>Hi, {toTitleCase(user.username)}</h1>
 		</div>
 		<div class="mx-[175px] flex items-center justify-center sm:flex-col md:flex-col lg:flex-row">
@@ -535,10 +556,10 @@
 				onclick={() => {
 					filterHandler();
 				}}
-				class="flex h-10 items-center rounded-md bg-black p-3 text-white">Filter</button
+				class="flex h-10 items-center rounded-md bg-uphButton p-3 text-white">Filter</button
 			>
 			<button
-				class="flex h-10 items-center rounded-md bg-black p-3 text-white"
+				class="flex h-10 items-center rounded-md bg-uphButton p-3 text-white"
 				onclick={() => {
 					filter = '';
 					statusValue = '';
@@ -556,7 +577,7 @@
 				}}
 				>Reset
 			</button>
-			<button class="rounded-md bg-black p-3 text-white" onclick={exportToExcelFunction}>
+			<button class="rounded-md bg-uphButton p-3 text-white" onclick={exportToExcelFunction}>
 				Export Excel
 			</button>
 			{#if navigating.to}
@@ -602,7 +623,9 @@
 			</div>
 		</div>
 	</div>
-	<div class="sticky bottom-0 pb-16">
+	<div
+		class="sticky bottom-0 mx-auto my-5 flex w-[400px] items-center justify-center rounded-full bg-white py-2"
+	>
 		<Pagination.Root count={data.totalCount ?? 0} {perPage} {siblingCount}>
 			{#snippet children({ pages })}
 				<Pagination.Content>

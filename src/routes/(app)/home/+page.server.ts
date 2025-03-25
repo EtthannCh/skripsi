@@ -117,7 +117,7 @@ export const actions = {
         const buffer = Buffer.from(await file.arrayBuffer());
         const formName = form.data.formFile?.name.slice(0, - 4) ?? "";
 
-        const regex = /^[a-zA-Z]{2,3}-\d{2,3}-\d{11}-[a-zA-Z]{2,3}-\d{11}@student.uph.edu$/;
+        const regex = /^[a-zA-Z]{2,3}-[a-zA-Z0-9+]{2,4}-\d{11}-[a-zA-Z]{2,3}-\d{11}@student.uph.edu$/;
         if (!regex.test(formName.trim())) {
             return fail(400, { message: "Invalid Name Format" });
         };

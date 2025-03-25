@@ -185,7 +185,7 @@
 			</Sheet.Content>
 		</Sheet.Root>
 	</div>
-	<div class="sticky bottom-0 mt-3 rounded-md bg-white pb-5 pt-10">
+	<div class="sticky bottom-0 my-5 rounded-full bg-white py-2 w-[400px] flex items-center justify-center mx-auto">
 		<Pagination.Root count={data.data.totalCount ?? 0} {perPage} {siblingCount}>
 			{#snippet children({ pages })}
 				<Pagination.Content>
