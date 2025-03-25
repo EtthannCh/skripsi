@@ -5,7 +5,7 @@ import type { ExcelTableSchema, FormSchema, UserCookiesSchema } from "../request
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ url, cookies }) => {
-    const filter: string = url.searchParams.get("filter") ?? "";
+    const filter: string = url.searchParams.get("filter")?.trim() ?? "";
     const startDate: string = url.searchParams.get("startDate") ?? "";
     const endDate: string = url.searchParams.get("endDate") ?? "";
     const formId: string = url.searchParams.get("form") ?? "";

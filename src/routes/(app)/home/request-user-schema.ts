@@ -136,6 +136,7 @@ export const excelTableSchema = z.object({
     nim: z.string(),
     username: z.string(),
     email: z.string(),
+    form_id: z.number(),
     form_code: z.string(),
     form_name: z.string(),
     pending: z.string(),
