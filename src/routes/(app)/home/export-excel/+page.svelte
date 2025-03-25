@@ -80,42 +80,63 @@
 		{
 			accessorKey: 'ongoing',
 			accessorFn: (row) => row.ongoing,
-			cell: ({ row }) =>
-				new Date(row.original.ongoing).toLocaleDateString('id-ID', {
-					day: '2-digit',
-					month: 'long',
-					year: '2-digit'
-				}) +
-				' ' +
-				new Date(row.original.ongoing).toLocaleTimeString(),
+			cell: ({ row }) => {
+				if (row.original.ongoing != 'NONE') {
+					return (
+						new Date(row.original.ongoing).toLocaleDateString('id-ID', {
+							day: '2-digit',
+							month: 'long',
+							year: '2-digit'
+						}) +
+						' ' +
+						new Date(row.original.ongoing).toLocaleTimeString()
+					);
+				} else {
+					return row.original.ongoing;
+				}
+			},
 			header: 'Ongoing',
 			size: 200
 		},
 		{
 			accessorKey: 'processing',
 			accessorFn: (row) => row.processing,
-			cell: ({ row }) =>
-				new Date(row.original.processing).toLocaleDateString('id-ID', {
-					day: '2-digit',
-					month: 'long',
-					year: '2-digit'
-				}) +
-				' ' +
-				new Date(row.original.processing).toLocaleTimeString(),
+			cell: ({ row }) => {
+				if (row.original.processing != 'NONE') {
+					return (
+						new Date(row.original.processing).toLocaleDateString('id-ID', {
+							day: '2-digit',
+							month: 'long',
+							year: '2-digit'
+						}) +
+						' ' +
+						new Date(row.original.processing).toLocaleTimeString()
+					);
+				} else {
+					return row.original.processing;
+				}
+			},
 			header: 'Processing',
 			size: 200
 		},
 		{
 			accessorKey: 'completed',
 			accessorFn: (row) => row.completed,
-			cell: ({ row }) =>
-				new Date(row.original.completed).toLocaleDateString('id-ID', {
-					day: '2-digit',
-					month: 'long',
-					year: '2-digit'
-				}) +
-				' ' +
-				new Date(row.original.completed).toLocaleTimeString(),
+			cell: ({ row }) => {
+				if (row.original.completed != 'NONE') {
+					return (
+						new Date(row.original.completed).toLocaleDateString('id-ID', {
+							day: '2-digit',
+							month: 'long',
+							year: '2-digit'
+						}) +
+						' ' +
+						new Date(row.original.completed).toLocaleTimeString()
+					);
+				} else {
+					return row.original.completed;
+				}
+			},
 			header: 'Completed',
 			size: 200
 		},
@@ -169,26 +190,43 @@
 		exportExcel(excelTable, 'apa');
 	};
 	let loading: boolean = $state(false);
+
+	let isMobile = $state(false);
+	let windowWidth = $state(0);
+	$effect(() => {
+		if (windowWidth > 1010) {
+			isMobile = false;
+		} else {
+			isMobile = true;
+		}
+	});
 </script>
 
-<div class="flex flex-col">
-	<div class="flex flex-col items-center justify-center gap-5">
+<svelte:window bind:innerWidth={windowWidth} />
+<div
+	class={`mx-auto mb-10 flex flex-col bg-white ${isMobile ? 'w-[400px]' : ' w-[1350px]'} rounded-md py-3`}
+>
+	<div class="my-5 flex flex-col items-center justify-center gap-5">
 		<div class="flex flex-row gap-5">
-			<span class="rounded-md bg-white p-5"
+			<span class="rounded-md bg-uph p-5 text-white"
 				>From (YYYY/MM/DD): ({page.url.searchParams.get('startDate')}) to : ({page.url.searchParams.get(
 					'endDate'
 				)})</span
 			>
-			<span class="rounded-md bg-white p-5">Filter : {page.url.searchParams.get('filter')}</span>
+			<span class="rounded-md bg-uph p-5 text-white"
+				>Filter : {page.url.searchParams.get('filter')}</span
+			>
 		</div>
 		<div class="flex flex-row gap-5">
 			{#if page.url.searchParams.get('status')}
-				<span class="rounded-md bg-white p-5">{page.url.searchParams.get('status')}</span>
+				<span class="rounded-md bg-uph p-5 text-white">{page.url.searchParams.get('status')}</span>
 			{:else}
-				<span class="rounded-md bg-white p-5">No Status Selected</span>
+				<span class="rounded-md bg-uph p-5 text-white">No Status Selected</span>
 			{/if}
-			<span class="rounded-md bg-white p-5"
-				>{data.formList.find((v) => v.id == Number(page.url.searchParams.get('form') ?? 0))?.name} ({data.formList.find((v) => v.id == Number(page.url.searchParams.get('form') ?? 0))?.code})</span
+			<span class="rounded-md bg-uph p-5 text-white"
+				>{data.formList.find((v) => v.id == Number(page.url.searchParams.get('form') ?? 0))?.name} ({data.formList.find(
+					(v) => v.id == Number(page.url.searchParams.get('form') ?? 0)
+				)?.code})</span
 			>
 		</div>
 		<div class="flex flex-row items-center justify-center">
@@ -204,7 +242,7 @@
 			</button>
 			{#if data.exportTableData != undefined && data.exportTableData.length > 0}
 				<button
-					class="flex h-10 items-center rounded-md bg-black p-3 text-white"
+					class="flex h-10 items-center rounded-md bg-uphButton p-3 text-white"
 					onclick={exportToExcel}>Export to Excel</button
 				>
 			{/if}
