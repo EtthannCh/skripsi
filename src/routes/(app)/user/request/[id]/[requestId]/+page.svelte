@@ -1,22 +1,45 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { ArrowLeft, FileText } from 'lucide-svelte';
 	import { Stretch } from 'svelte-loading-spinners';
 	import type { PageData } from './$types';
-	import { FileText } from 'lucide-svelte';
 
-	let { data, requestCode }: { data: PageData; requestCode: string } = $props();
+	let {
+		data,
+		requestCode,
+		isMainPage
+	}: { data: PageData; requestCode: string; isMainPage: boolean } = $props();
 	const processArray = ['Approved By : ', 'Processed By : ', 'Delivered By : '];
+
+	let mainPage = isMainPage == false ? false : true;
 </script>
 
-<div>
-	<h1 class="text-xl">Request Code : {requestCode}</h1>
+<div
+	class={`${mainPage ? 'mx-auto flex h-[500px] w-[500px] flex-col justify-center rounded-2xl bg-white' : ''}`}
+>
+	<h1 class={`text-xl ${mainPage ? ' flex flex-col items-center justify-center gap-5' : ''}`}>
+		Request Code : {requestCode ?? data.userApprovalOrRejectFileUrl.request_code}
+		<span
+			>{mainPage
+				? `Submission Date : ${new Date(data.userRequestHistory[0].created_at).toLocaleDateString(
+						'id-ID',
+						{
+							day: '2-digit',
+							month: 'long',
+							year: 'numeric'
+						}
+					)}`
+				: ''}</span
+		>
+	</h1>
 	{#if data && data.userRequestHistory}
-		<div class="mt-5 flex flex-col gap-5">
+		<div class="mt-5 flex flex-col mx-28 gap-5">
 			{#each data.userRequestHistory.slice(0, 2) ?? [] as history, idx}
 				<span>{processArray[idx]}{history.created_by}</span>
 			{/each}
 		</div>
 		{#if data.userApprovalOrRejectFileUrl.status != 'PENDING'}
-			<div class="mt-5 flex flex-col gap-5">
+			<div class="mt-5 flex flex-col gap-5 mx-28">
 				<span
 					>{processArray[2]}{data.userRequestHistory[data.userRequestHistory.length - 1]
 						.created_by}</span
@@ -49,4 +72,13 @@
 			<Stretch color="#314986" />
 		</div>
 	{/if}
+	<button
+		class={`w-[100px] mx-auto my-5 flex rounded-md bg-uphButton p-3 text-white ${mainPage ? 'block' : 'hidden'}`}
+		onclick={() => {
+			goto(`/user/request/${data.user.id}`);
+		}}
+	>
+		<ArrowLeft />
+		<span>Back</span>
+	</button>
 </div>

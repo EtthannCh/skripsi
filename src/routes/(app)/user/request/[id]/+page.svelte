@@ -181,7 +181,7 @@
 				<Sheet.Header>
 					<Sheet.Title>Process Details</Sheet.Title>
 				</Sheet.Header>
-				<RequestDetailPage data={page.state.preloadedData} {requestCode}></RequestDetailPage>
+				<RequestDetailPage isMainPage={false} data={page.state.preloadedData} {requestCode}></RequestDetailPage>
 			</Sheet.Content>
 		</Sheet.Root>
 	</div>
