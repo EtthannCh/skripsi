@@ -62,7 +62,11 @@
 			invalidateAll: true
 		});
 	};
+
+	let windowWidth = $state(0);
 </script>
+
+<svelte:window bind:innerWidth={windowWidth} />
 
 <button
 	class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
@@ -130,7 +134,7 @@
 		>
 	</div>
 	<div
-		class="grid overflow-y-scroll sm:grid-cols-1 sm:gap-36 md:grid-cols-2 md:gap-24 lg:grid-cols-3 lg:gap-10"
+		class={`grid overflow-y-scroll sm:gap-36 ${windowWidth < 700 ? 'grid-cols-1' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2' : ' grid-cols-3'} md:gap-24 lg:gap-10`}
 	>
 		{#each data.data.userRequestFromDb as userRequest}
 			<div class="w-[320px]">
@@ -181,11 +185,14 @@
 				<Sheet.Header>
 					<Sheet.Title>Process Details</Sheet.Title>
 				</Sheet.Header>
-				<RequestDetailPage isMainPage={false} data={page.state.preloadedData} {requestCode}></RequestDetailPage>
+				<RequestDetailPage isMainPage={false} data={page.state.preloadedData} {requestCode}
+				></RequestDetailPage>
 			</Sheet.Content>
 		</Sheet.Root>
 	</div>
-	<div class="sticky bottom-0 my-5 rounded-full bg-white py-2 w-[400px] flex items-center justify-center mx-auto">
+	<div
+		class="sticky bottom-0 mx-auto my-5 flex w-[400px] items-center justify-center rounded-full bg-white py-2"
+	>
 		<Pagination.Root count={data.data.totalCount ?? 0} {perPage} {siblingCount}>
 			{#snippet children({ pages })}
 				<Pagination.Content>
