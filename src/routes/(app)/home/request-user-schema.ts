@@ -36,7 +36,7 @@ export type FormSchema = z.infer<typeof formSchema>;
 export const userRequestSchema = z.object({
     id: z.number(),
     userId: z.string(),
-    formId: z.string(),
+    formId: z.string().min(1, "Please Select a Form to Continue"),
     formFile: z.instanceof(File, { message: "please Upload a file" }).refine((f) => f.size < 5 * 1024 * 1024, "Max 5 mb upload size.").optional(),
 })
 

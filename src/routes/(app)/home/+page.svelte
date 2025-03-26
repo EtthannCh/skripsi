@@ -46,7 +46,6 @@
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';
-	import { slide } from 'svelte/transition';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -85,6 +84,8 @@
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
+			console.log(result);
+			
 			formLoading = false;
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
@@ -93,7 +94,7 @@
 				});
 				return goto('/home', { invalidateAll: true });
 			} else if (result.type == 'failure') {
-				toast.error(result.data?.message, {
+				toast.error(result.data?.message ?? "Please Fill In the Form with Required Data", {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -354,7 +355,7 @@
 						<Form.Field {form} name="formId">
 							<Form.Control let:attrs>
 								<div class="my-5 flex w-full flex-col gap-5">
-									<Form.Label class="text-xl">Form Type</Form.Label>
+									<Form.Label class="text-xl">Form Type <span class="text-red-700">*</span></Form.Label>
 									<Select.Root type="single" name="formId" bind:value={$formData.formId}>
 										<Select.Trigger>
 											{formSelection
@@ -372,9 +373,6 @@
 												{/each}
 											</Select.Group>
 										</Select.Content>
-										{#if $formData.formId == '' && submitPressed}
-											<span class="text-red-700">Please Select a Form to Continue</span>
-										{/if}
 									</Select.Root>
 								</div>
 							</Form.Control>
@@ -383,7 +381,7 @@
 						<Form.Field {form} name="formFile">
 							<Form.Control let:attrs>
 								<div class="flex flex-col gap-5">
-									<Form.Label class="text-xl">{`Upload Your Form (Max Size Allowed :  5mb)`}</Form.Label>
+									<Form.Label class="text-xl">{`Upload Your Form (Max Size Allowed :  5mb)`} <span class="text-red-700">*</span></Form.Label>
 									<span class="text-sm"
 										>(File Name Format :
 										KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon.pdf)</span
