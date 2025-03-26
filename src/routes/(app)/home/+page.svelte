@@ -309,7 +309,7 @@
 					{#each data.formSelection as form}
 						<Card.Root class="my-5 flex w-full items-center justify-between">
 							<Card.Header class="px-5 py-0">
-								<Card.Title>{form.name}</Card.Title>
+								<Card.Title class="text-xl">{form.name}</Card.Title>
 								<Card.Description>{form.description ?? 'Tidak Ada Penjelasan'}</Card.Description>
 							</Card.Header>
 							<Card.Content class="grid gap-4">
@@ -319,11 +319,11 @@
 										><a
 											href={`${form.form_url}`}
 											target="_blank"
-											class="group relative text-[#18272F] no-underline"
+											class="group relative text-[#3e74c5] no-underline"
 										>
 											View PDF
 											<span
-												class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-[#18272F] transition-transform group-hover:origin-left group-hover:scale-x-100"
+												class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-uph transition-transform group-hover:origin-left group-hover:scale-x-100"
 											></span>
 										</a></span
 									>

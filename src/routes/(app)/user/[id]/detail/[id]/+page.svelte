@@ -109,7 +109,7 @@
 			<img
 				src={uphLogo}
 				alt="logo_uph"
-				class="rounded-full sm:hidden md:hidden lg:block lg:w-[300px]"
+				class="rounded-full sm:hidden md:hidden lg:block lg:w-[200px]"
 			/>
 		{/if}
 
@@ -151,7 +151,7 @@
 									<div class="flex flex-col">
 										<span>File </span>
 									</div>
-									<a class="lg:w-[250px]" href={data.requestData?.form_url} target="_blank"
+									<a class="lg:w-[250px] text-[#3e74c5]" href={data.requestData?.form_url} target="_blank"
 										><FileText /></a
 									>
 								</div>
@@ -178,7 +178,7 @@
 										<Tabs.Root value="account" class="flex flex-col justify-between">
 											<Tabs.List class="grid w-full grid-cols-2">
 												<Tabs.Trigger value="approve"
-													><strong class="text-black">
+													><strong class="text-[#3e74c5]">
 														{#if data.requestData.status == 'ONGOING'}
 															<span>Process</span>
 														{:else if data.requestData.status == 'PROCESSING'}
@@ -188,8 +188,8 @@
 														{/if}
 													</strong></Tabs.Trigger
 												>
-												<Tabs.Trigger value="reject"
-													><strong class="text-black">Reject</strong></Tabs.Trigger
+												<Tabs.Trigger value="reject" 
+													><strong class="text-[#3e74c5]">Reject</strong></Tabs.Trigger
 												>
 											</Tabs.List>
 											<Tabs.Content value="approve">
@@ -210,7 +210,9 @@
 															</div>
 														</Card.Content>
 													{/if}
-													<Card.Footer>
+													<Card.Footer
+														class={`${data.requestData.status == 'ONGOING' || data.requestData.status == 'PENDING' ? 'flex items-center justify-center pt-5' : ''}`}
+													>
 														<Button
 															disabled={(($file.length == 0 ||
 																($rejectFile.length != 0 && $formData.reason != '')) &&
@@ -271,7 +273,8 @@
 																		($rejectFile.length == 0 && $formData.reason == ''))) ||
 																loading ||
 																(data.requestData.status == 'PENDING' &&
-																	($rejectFile.length == 0 && $formData.reason == ''))}
+																	$rejectFile.length == 0 &&
+																	$formData.reason == '')}
 															type="submit"
 															onclick={() => {
 																$formData.process = 'REJECT';
