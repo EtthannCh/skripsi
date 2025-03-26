@@ -293,17 +293,17 @@
 	});
 </script>
 
-<svelte:window bind:innerWidth={windowWidth}></svelte:window>
+<svelte:window bind:innerWidth={windowWidth} />
 {#if user.roleId == 3 && user.roleId}
 	<div
-		class={`mx-auto mb-10 flex min-h-screen flex-col rounded-md bg-white py-5 ${isMobile? 'w-auto' : 'w-[1300px]'}`}
+		class={`mx-auto mb-10 flex min-h-screen flex-col rounded-md bg-white py-5 ${isMobile ? 'w-auto' : 'w-[1300px]'}`}
 	>
 		<Accordion.Root
 			type="single"
-			class={`mx-auto my-auto flex ${isMobile? 'w-[400px]' : 'w-[600px]'} flex-col justify-center`}
+			class={`mx-auto my-auto flex ${isMobile ? 'w-[400px]' : 'w-[600px]'} flex-col justify-center`}
 		>
 			<Accordion.Item value="item-1">
-				<Accordion.Trigger class="text-2xl">Pengambilan Form</Accordion.Trigger>
+				<Accordion.Trigger class="text-2xl">Form Retrieval</Accordion.Trigger>
 				<Accordion.Content class="scroll-none max-h-[550px] overflow-y-scroll">
 					{#each data.formSelection as form}
 						<Card.Root class="my-5 flex w-full items-center justify-between">
@@ -333,7 +333,7 @@
 				</Accordion.Content>
 			</Accordion.Item>
 			<Accordion.Item value="item-2">
-				<Accordion.Trigger class="text-2xl">Pengajuan Form</Accordion.Trigger>
+				<Accordion.Trigger class="text-2xl">Form Submission</Accordion.Trigger>
 				<Accordion.Content>
 					<form action="?/submit" enctype="multipart/form-data" method="post" use:enhance>
 						<Form.Field {form} name="userId">
@@ -343,18 +343,18 @@
 						</Form.Field>
 						<div class="flex flex-col gap-5">
 							<div>
-								<Label>User Name</Label>
+								<Label class="text-xl">User Name</Label>
 								<Input value={user.username} disabled />
 							</div>
 							<div>
-								<Label>User Email</Label>
+								<Label class="text-xl">User Email</Label>
 								<Input value={user.email} disabled />
 							</div>
 						</div>
 						<Form.Field {form} name="formId">
 							<Form.Control let:attrs>
 								<div class="my-5 flex w-full flex-col gap-5">
-									<Form.Label>Jenis Form</Form.Label>
+									<Form.Label class="text-xl">Form Type</Form.Label>
 									<Select.Root type="single" name="formId" bind:value={$formData.formId}>
 										<Select.Trigger>
 											{formSelection
@@ -373,7 +373,7 @@
 											</Select.Group>
 										</Select.Content>
 										{#if $formData.formId == '' && submitPressed}
-											<span class="text-red-700">Belum Memilih Jenis Form</span>
+											<span class="text-red-700">Please Select a Form to Continue</span>
 										{/if}
 									</Select.Root>
 								</div>
@@ -383,13 +383,14 @@
 						<Form.Field {form} name="formFile">
 							<Form.Control let:attrs>
 								<div class="flex flex-col gap-5">
-									<Form.Label>{`Upload Form Permohonan (Max Size Allowed :  5mb)`}</Form.Label>
+									<Form.Label class="text-xl">{`Upload Your Form (Max Size Allowed :  5mb)`}</Form.Label>
 									<span class="text-sm"
-										>(Penamaan File :
+										>(File Name Format :
 										KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon.pdf)</span
 									>
+									<!-- Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan -->
 									<span class="text-red-600"
-										>({'NOTE : Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan'
+										>({'NOTE : Form Code in the File Name must MATCH with the one that you SELECTED'
 											.toString()
 											.toUpperCase()})</span
 									>

@@ -155,7 +155,7 @@
 									<span>Form Code : {userRequest.form_db.code.replace('_', '-')}</span>
 									<span>Form Name : {userRequest.form_db.name}</span>
 									<span
-										>Tanggal Pengajuan : {new Date(userRequest.created_at).toLocaleDateString(
+										>Submission Date : {new Date(userRequest.created_at).toLocaleDateString(
 											'id-ID',
 											{ day: '2-digit', month: 'short', year: 'numeric' }
 										)}</span

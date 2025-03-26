@@ -33,13 +33,13 @@
 		>
 	</h1>
 	{#if data && data.userRequestHistory}
-		<div class="mt-5 flex flex-col mx-28 gap-5">
+		<div class={`mt-5 flex flex-col ${mainPage ? 'mx-28' : ''} gap-5`}>
 			{#each data.userRequestHistory.slice(0, 2) ?? [] as history, idx}
 				<span>{processArray[idx]}{history.created_by}</span>
 			{/each}
 		</div>
 		{#if data.userApprovalOrRejectFileUrl.status != 'PENDING'}
-			<div class="mt-5 flex flex-col gap-5 mx-28">
+			<div class={`mt-5 flex flex-col gap-5 ${mainPage ? 'mx-28' : ''}`}>
 				<span
 					>{processArray[2]}{data.userRequestHistory[data.userRequestHistory.length - 1]
 						.created_by}</span
@@ -73,7 +73,7 @@
 		</div>
 	{/if}
 	<button
-		class={`w-[100px] mx-auto my-5 flex rounded-md bg-uphButton p-3 text-white ${mainPage ? 'block' : 'hidden'}`}
+		class={`mx-auto my-5 flex w-[100px] rounded-md bg-uphButton p-3 text-white ${mainPage ? 'block' : 'hidden'}`}
 		onclick={() => {
 			goto(`/user/request/${data.user.id}`);
 		}}
