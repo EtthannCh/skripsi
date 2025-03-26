@@ -20,13 +20,11 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
     let query = supabase.rpc("export_to_excel_table", {
         start_date: startDate,
         end_date: endDate,
-        major_id_param: userCookies.majorId
+        major_id_param: userCookies.majorId,
+        filter_param: filter
     }).limit(10);
 
     let formListQuery = supabase.from("form_db").select("*");
-    if (filter.length > 0) {
-        query = query.or(`created_by.ilike.${filter},request_code.ilike.${filter}`);
-    }
     if (status.length > 0) {
         query = query.eq("status", status);
     }
