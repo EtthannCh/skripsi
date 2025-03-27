@@ -364,7 +364,9 @@
 												target="_blank"
 											>
 												<span class="flex gap-5">
+													{#if data.requestData.completion_file_url.length > 0}
 													<FileText />
+													{/if}
 													<DataTableBadgeCell
 														value={requestDbStatusEnum[data.requestData.status]}
 														className="bg-red-500 text-white w-[90px] h-[30px]"
