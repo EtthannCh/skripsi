@@ -44,24 +44,18 @@ export type UserRequestSchema = z.infer<typeof userRequestSchema>;
 
 export const requestDbStatusEnum = {
     PENDING: "PENDING",
-    APPROVED: "APPROVED",
     REJECTED: "REJECTED",
     ONGOING: "ONGOING",
     PROCESSING: "PROCESSING",
     COMPLETED: "COMPLETED",
-    AWAITING_FINALIZED: "AWAITING FINALIZED",
-    FINALIZED: "FINALIZED"
 };
 
 export const requestEnumColor = {
     PENDING: 'bg-gray-300 text-gray-900',
-    APPROVED: 'bg-blue-500 text-white',
     REJECTED: 'bg-red-500 text-white',
     ONGOING: 'bg-yellow-300 text-yellow-800',
     PROCESSING: 'bg-orange-500 text-white',
     COMPLETED: 'bg-green-500 text-white',
-    AWAITING_FINALIZED: 'bg-teal-500 text-teal-900',
-    FINALIZED: 'bg-green-500 text-green-900'
 };
 
 export const requestDbStatusCombobox = [
