@@ -58,7 +58,7 @@ export const requestEnumColor = {
     APPROVED: 'bg-blue-500 text-white',
     REJECTED: 'bg-red-500 text-white',
     ONGOING: 'bg-yellow-300 text-yellow-800',
-    PROCESSING: '',
+    PROCESSING: 'bg-orange-500 text-white',
     COMPLETED: 'bg-green-500 text-white',
     AWAITING_FINALIZED: 'bg-teal-500 text-teal-900',
     FINALIZED: 'bg-green-500 text-green-900'

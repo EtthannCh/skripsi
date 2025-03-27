@@ -21,7 +21,7 @@
 				});
 				return goto('/verify-user', { invalidateAll: true });
 			} else if (result.type == 'failure') {
-				toast.error(result.data?.message, {
+				toast.error(result.data?.message ?? 'Please Fill In the Form with Required Data', {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -48,17 +48,18 @@
 <svelte:window bind:innerWidth={windowWidth} />
 <div class="flex min-h-screen flex-col items-center justify-center bg-slate-300 text-white">
 	<div
-		class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10 bg-white p-10`}
+		class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10 bg-white rounded-md`}
 	>
-		
-		<img src={uphLogo} class="h-[250px] w-[250px] rounded-full bg-uphButton" alt="uph_logo" />
+		<div class="flex h-[650px] w-[350px] items-center justify-center rounded-l-lg bg-uph">
+			<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
+		</div>
 		{#if loading}
 			<span class="h-10">
 				<SyncLoader color="#007bff" />
 			</span>
 		{:else}
 			<div
-				class="flex w-[350px] flex-col items-center justify-center rounded-md bg-uphButton p-10 text-white"
+				class="flex h-[650px] w-[350px] flex-col items-center justify-center rounded-md p-10 text-black"
 			>
 				<h1 class="my-5 text-[36px]">REGISTER</h1>
 				<form method="POST" use:enhance action="?/register">
@@ -105,15 +106,15 @@
 						<span
 							>Already has an Account? <a
 								href="../login"
-								class="group relative text-white no-underline"
+								class="group relative text-black no-underline"
 							>
 								Login
 								<span
-									class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-white transition-transform group-hover:origin-left group-hover:scale-x-100"
+									class="absolute bottom-0 left-0 h-[2px] w-full origin-right scale-x-0 rounded-sm bg-uphButton transition-transform group-hover:origin-left group-hover:scale-x-100"
 								></span>
 							</a></span
 						>
-						<button class="my-3 rounded-md bg-uph p-2">Register</button>
+						<button class="my-3 rounded-md bg-uphButton p-2 text-white">Register</button>
 					</div>
 				</form>
 			</div>

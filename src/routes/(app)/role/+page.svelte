@@ -106,7 +106,7 @@
 	const { form: formData, enhance } = form;
 </script>
 
-<div class="mx-auto mt-10 flex max-w-[50%] flex-col items-center justify-center gap-10 rounded-md">
+<div class="mx-auto mt-10 flex max-w-[50%] flex-col items-center justify-center gap-10 rounded-md bg-white p-10">
 	{#if formLoading}
 		<span>
 			<SyncLoader color="#007bff" />
@@ -143,7 +143,7 @@
 								</Button>
 							{/snippet}
 						</Popover.Trigger>
-						<Popover.Content class="w-[200px] p-0">
+						<Popover.Content class="w-max p-0">
 							<Command.Root>
 								<Command.Input placeholder="Search Email..." />
 								<Command.List>

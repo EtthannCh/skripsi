@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { navigating, page } from '$app/state';
+	import { page } from '$app/state';
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -10,7 +10,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { ArrowLeft, FileText } from 'lucide-svelte';
-	import { Stretch, SyncLoader } from 'svelte-loading-spinners';
+	import { Stretch } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -117,7 +117,7 @@
 			<Card.Root>
 				<Card.Header>
 					<Card.Title>Applicant's Detail</Card.Title>
-					<Card.Description>Applicants who Submitted this Request</Card.Description>
+					<Card.Description class="pb-3">Applicant's who Submitted this Request</Card.Description>
 				</Card.Header>
 				<Separator />
 				<Card.Content>
@@ -151,8 +151,10 @@
 									<div class="flex flex-col">
 										<span>File </span>
 									</div>
-									<a class="lg:w-[250px] text-[#3e74c5]" href={data.requestData?.form_url} target="_blank"
-										><FileText /></a
+									<a
+										class="text-[#3e74c5] lg:w-[250px]"
+										href={data.requestData?.form_url}
+										target="_blank"><FileText /></a
 									>
 								</div>
 							</Label>
@@ -188,7 +190,7 @@
 														{/if}
 													</strong></Tabs.Trigger
 												>
-												<Tabs.Trigger value="reject" 
+												<Tabs.Trigger value="reject"
 													><strong class="text-[#3e74c5]">Reject</strong></Tabs.Trigger
 												>
 											</Tabs.List>
@@ -299,7 +301,7 @@
 	<Card.Root>
 		<Card.Header>
 			<Card.Title>Process</Card.Title>
-			<Card.Description
+			<Card.Description class="pb-4"
 				>From Submitting Application until Receiving Requested Document</Card.Description
 			>
 		</Card.Header>
@@ -307,7 +309,7 @@
 		<Card.Content>
 			<div class="flex flex-row gap-5">
 				<Label class="text-lg">
-					<div class="flex flex-col items-start justify-between gap-5">
+					<div class="flex flex-col items-start justify-between gap-2">
 						<span class="text-xl">Date of Submission</span>
 						<span class="flex flex-col">
 							<span
@@ -326,12 +328,13 @@
 					{#if data.requetsHistoryData}
 						{#each data.requetsHistoryData as historyData, idx}
 							<Label class="text-lg ">
-								<div class="flex flex-col items-start justify-between gap-5">
-									<div class="flex flex-col">
-										<span class="text-xl">{processArray[idx]}</span>
-										<span class="text-sm">{processCaptionArray[idx]}</span>
+								<div class="flex flex-col items-start justify-between gap-2">
+									<div class="flex">
+										<span class="text-xl"
+											>{processArray[idx]}<sub>{processCaptionArray[idx]}</sub></span
+										>
 									</div>
-									<span class="flex flex-col">
+									<span class="flex flex-row gap-3">
 										<span
 											>{historyData.created_at
 												? `${new Date(historyData.created_at).toLocaleDateString('id-ID', {
@@ -343,33 +346,36 @@
 										>
 										{#if data.requestData.status == 'COMPLETED' && idx == data.requetsHistoryData.length - 1}
 											<a
-												class="lg:w-[250px]"
+												class="text-green-500 lg:w-[250px]"
 												href={data.requestData.completion_file_url}
-												target="_blank"><FileText /></a
+												target="_blank"
+												><span class="flex gap-5">
+													<FileText />
+													<DataTableBadgeCell
+														value={requestDbStatusEnum[data.requestData.status]}
+														className="bg-green-500 text-white w-[90px] h-[30px]"
+													></DataTableBadgeCell>
+												</span></a
 											>
+										{:else if data.requestData.status == 'REJECTED' && idx == data.requetsHistoryData.length - 1}
+											<a
+												class="text-red-500 lg:w-[250px]"
+												href={data.requestData.completion_file_url}
+												target="_blank"
+											>
+												<span class="flex gap-5">
+													<FileText />
+													<DataTableBadgeCell
+														value={requestDbStatusEnum[data.requestData.status]}
+														className="bg-red-500 text-white w-[90px] h-[30px]"
+													></DataTableBadgeCell>
+												</span>
+											</a>
 										{/if}
 									</span>
 								</div>
 							</Label>
 						{/each}
-						{#if data.requestData.status == 'REJECTED'}
-							<div
-								class={`flex flex-col items-start justify-${data.requestData.completion_file_url ? 'between' : 'center'} gap-5`}
-							>
-								<div class="flex flex-col">
-									<span class="text-xl text-red-600">{'REJECTED'}</span>
-								</div>
-								{#if data.requestData.completion_file_url}
-									<span class="mt-3">
-										<a
-											class="lg:w-[250px]"
-											href={data.requestData.completion_file_url}
-											target="_blank"><FileText /></a
-										>
-									</span>
-								{/if}
-							</div>
-						{/if}
 					{/if}
 				</div>
 			</div>
