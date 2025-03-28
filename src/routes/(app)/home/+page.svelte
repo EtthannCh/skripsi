@@ -85,7 +85,7 @@
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
 			console.log(result);
-			
+
 			formLoading = false;
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
@@ -94,7 +94,7 @@
 				});
 				return goto('/home', { invalidateAll: true });
 			} else if (result.type == 'failure') {
-				toast.error(result.data?.message ?? "Please Fill In the Form with Required Data", {
+				toast.error(result.data?.message ?? 'Please Fill In the Form with Required Data', {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -264,6 +264,16 @@
 		pageFilter = Number(pagesParam);
 	});
 
+	let disabledFilter = $state(false);
+	$effect(() => {
+		if (calenderValue.start == undefined && calenderValue.end == undefined) {
+			toast.info('Please Select Both Start and End Date');
+			disabledFilter = true;
+		} else {
+			disabledFilter = false;
+		}
+	});
+
 	const filterHandler = async () => {
 		await goto(
 			`/home?pages=${pageFilter}&filter=${filter}&status=${statusValue}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}`,
@@ -355,7 +365,9 @@
 						<Form.Field {form} name="formId">
 							<Form.Control let:attrs>
 								<div class="my-5 flex w-full flex-col gap-5">
-									<Form.Label class="text-xl">Form Type <span class="text-red-700">*</span></Form.Label>
+									<Form.Label class="text-xl"
+										>Form Type <span class="text-red-700">*</span></Form.Label
+									>
 									<Select.Root type="single" name="formId" bind:value={$formData.formId}>
 										<Select.Trigger>
 											{formSelection
@@ -381,7 +393,10 @@
 						<Form.Field {form} name="formFile">
 							<Form.Control let:attrs>
 								<div class="flex flex-col gap-5">
-									<Form.Label class="text-xl">{`Upload Your Form (Max Size Allowed :  5mb)`} <span class="text-red-700">*</span></Form.Label>
+									<Form.Label class="text-xl"
+										>{`Upload Your Form (Max Size Allowed :  5mb)`}
+										<span class="text-red-700">*</span></Form.Label
+									>
 									<span class="text-sm"
 										>(File Name Format :
 										KodeForm-NIMPemohon-KodeJurusan(INF/IS/MGT/HOS/MGT/LAW)-EmailPemohon.pdf)</span
@@ -555,10 +570,13 @@
 				onclick={() => {
 					filterHandler();
 				}}
-				class="flex h-10 items-center rounded-md bg-uphButton p-3 text-white">Filter</button
+				disabled={disabledFilter}
+				class={`flex h-10 items-center rounded-md ${disabledFilter ? 'bg-gray-400' : 'bg-uphButton'} p-3 text-white`}
+				>Filter</button
 			>
 			<button
-				class="flex h-10 items-center rounded-md bg-uphButton p-3 text-white"
+				class={`flex h-10 items-center rounded-md p-3 text-white ${disabledFilter ? ' bg-gray-400' : 'bg-uphButton '}`}
+				disabled={disabledFilter}
 				onclick={() => {
 					filter = '';
 					statusValue = '';
@@ -576,7 +594,11 @@
 				}}
 				>Reset
 			</button>
-			<button class="rounded-md bg-uphButton p-3 text-white" onclick={exportToExcelFunction}>
+			<button
+				class={`rounded-md ${disabledFilter ? ' bg-gray-400' : 'bg-uphButton '} p-3 text-white`}
+				onclick={exportToExcelFunction}
+				disabled={disabledFilter}
+			>
 				Export Excel
 			</button>
 			{#if navigating.to}
