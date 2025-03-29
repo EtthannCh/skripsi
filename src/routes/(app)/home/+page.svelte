@@ -283,6 +283,7 @@
 			}
 		);
 	};
+	
 	const isDesktop = new MediaQuery('(min-width: 414px)');
 	const perPage = $derived(isDesktop.current ? 10 : 5);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
@@ -312,6 +313,7 @@
 		<Accordion.Root
 			type="single"
 			class={`mx-auto my-auto flex ${isMobile ? 'w-[400px]' : 'w-[600px]'} flex-col justify-center`}
+			value="item-1"
 		>
 			<Accordion.Item value="item-1">
 				<Accordion.Trigger class="text-2xl">Form Retrieval</Accordion.Trigger>
