@@ -308,7 +308,7 @@
 <svelte:window bind:innerWidth={windowWidth} />
 {#if user.roleId == 3 && user.roleId}
 	<div
-		class={`mx-auto mb-10 flex min-h-screen flex-col rounded-md bg-white py-5 ${isMobile ? 'w-auto' : 'w-[1300px]'}`}
+		class={`mx-auto mb-10 flex min-h-screen flex-col rounded-md bg-white py-5 ${isMobile ? 'w-[500px]' : 'w-[1000px]'}`}
 	>
 		<Accordion.Root
 			type="single"

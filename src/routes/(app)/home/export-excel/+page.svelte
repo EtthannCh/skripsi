@@ -7,10 +7,15 @@
 	import { getCoreRowModel } from '@tanstack/table-core';
 	import { ArrowLeft } from 'lucide-svelte';
 	import { Stretch } from 'svelte-loading-spinners';
-	import type { ExcelTableSchema } from '../request-user-schema';
+	import {
+		requestDbStatusEnum,
+		requestEnumColor,
+		type ExcelTableSchema
+	} from '../request-user-schema';
 	import type { PageData } from './$types';
 	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
 	import { page } from '$app/state';
+	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -30,7 +35,12 @@
 		{
 			accessorKey: 'status',
 			accessorFn: (row) => row.status,
-			cell: ({ row }) => row.original.status,
+			cell: ({ row }) => {
+				return renderComponent(DataTableBadgeCell, {
+					value: requestDbStatusEnum[row.original.status],
+					className: requestEnumColor[row.original.status]
+				});
+			},
 			header: 'Application Status'
 		},
 		{

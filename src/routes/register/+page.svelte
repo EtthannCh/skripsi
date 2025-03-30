@@ -48,13 +48,13 @@
 <svelte:window bind:innerWidth={windowWidth} />
 <div class="flex min-h-screen flex-col items-center justify-center bg-slate-300 text-white">
 	<div
-		class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10 bg-white rounded-md`}
+		class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10 rounded-md bg-white`}
 	>
 		<div class="flex h-[650px] w-[350px] items-center justify-center rounded-l-lg bg-uph">
 			<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
 		</div>
 		{#if loading}
-			<span class="h-10">
+			<span class="flex h-10 w-[350px] flex-col items-center justify-center">
 				<SyncLoader color="#007bff" />
 			</span>
 		{:else}

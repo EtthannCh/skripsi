@@ -126,7 +126,7 @@ export type SequenceSchema = z.infer<typeof sequenceSchema>;
 export const excelTableSchema = z.object({
     request_id: z.number(),
     request_code: z.string(),
-    status: z.string(),
+    status: z.enum(Object.keys(requestDbStatusEnum) as [keyof typeof requestDbStatusEnum, ...Array<keyof typeof requestDbStatusEnum>]),
     nim: z.string(),
     username: z.string(),
     email: z.string(),

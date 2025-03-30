@@ -134,7 +134,7 @@
 		>
 	</div>
 	<div
-		class={`grid overflow-y-scroll sm:gap-36 ${windowWidth < 700 ? 'grid-cols-1' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2' : ' grid-cols-3'} md:gap-24 lg:gap-10`}
+		class={`grid overflow-y-scroll ${windowWidth < 700 ? 'grid-cols-1 gap-36 ' : ''} ${windowWidth > 1300 ? ' grid-cols-3 gap-10' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2 gap-24 ' : ''} place-items-center`}
 	>
 		{#each data.data.userRequestFromDb as userRequest}
 			<div class="w-[320px]">
