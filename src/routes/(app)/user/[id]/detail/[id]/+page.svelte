@@ -180,7 +180,7 @@
 										<Tabs.Root value="account" class="flex flex-col justify-between">
 											<Tabs.List class="grid w-full grid-cols-2">
 												<Tabs.Trigger value="approve"
-													><strong class="text-[#3e74c5]">
+													><strong class="">
 														{#if data.requestData.status == 'ONGOING'}
 															<span>Process</span>
 														{:else if data.requestData.status == 'PROCESSING'}
@@ -191,7 +191,7 @@
 													</strong></Tabs.Trigger
 												>
 												<Tabs.Trigger value="reject"
-													><strong class="text-[#3e74c5]">Reject</strong></Tabs.Trigger
+													><strong class="">Reject</strong></Tabs.Trigger
 												>
 											</Tabs.List>
 											<Tabs.Content value="approve">

@@ -181,9 +181,12 @@
 				onInteractOutside={() => {
 					window.history.back();
 				}}
+				onClose={() => {
+					window.history.back();
+				}}
 			>
 				<Sheet.Header>
-					<Sheet.Title>Process Details</Sheet.Title>
+					<Sheet.Title class="pb-5 text-3xl">Process Details</Sheet.Title>
 				</Sheet.Header>
 				<RequestDetailPage isMainPage={false} data={page.state.preloadedData} {requestCode}
 				></RequestDetailPage>

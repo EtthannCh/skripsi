@@ -18,7 +18,7 @@
 	class={`${mainPage ? 'mx-auto flex h-[500px] w-[500px] flex-col justify-center rounded-2xl bg-white' : ''}`}
 >
 	<h1 class={`text-xl ${mainPage ? ' flex flex-col items-center justify-center gap-5' : ''}`}>
-		Request Code : {requestCode ?? data.userApprovalOrRejectFileUrl.request_code}
+		<span>Request Code : {requestCode ?? data.userApprovalOrRejectFileUrl.request_code}</span>
 		<span
 			>{mainPage
 				? `Submission Date : ${new Date(data.userRequestHistory[0].created_at).toLocaleDateString(
