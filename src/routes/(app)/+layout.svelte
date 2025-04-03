@@ -32,7 +32,7 @@
 {#if !isMobile}
 	<Sidebar.Provider data-sveltekit-reload bind:open={openSidebar}>
 		<AppSidebar {user} majorData={data.majorDb} />
-		<main class="w-full bg-gray-200">
+		<main class="w-full bg-slate-300">
 			<div class="flex items-center sm:hidden md:hidden lg:block">
 				{#if openSidebar}
 					<X
@@ -54,14 +54,14 @@
 		</main>
 	</Sidebar.Provider>
 {:else}
-	<main class="h-full w-full bg-gray-100">
+	<main class={`${isMobile ? 'flex flex-col gap-5 overflow-hidden' : 'h-full'} w-full bg-slate-300`}>
 		<Sheet.Root>
 			<Sheet.Trigger class={`${buttonVariants({ variant: 'outline' })} mx-10 my-3`}
 				>Open Sidebar</Sheet.Trigger
 			>
-			<Sheet.Content side="left" class="w-[200px]">
+			<Sheet.Content side="left" class="w-[200px] bg-uph text-white" onClose={() => {}}>
 				<Sheet.Header>
-					<Sheet.Title class="my-3 flex flex-row items-center gap-5">
+					<Sheet.Title class="my-3 flex flex-row items-center gap-5 text-white">
 						<img src={uphLogo} alt="logo uph" class="h-10 w-10 rounded-full" />
 						<span>UPH MEDAN</span>
 					</Sheet.Title>
