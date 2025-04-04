@@ -35,7 +35,9 @@
 		onSubmit: () => {
 			loading = true;
 		},
-		multipleSubmits: 'prevent'
+		multipleSubmits: 'prevent',
+		delayMs: 500,
+		timeoutMs: 8000
 	});
 
 	let isMobile = $state(false);
@@ -47,7 +49,7 @@
 			isMobile = true;
 		}
 	});
-	const { form: formData, enhance } = form;
+	const { form: formData, enhance, submitting } = form;
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -55,11 +57,11 @@
 	<div
 		class={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-center justify-center gap-10 rounded-xl bg-white`}
 	>
-		<div class="flex h-[480px] w-[350px] items-center justify-center bg-uph rounded-l-lg">
+		<div class="flex h-[480px] w-[350px] items-center justify-center rounded-l-lg bg-uph">
 			<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
 		</div>
-		{#if navigating.to}
-			<span class="flex items-center justify-center h-10 w-[350px]">
+		{#if loading || navigating.to}
+			<span class="flex h-10 w-[350px] items-center justify-center">
 				<SyncLoader color="#007bff" />
 			</span>
 		{:else}
@@ -68,6 +70,9 @@
 			>
 				<h1 class="my-5 text-[36px]">LOGIN</h1>
 				<form method="POST" use:enhance action="?/login" class=" text-black">
+					{#if $submitting}
+						<span>loading</span>
+					{/if}
 					<Form.Field {form} name="email">
 						<Form.Control let:attrs>
 							<Form.Label>Email</Form.Label>

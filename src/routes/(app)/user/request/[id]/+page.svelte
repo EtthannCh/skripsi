@@ -44,6 +44,12 @@
 		pagesFilter = Number(pagesParam);
 	});
 
+	$effect(() => {
+		if (page.state.preloadedData != null) {
+			openDetailSheet = false;
+		}
+	});
+
 	let requestCode = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
 	let open = $state(false);
@@ -64,6 +70,7 @@
 	};
 
 	let windowWidth = $state(0);
+	let openDetailSheet = $state(false);
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -77,11 +84,7 @@
 	<ArrowLeft />
 	<span>Back</span>
 </button>
-{#if navigating.to}
-	<div class="mx-10 mb-4 h-10">
-		<Stretch color="#314986" />
-	</div>
-{/if}
+
 <div class="w-full pl-10">
 	<div class="flex items-center gap-5 pb-5">
 		<Popover.Root bind:open>
@@ -132,6 +135,11 @@
 				filterHandler();
 			}}>Filter</button
 		>
+		{#if navigating.to || openDetailSheet}
+			<div class="mb-4 h-10">
+				<Stretch color="#314986" />
+			</div>
+		{/if}
 	</div>
 	<div
 		class={`grid overflow-y-scroll ${windowWidth < 700 ? 'grid-cols-1 gap-36 ' : ''} ${windowWidth > 1300 ? ' grid-cols-3 gap-10' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2 gap-24 ' : ''} place-items-center`}
@@ -165,6 +173,7 @@
 										onclick={() => {
 											fetchPreloadData(userRequest.id);
 											requestCode = userRequest.request_code;
+											openDetailSheet = true;
 										}}>Detail</Button
 									>
 								</div>
@@ -188,8 +197,7 @@
 				<Sheet.Header>
 					<Sheet.Title class="pb-5 text-3xl">Process Details</Sheet.Title>
 				</Sheet.Header>
-				<RequestDetailPage isMainPage={false} data={page.state.preloadedData} {requestCode}
-				></RequestDetailPage>
+				<RequestDetailPage isMainPage={false} data={page.state.preloadedData} {requestCode} />
 			</Sheet.Content>
 		</Sheet.Root>
 	</div>

@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from './$types';
+	import { navigating } from '$app/state';
 
 	let loading = $state(false);
 	let { data }: { data: PageData } = $props();
@@ -24,7 +25,6 @@
 					position: 'top-center',
 					dismissable: true
 				});
-				goto('/').then(() => goto('/forgot-password', { invalidateAll: true }));
 			}
 			loading = false;
 		},
@@ -39,7 +39,7 @@
 <div
 	class="flex min-h-screen flex-col items-center justify-center gap-5 space-y-1.5 bg-uph text-white"
 >
-	{#if loading}
+	{#if loading || navigating.to}
 		<span class="h-10">
 			Loading <SyncLoader color="#007bff" />
 		</span>

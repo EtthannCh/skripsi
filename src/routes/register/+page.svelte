@@ -8,6 +8,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from './register-schema';
+	import { navigating } from '$app/state';
 
 	let { data } = $props();
 	let loading = $state(false);
@@ -53,7 +54,7 @@
 		<div class="flex h-[650px] w-[350px] items-center justify-center rounded-l-lg bg-uph">
 			<img src={uphLogo} class="h-[250px] w-[250px] rounded-full" alt="uph_logo" />
 		</div>
-		{#if loading}
+		{#if loading || navigating.to}
 			<span class="flex h-10 w-[350px] flex-col items-center justify-center">
 				<SyncLoader color="#007bff" />
 			</span>

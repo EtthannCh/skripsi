@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { navigating } from '$app/state';
 	import * as Form from '$lib/components/ui/form';
 	import * as InputOTP from '$lib/components/ui/input-otp/index.js';
 	import Label from '$lib/components/ui/label/label.svelte';
@@ -45,7 +46,7 @@
 <div
 	class="flex min-h-screen flex-col items-center justify-center gap-10 rounded-md bg-uph text-white"
 >
-	{#if loading}
+	{#if loading || navigating.to}
 		<span class="h-10">
 			Loading <SyncLoader color="#007bff" />
 		</span>

@@ -36,18 +36,15 @@
 		validators: zod(updateRoleSchema),
 		invalidateAll: true,
 		onResult: ({ result }) => {
+			console.log(result);
+
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
 					position: 'top-right',
 					dismissable: true
 				});
 			} else if (result.type == 'failure') {
-				toast.error(result.data?.message, {
-					position: 'top-right',
-					dismissable: true
-				});
-			} else {
-				toast.error('Invalid Form', {
+				toast.error(result.data?.message ?? "Invalid Input", {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -58,6 +55,7 @@
 			roleValue = '';
 			majorValue = '';
 			formLoading = false;
+			form.reset();
 		},
 		onSubmit: () => {
 			formLoading = true;
@@ -106,12 +104,17 @@
 	const { form: formData, enhance } = form;
 </script>
 
-<div class="mx-auto mt-10 flex max-w-[50%] flex-col items-center justify-center gap-10 rounded-md bg-white p-10">
+<div
+	class="mx-auto mt-10 flex max-w-[50%] flex-col items-center justify-center gap-10 rounded-md bg-white p-10"
+>
 	{#if formLoading}
 		<span>
 			<SyncLoader color="#007bff" />
 		</span>
 	{/if}
+	{$formData.majorId}
+	{$formData.email}
+	{$formData.roleId}
 	<form action="?/submit" method="post" use:enhance class="flex flex-col gap-5">
 		<h1 class="mb-5 text-center text-3xl">Change Role</h1>
 		<input type="hidden" name="roleId" bind:value={$formData.roleId} />

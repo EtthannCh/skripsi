@@ -219,7 +219,7 @@
 	<div class="my-5 flex flex-col items-center justify-center gap-5">
 		<div class="flex flex-row gap-5">
 			<span class="rounded-md bg-uph p-5 text-white"
-				>From (YYYY/MM/DD): ({page.url.searchParams.get('startDate')}) to : ({page.url.searchParams.get(
+				>From (YYYY/MM/DD) : ({page.url.searchParams.get('startDate')}) to  ({page.url.searchParams.get(
 					'endDate'
 				)})</span
 			>
@@ -236,7 +236,7 @@
 			<span class="rounded-md bg-uph p-5 text-white"
 				>{data.formList.find((v) => v.id == Number(page.url.searchParams.get('form') ?? 0))?.name} ({data.formList.find(
 					(v) => v.id == Number(page.url.searchParams.get('form') ?? 0)
-				)?.code})</span
+				)?.code.replace("_", "-")})</span
 			>
 		</div>
 		<div class="flex flex-row items-center justify-center">
