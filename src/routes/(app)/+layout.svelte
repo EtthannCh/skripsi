@@ -1,13 +1,15 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import AppSidebar from '$lib/components/ui/sidebar/app-sidebar.svelte';
-	import { ChevronUp, HouseIcon, InboxIcon, Menu, Users, X } from 'lucide-svelte';
-	import type { UserCookiesSchema } from './home/request-user-schema';
+	import { ChevronUp, HouseIcon, Menu, Users, X } from 'lucide-svelte';
 	import * as DropdownMenu from '../../lib/components/ui/dropdown-menu';
-	import { goto } from '$app/navigation';
+	import type { UserCookiesSchema } from './home/request-user-schema';
+	import { navigating } from '$app/state';
+	import { SyncLoader } from 'svelte-loading-spinners';
 
 	let { children, data } = $props();
 	const user: UserCookiesSchema = data.user;
@@ -54,7 +56,9 @@
 		</main>
 	</Sidebar.Provider>
 {:else}
-	<main class={`${isMobile ? 'flex flex-col gap-5 overflow-hidden' : 'h-full'} w-full bg-slate-300`}>
+	<main
+		class={`${isMobile ? 'flex flex-col gap-5 overflow-hidden' : 'h-full'} w-full bg-slate-300`}
+	>
 		<Sheet.Root>
 			<Sheet.Trigger class={`${buttonVariants({ variant: 'outline' })} mx-10 my-3`}
 				>Open Sidebar</Sheet.Trigger
@@ -67,6 +71,9 @@
 					</Sheet.Title>
 				</Sheet.Header>
 				<div class="grid gap-4 py-4">
+					{#if navigating.to}
+						<SyncLoader color="#007bff" />
+					{/if}
 					<div class="grid grid-cols-4 items-center gap-4">
 						<HouseIcon />
 						<a href="/home">Home</a>

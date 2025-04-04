@@ -11,6 +11,8 @@
 		MajorDbSchema,
 		UserCookiesSchema
 	} from '../../../../routes/(app)/home/request-user-schema';
+	import { navigating } from '$app/state';
+	import { SyncLoader } from 'svelte-loading-spinners';
 
 	let { user, majorData }: { user: UserCookiesSchema; majorData: MajorDbSchema } = $props();
 	const items = [
@@ -22,7 +24,7 @@
 		{
 			title: 'Role',
 			url: '/role',
-			icon: Users,
+			icon: Users
 		}
 	];
 
@@ -39,6 +41,9 @@
 				><img src={uphLogo} alt="logo uph" class="h-10 w-10 rounded-full" /> UPH MEDAN</Sidebar.GroupLabel
 			>
 			<Sidebar.GroupContent>
+				{#if navigating.to}
+					<SyncLoader color="#007bff"/>
+				{/if}
 				<Sidebar.Menu>
 					{#each items.slice(0, 1) as item (item.title)}
 						<Sidebar.MenuItem>

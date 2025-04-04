@@ -21,6 +21,7 @@
 					position: 'top-right',
 					dismissable: true
 				});
+				$formData.email = '';
 				goto('/home', { invalidateAll: true });
 			} else {
 				toast.error('Credentials Invalid', {
@@ -29,7 +30,7 @@
 				});
 			}
 			loading = false;
-			$formData.email = '';
+
 			$formData.password = '';
 		},
 		onSubmit: () => {
