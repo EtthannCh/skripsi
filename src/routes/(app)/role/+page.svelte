@@ -44,7 +44,7 @@
 					dismissable: true
 				});
 			} else if (result.type == 'failure') {
-				toast.error(result.data?.message ?? "Invalid Input", {
+				toast.error(result.data?.message ?? 'Invalid Input', {
 					position: 'top-right',
 					dismissable: true
 				});
@@ -112,9 +112,6 @@
 			<SyncLoader color="#007bff" />
 		</span>
 	{/if}
-	{$formData.majorId}
-	{$formData.email}
-	{$formData.roleId}
 	<form action="?/submit" method="post" use:enhance class="flex flex-col gap-5">
 		<h1 class="mb-5 text-center text-3xl">Change Role</h1>
 		<input type="hidden" name="roleId" bind:value={$formData.roleId} />
