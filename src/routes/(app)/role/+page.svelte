@@ -43,19 +43,20 @@
 					position: 'top-right',
 					dismissable: true
 				});
+				form.reset();
+				selectedEmailRoleId = '';
+				selectedEmailMajorId = '';
+				value = '';
+				roleValue = '';
+				majorValue = '';
 			} else if (result.type == 'failure') {
 				toast.error(result.data?.message ?? 'Invalid Input', {
 					position: 'top-right',
 					dismissable: true
 				});
 			}
-			selectedEmailRoleId = '';
-			selectedEmailMajorId = '';
-			value = '';
-			roleValue = '';
-			majorValue = '';
+
 			formLoading = false;
-			form.reset();
 		},
 		onSubmit: () => {
 			formLoading = true;
@@ -112,6 +113,7 @@
 			<SyncLoader color="#007bff" />
 		</span>
 	{/if}
+
 	<form action="?/submit" method="post" use:enhance class="flex flex-col gap-5">
 		<h1 class="mb-5 text-center text-3xl">Change Role</h1>
 		<input type="hidden" name="roleId" bind:value={$formData.roleId} />
@@ -163,7 +165,6 @@
 															$formData.email = value;
 															selectedEmailRoleId = email.role_id;
 															selectedEmailMajorId = email.major_id;
-															console.log(email.major_id);
 														}
 														closeAndFocusTrigger();
 													}}
