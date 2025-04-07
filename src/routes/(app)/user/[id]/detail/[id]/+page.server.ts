@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ url }) => {
     const requestData: RequestDbSchema = requestDataFromDb.data[0];
     const requetsHistoryData: RequestHistorySchema[] = requestHistoryDataFromDb.data;
 
-    const form: SuperValidated<ApproveRejectSchema> = await superValidate({ requestId: requestData.id, status: requestData.status }, zod(approveRejectSchema))
+    const form: SuperValidated<ApproveRejectSchema> = await superValidate({ requestId: requestData.id, status: requestData.status, studentId: userData.id }, zod(approveRejectSchema))
     return {
         userData,
         requestData,
@@ -74,16 +74,13 @@ export const actions = {
         else if (form.data.status == "ONGOING" && user.roleId != 2) {
             return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
-        else if (form.data.status == "APPROVED" && user.roleId != 4) {
-            return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
-        }
 
         let nextRoleId = 0;
         let emailSubject = "";
         let emailBody = "";
 
         if (form.data.process == "REJECT" && user.roleId == 2 &&
-            (form.data.status == requestData.status )) {
+            (form.data.status == requestData.status)) {
             nextRoleId = 3;
             currentStatus = "REJECTED";
             emailSubject = `Your Request with Number ${requestData.request_code} has Been Rejected.`;
@@ -105,6 +102,7 @@ export const actions = {
             currentStatus = "PROCESSING";
         }
         else if (form.data.status == "PROCESSING" && user.roleId == 2 && requestData.status == "PROCESSING") {
+            nextRoleId = 3;
             currentStatus = "COMPLETED";
             emailSubject = `Your Request with Number ${requestData.request_code} Has Been Processed`;
             emailBody = "Please Open Academic Service Website to View Your Request.";
@@ -117,7 +115,7 @@ export const actions = {
         if (nextRoleId == 2) {
             nextEmailResponse = nextEmailResponse.eq("role_id", nextRoleId).eq("major_id", user.majorId);
         } else if (nextRoleId == 3) {
-            nextEmailResponse = nextEmailResponse.eq("id", user.id);
+            nextEmailResponse = nextEmailResponse.eq("id", form.data.studentId);
         }
 
         const nextEmail = await nextEmailResponse;
@@ -125,6 +123,7 @@ export const actions = {
             return fail(400, { message: "Failed to fetch Data... Please Try Again" });
         }
 
+        const sentToEmail = nextEmail.data[0].email;
         let fileUrl: string | File = "";
         let reason: string = form.data.reason;
         let approveFileOrReject: File | undefined = undefined;
@@ -169,6 +168,7 @@ export const actions = {
             return fail(400, { message: "Server Error... Please Refresh and Try Again" });
         }
 
+        // change the to email to sentToEmail variable
         if (currentStatus == "REJECTED" || currentStatus == "COMPLETED" || currentStatus == "ONGOING") {
             const resend = new Resend(RESEND_API_KEY);
             const response = await resend.emails.send({

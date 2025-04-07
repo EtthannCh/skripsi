@@ -15,7 +15,8 @@ export const approveRejectSchema = z.object({
     process: z.string(),
     approvalFile: z.instanceof(File, { message: "please Upload a file" }).refine((f) => f.size < 5 * 1024 * 1024, "Max 5 mb upload size.").optional(),
     rejectFile: z.instanceof(File, { message: "please Upload a file" }).refine((f) => f.size < 5 * 1024 * 1024, "Max 5 mb upload size.").optional(),
-    reason: z.string()
+    reason: z.string(),
+    studentId: z.number()
 })
 
 export type ApproveRejectSchema = z.infer<typeof approveRejectSchema>;

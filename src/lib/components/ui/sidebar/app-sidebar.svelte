@@ -41,9 +41,6 @@
 				><img src={uphLogo} alt="logo uph" class="h-10 w-10 rounded-full" /> UPH MEDAN</Sidebar.GroupLabel
 			>
 			<Sidebar.GroupContent>
-				{#if navigating.to}
-					<SyncLoader color="#007bff"/>
-				{/if}
 				<Sidebar.Menu>
 					{#each items.slice(0, 1) as item (item.title)}
 						<Sidebar.MenuItem>

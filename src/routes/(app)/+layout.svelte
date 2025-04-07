@@ -71,9 +71,6 @@
 					</Sheet.Title>
 				</Sheet.Header>
 				<div class="grid gap-4 py-4">
-					{#if navigating.to}
-						<SyncLoader color="#007bff" />
-					{/if}
 					<div class="grid grid-cols-4 items-center gap-4">
 						<HouseIcon />
 						<a href="/home">Home</a>

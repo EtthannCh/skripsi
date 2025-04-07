@@ -176,6 +176,7 @@
 							{:else}
 								<form action="?/submit" method="post" enctype="multipart/form-data" use:enhance>
 									<input type="hidden" name="process" bind:value={$formData.process} />
+									<input type="hidden" name="studentId" bind:value={$formData.studentId} />
 									{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
 										<Tabs.Root value="account" class="flex flex-col justify-between">
 											<Tabs.List class="grid w-full grid-cols-2">
@@ -190,9 +191,7 @@
 														{/if}
 													</strong></Tabs.Trigger
 												>
-												<Tabs.Trigger value="reject"
-													><strong class="">Reject</strong></Tabs.Trigger
-												>
+												<Tabs.Trigger value="reject"><strong class="">Reject</strong></Tabs.Trigger>
 											</Tabs.List>
 											<Tabs.Content value="approve">
 												<Card.Root>
@@ -365,7 +364,7 @@
 											>
 												<span class="flex gap-5">
 													{#if data.requestData.completion_file_url.length > 0}
-													<FileText />
+														<FileText />
 													{/if}
 													<DataTableBadgeCell
 														value={requestDbStatusEnum[data.requestData.status]}
