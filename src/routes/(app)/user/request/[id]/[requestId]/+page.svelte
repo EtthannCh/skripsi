@@ -40,11 +40,11 @@
 		</div>
 		{#if data.userApprovalOrRejectFileUrl.status != 'PENDING'}
 			<div class={`mt-5 flex flex-col gap-5 ${mainPage ? 'mx-28' : ''}`}>
-				<span
-					>{processArray[2]}{data.userRequestHistory[data.userRequestHistory.length - 1]
-						.created_by}</span
-				>
 				{#if (data.userApprovalOrRejectFileUrl.completion_file_url != '' || data.userApprovalOrRejectFileUrl.reason != '') && (data.userApprovalOrRejectFileUrl.status == 'COMPLETED' || data.userApprovalOrRejectFileUrl.status == 'REJECTED')}
+					<span
+						>{processArray[2]}{data.userRequestHistory[data.userRequestHistory.length - 1]
+							.created_by}</span
+					>
 					{#if data.userApprovalOrRejectFileUrl.completion_file_url != ''}
 						<a
 							class="flex items-center gap-5 lg:w-[250px]"

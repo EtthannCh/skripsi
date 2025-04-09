@@ -84,8 +84,6 @@
 	const form = superForm(data.form, {
 		validators: zodClient(userRequestSchema),
 		onResult: ({ result }) => {
-			console.log(result);
-
 			formLoading = false;
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
