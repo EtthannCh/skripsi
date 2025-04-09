@@ -21,13 +21,19 @@ export const actions: Actions = {
     register: async ({ request, cookies }) => {
         const form = await superValidate(request, zod(registerSchema));
         if (!form.valid) {
-            return message(form, {message:"Invalid Form"})
+            return message(form, { message: "Invalid Form" })
         }
 
         const userDbResponse = await supabase.from("user_credentials").select("*").eq("email", form.data.email);
         const userDb: UserDbSchema[] = JSON.parse(JSON.stringify(userDbResponse.data))
         if (userDb.length > 0) {
             return fail(400, { data: form, message: "User Exist" });
+        }
+
+        const sameUsernameResponse = await supabase.from("user_credentials").select("username").eq("username", form.data.username);
+        const sameUsername: string = JSON.parse(JSON.stringify(sameUsernameResponse.data));
+        if (sameUsername.length > 0) {
+            return fail(400, { data: form, message: "Username Exist" })
         }
 
         const otp: number = Math.floor(Math.random() * (999999 - 100000) + 100000);

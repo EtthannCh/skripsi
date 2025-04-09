@@ -53,7 +53,7 @@ export const actions = {
                 return fail(400);
             }
 
-            //TODO: ganti email dengan email user
+            //TODO: ganti email dengan email user (userCookies.email)
             const resend = new Resend(RESEND_API_KEY);
             const response = await resend.emails.send({
                 from: "no-reply@uph-academic-services.web.id",

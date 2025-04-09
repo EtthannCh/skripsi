@@ -123,6 +123,10 @@ export const actions = {
             return fail(400, { message: "Failed to fetch Data... Please Try Again" });
         }
 
+        if (nextEmail.data.length == 0) {
+            return fail(400, { message: "Head of Department / Admin not found... Please Contact Administrator" })
+        }
+
         const sentToEmail = nextEmail.data[0].email;
         let fileUrl: string | File = "";
         let reason: string = form.data.reason;
