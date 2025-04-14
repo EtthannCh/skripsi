@@ -20,7 +20,7 @@
 	<h1 class={`text-xl ${mainPage ? ' flex flex-col items-center justify-center gap-5' : ''}`}>
 		<span>Request Code : {requestCode ?? data.userApprovalOrRejectFileUrl.request_code}</span>
 		<span
-			>{mainPage
+			>{mainPage && data.userRequestHistory[0]?.created_at != undefined
 				? `Submission Date : ${new Date(data.userRequestHistory[0].created_at).toLocaleDateString(
 						'id-ID',
 						{
