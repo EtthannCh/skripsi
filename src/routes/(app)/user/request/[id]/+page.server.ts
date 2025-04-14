@@ -1,10 +1,15 @@
 import { sessionManager } from '$lib/server/sessionManager';
 import { supabase } from '$lib/supabaseClient';
+import { error } from '@sveltejs/kit';
 import type { UserCookiesSchema } from '../../../home/request-user-schema';
 import type { RequestHistorySchema, UserRequestSchema } from '../../[id]/detail/[id]/user-detail-schema';
 
 export const load = async ({ cookies, url }) => {
     const userCookies: UserCookiesSchema = (await sessionManager.getSession(cookies)).data;
+    if (userCookies.roleId != 3) {
+        throw error(401, "Unauthorized");
+    }
+
     const pages = Number(url.searchParams.get("pages") ?? 0);
     const status = url.searchParams.get("status") ?? "";
 

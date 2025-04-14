@@ -1,6 +1,6 @@
 import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
-import { fail, redirect } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import type { ExcelTableSchema, FormSchema, UserCookiesSchema } from "../request-user-schema";
 import type { PageServerLoad } from "./$types";
 
@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 
     const userCookies: UserCookiesSchema = (await sessionManager.getSession(cookies)).data;
     if (userCookies.majorId != Number(majorId)) {
-        throw redirect(307, "/error/unauthorized")
+        throw error(401, "Unauthorized")
     }
 
     let query = supabase.rpc("export_to_excel_table", {

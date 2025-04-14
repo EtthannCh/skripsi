@@ -1,7 +1,7 @@
 import { RESEND_API_KEY } from "$env/static/private";
 import { sessionManager } from '$lib/server/sessionManager';
 import { supabase } from '$lib/supabaseClient.js';
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { Resend } from 'resend';
 import { zod } from 'sveltekit-superforms/adapters';
 import { message, superValidate, type SuperValidated } from 'sveltekit-superforms/server';
@@ -10,7 +10,13 @@ import type { PageServerLoad } from './$types.js';
 import type { ApproveRejectSchema, RequestHistorySchema, UserDetailSchema } from './user-detail-schema';
 import { approveRejectSchema } from './user-detail-schema';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, cookies }) => {
+    const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
+    const validRoleId = [1,2];
+    if (!validRoleId.includes(user.roleId) ) {
+        throw error(401, "Unauthorized")
+    }
+
     const userPkey: string = url.pathname.split("/")[2];
     const requestFormId: string = url.pathname.split("/")[4];
 

@@ -1,13 +1,17 @@
 import { sessionManager } from "$lib/server/sessionManager";
 import { supabase } from "$lib/supabaseClient";
-import { redirect, type Actions } from "@sveltejs/kit";
+import { error, redirect, type Actions } from "@sveltejs/kit";
 import { fail, message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { UserCookiesSchema } from "../home/request-user-schema";
 import type { PageServerLoad } from "./$types";
 import { updateRoleSchema, type EmailList, type MajorList, type RoleList } from "./change-role-schema";
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ cookies }) => {
+    const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
+    if (user.roleId != 6) {
+        throw error(401, "Unauthorized");
+    }
 
     const emailListResponse = await supabase.from("user_credentials").select("email, id, role_id, username, major_id")
         .in("role_id", ["1", "2", "5"]).order("email", { ascending: true });
