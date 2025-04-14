@@ -320,7 +320,7 @@
 						<Card.Root class="my-5 flex w-full items-center justify-between">
 							<Card.Header class="px-5 py-0">
 								<Card.Title class="text-xl">{form.name}</Card.Title>
-								<Card.Description>{form.description ?? 'Tidak Ada Penjelasan'}</Card.Description>
+								<Card.Description>{form.description ?? 'No Description'}</Card.Description>
 							</Card.Header>
 							<Card.Content class="grid gap-4">
 								<div class="flex flex-col items-center justify-center gap-0.5 text-right">
