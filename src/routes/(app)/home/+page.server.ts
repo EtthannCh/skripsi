@@ -132,7 +132,8 @@ export const actions = {
         }
 
         if (
-            (!splittedField[2].startsWith("03") || splittedField[2].length != 11) || (!splittedField[2].startsWith("03") && splittedField[2].length != 11)
+            (!splittedField[2].startsWith("03") || splittedField[2].length != 11) || (!splittedField[2].startsWith("03") && splittedField[2].length != 11) ||
+            splittedField[2] != userCookies.email.split("@")[0]
         ) {
             return fail(400, { message: "Invalid Student Number" })
         }
