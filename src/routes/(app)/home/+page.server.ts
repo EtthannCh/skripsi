@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
     if ([1, 2, 6].includes(user.roleId)) {
         let query = (supabase.from("request_db")
             .select(
-                `id, status, user_id, form_id, request_code,
+                `id, status, user_id, form_id, request_code, major_id,
                 reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url
                 `
             ).order("created_at", { ascending: true })
@@ -48,7 +48,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         );
         let totalCountQuery = supabase.from("request_db")
             .select(
-                `id, status, user_id, form_id, request_code,
+                `id, status, user_id, form_id, request_code,major_id,
                 reason, created_by, created_at, form_db(code, name) ,user_credentials(email, user_pkey:id),form_url, completion_file_url
                 `, { count: "exact" }
             ).order("created_at", { ascending: true })

@@ -86,6 +86,7 @@ export const requestDbSchema = z.object({
     status: z.enum(Object.keys(requestDbStatusEnum) as [keyof typeof requestDbStatusEnum, ...Array<keyof typeof requestDbStatusEnum>]),
     user_id: z.string(),
     form_id: z.number(),
+    major_id: z.number(),
     reason: z.string().optional(),
     created_by: z.string(),
     created_at: z.string(),
