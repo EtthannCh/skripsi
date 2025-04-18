@@ -95,9 +95,11 @@
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content side="top" class="w-[--bits-dropdown-menu-anchor-width]">
 						{#if user.roleId == 3}
-							<DropdownMenu.Item>
-								<span><a href={`/user/request/${user.id}`}>My Request</a></span>
-							</DropdownMenu.Item>
+							<a href={`/user/request/${user.id}`}>
+								<DropdownMenu.Item>
+									<span>My Request</span>
+								</DropdownMenu.Item>
+							</a>
 						{/if}
 						<DropdownMenu.Item onclick={logout}>
 							<span>Log Out</span>

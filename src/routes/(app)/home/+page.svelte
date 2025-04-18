@@ -403,7 +403,7 @@
 									>
 									<!-- Kode Form pada penamaan file yang diupload jika tidak sama dengan yang dipilih, tidak dapat dilanjutkan -->
 									<span class="text-red-600"
-										>({'NOTE : Form Code in the File Name must MATCH with the one that you SELECTED'
+										>({'NOTE : The Form Code in the File Name must MATCH the one that you SELECTED'
 											.toString()
 											.toUpperCase()})</span
 									>
