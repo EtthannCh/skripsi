@@ -240,6 +240,7 @@
 					{/each}
 					<Pagination.Item>
 						<Pagination.NextButton
+							disabled={data.data.userRequestFromDb.length == 0}
 							onclick={() => {
 								pagesFilter += 1;
 								filterHandler();

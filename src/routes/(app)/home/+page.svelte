@@ -69,6 +69,7 @@
 	let statusValue = $state('');
 	let formValue = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
+	let disabledExport = $state(false);
 
 	const formDbCombobox = data.formSelection.flatMap((v) => {
 		return {
@@ -270,6 +271,10 @@
 		} else {
 			disabledFilter = false;
 		}
+
+		if (data.totalCount == 0) {
+			disabledExport = true;
+		}
 	});
 
 	const filterHandler = async () => {
@@ -281,7 +286,7 @@
 			}
 		);
 	};
-	
+
 	const isDesktop = new MediaQuery('(min-width: 414px)');
 	const perPage = $derived(isDesktop.current ? 10 : 5);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
@@ -595,9 +600,9 @@
 				>Reset
 			</button>
 			<button
-				class={`rounded-md ${disabledFilter ? ' bg-gray-400' : 'bg-uphButton '} p-3 text-white`}
+				class={`rounded-md ${disabledFilter || disabledExport ? ' bg-gray-400' : 'bg-uphButton '} p-3 text-white`}
 				onclick={exportToExcelFunction}
-				disabled={disabledFilter}
+				disabled={disabledFilter || disabledExport}
 			>
 				Export Excel
 			</button>
@@ -683,6 +688,7 @@
 					{/each}
 					<Pagination.Item>
 						<Pagination.NextButton
+							disabled={data.requestDbData.length == 0}
 							onclick={() => {
 								pageFilter += 1;
 								filterHandler();

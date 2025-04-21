@@ -73,9 +73,11 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         }
         if (user.roleId == 1) {
             query = query.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
+            totalCountQuery = totalCountQuery.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
         }
         else if (user.roleId == 2) {
-            query = query.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"])
+            query = query.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"]);
+            totalCountQuery = totalCountQuery.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"]);
         }
 
         const requestDbDataFromDb = (await query).data;
