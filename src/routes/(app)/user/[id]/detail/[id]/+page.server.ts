@@ -12,8 +12,8 @@ import { approveRejectSchema } from './user-detail-schema';
 
 export const load: PageServerLoad = async ({ url, cookies }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
-    const validRoleId = [1,2];
-    if (!validRoleId.includes(user.roleId) ) {
+    const validRole = ['HOD', 'ADM'];
+    if (!validRole.includes(user.roleCode)) {
         throw error(401, "Unauthorized")
     }
 
@@ -74,41 +74,41 @@ export const actions = {
         const requestData: RequestDbSchema = requestDataFromDb.data[0];
 
         let currentStatus = "";
-        if (form.data.status == "PENDING" && user.roleId != 1) {
+        if (form.data.status == "PENDING" && user.roleCode != 'HOD') {
             return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
-        else if (form.data.status == "ONGOING" && user.roleId != 2) {
+        else if (form.data.status == "ONGOING" && user.roleCode != 'ADM') {
             return fail(400, { message: "Permission not Allowed... Please Refresh or Login Again" })
         }
 
-        let nextRoleId = 0;
+        let nextRoleCode = '';
         let emailSubject = "";
         let emailBody = "";
 
-        if (form.data.process == "REJECT" && user.roleId == 2 &&
+        if (form.data.process == "REJECT" && user.roleCode == 'ADM' &&
             (form.data.status == requestData.status)) {
-            nextRoleId = 3;
+            nextRoleCode = 'STD';
             currentStatus = "REJECTED";
             emailSubject = `Your Request with Number ${requestData.request_code} has Been Rejected.`;
             emailBody = "Please Check Again at Academic Service Website.";
         }
-        else if (form.data.status == requestData.status && user.roleId == 1 && form.data.process == "REJECT") {
-            nextRoleId = 3;
+        else if (form.data.status == requestData.status && user.roleCode == 'HOD' && form.data.process == "REJECT") {
+            nextRoleCode = 'STD';
             currentStatus = "REJECTED";
             emailSubject = `Your Request with Number ${requestData.request_code} has Been Rejected.`;
             emailBody = "Please Check Again at Academic Service Website.";
         }
-        else if (form.data.status == "PENDING" && user.roleId == 1 && requestData.status == "PENDING") {
-            nextRoleId = 2;
+        else if (form.data.status == "PENDING" && user.roleCode == 'HOD' && requestData.status == "PENDING") {
+            nextRoleCode = 'ADM';
             currentStatus = "ONGOING";
             emailSubject = "This Request has Been Approved.";
             emailBody = `Request with Number ${requestData.request_code} Has Been Approved... Please Proceed to the Next Step`;
         }
-        else if (form.data.status == "ONGOING" && user.roleId == 2 && requestData.status == "ONGOING") {
+        else if (form.data.status == "ONGOING" && user.roleCode == 'ADM' && requestData.status == "ONGOING") {
             currentStatus = "PROCESSING";
         }
-        else if (form.data.status == "PROCESSING" && user.roleId == 2 && requestData.status == "PROCESSING") {
-            nextRoleId = 3;
+        else if (form.data.status == "PROCESSING" && user.roleCode == 'ADM' && requestData.status == "PROCESSING") {
+            nextRoleCode = 'STD';
             currentStatus = "COMPLETED";
             emailSubject = `Your Request with Number ${requestData.request_code} Has Been Processed`;
             emailBody = "Please Open Academic Service Website to View Your Request.";
@@ -117,10 +117,15 @@ export const actions = {
             return fail(400, { message: "Please Refresh to Retrieve Latest Data" });
         }
 
+        const nextRoleResponse = (await supabase.from("role_db").select("id").eq("code", nextRoleCode));
+        if(nextRoleResponse.error){
+            return fail(400, {message:"Next Role Not Found... Please Check Role Master Data"});
+        }
+
         let nextEmailResponse = supabase.from("user_credentials").select("email");
-        if (nextRoleId == 2) {
-            nextEmailResponse = nextEmailResponse.eq("role_id", nextRoleId).eq("major_id", user.majorId);
-        } else if (nextRoleId == 3) {
+        if (nextRoleCode == 'ADM') {
+            nextEmailResponse = nextEmailResponse.eq("role_id", nextRoleResponse.data[0].id).eq("major_id", user.majorId);
+        } else if (nextRoleCode == 'STD') {
             nextEmailResponse = nextEmailResponse.eq("id", form.data.studentId);
         }
 

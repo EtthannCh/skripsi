@@ -71,6 +71,15 @@
 
 	let windowWidth = $state(0);
 	let openDetailSheet = $state(false);
+
+	let isMobile = $state(false);
+	$effect(() => {
+		if (windowWidth > 1000) {
+			isMobile = false;
+		} else {
+			isMobile = true;
+		}
+	});
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -85,7 +94,7 @@
 	<span>Back</span>
 </button>
 
-<div class="w-full pl-10">
+<div class={`w-full pl-10 overflow-x-scroll ${isMobile ? "":""}`}>
 	<div class="flex items-center gap-5 pb-5">
 		<Popover.Root bind:open>
 			<Popover.Trigger bind:ref={triggerRef}>
@@ -142,7 +151,7 @@
 		{/if}
 	</div>
 	<div
-		class={`grid overflow-y-scroll ${windowWidth < 700 ? 'grid-cols-1 gap-36 ' : ''} ${windowWidth > 1300 ? ' grid-cols-3 gap-10' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2 gap-24 ' : ''} place-items-center`}
+		class={`wrapper-1 grid overflow-scroll ${windowWidth < 700 ? 'grid-cols-1 gap-36 ' : ''} ${windowWidth > 1300 ? ' grid-cols-3 gap-10' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2 gap-24 ' : ''} place-items-center`}
 	>
 		{#each data.data.userRequestFromDb as userRequest}
 			<div class="w-[320px]">
@@ -255,3 +264,9 @@
 		</Pagination.Root>
 	</div>
 </div>
+
+<style>
+	.wrapper-1::-webkit-scrollbar {
+		display: none;
+	}
+</style>

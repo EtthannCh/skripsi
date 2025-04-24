@@ -22,7 +22,7 @@ export const actions = {
         }
         try {
             const { data, error } = await supabase.from("user_credentials")
-                .select('*')
+                .select('*, major_db(code), role_db(code)')
                 .eq("email", form.data.email);
             const user: UserDbSchema = JSON.parse(JSON.stringify(data))[0];
             if (!user) {
@@ -37,7 +37,9 @@ export const actions = {
                 email: user.email,
                 username: user.username,
                 roleId: user.role_id,
+                roleCode: user.role_db.code,
                 majorId: user.major_id,
+                majorCode: user.major_db.code
             }
             if ((form.data.email == user.email && !matchPassword)) {
                 return fail(400, { data: form })

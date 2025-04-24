@@ -8,8 +8,6 @@
 	import { ChevronUp, HouseIcon, Menu, Users, X } from 'lucide-svelte';
 	import * as DropdownMenu from '../../lib/components/ui/dropdown-menu';
 	import type { UserCookiesSchema } from './home/request-user-schema';
-	import { navigating } from '$app/state';
-	import { SyncLoader } from 'svelte-loading-spinners';
 
 	let { children, data } = $props();
 	const user: UserCookiesSchema = data.user;
@@ -57,7 +55,7 @@
 	</Sidebar.Provider>
 {:else}
 	<main
-		class={`${isMobile ? 'flex flex-col gap-5 overflow-hidden' : 'h-full'} w-full bg-slate-300`}
+		class={`${isMobile ? 'flex flex-col gap-5 w-full' : 'h-full'} w-full bg-slate-300`}
 	>
 		<Sheet.Root>
 			<Sheet.Trigger class={`${buttonVariants({ variant: 'outline' })} mx-10 my-3`}
@@ -75,7 +73,7 @@
 						<HouseIcon />
 						<a href="/home">Home</a>
 					</div>
-					{#if user.roleId == 6}
+					{#if user.roleCode == 'HUPHM'}
 						<div class="grid grid-cols-4 items-center gap-4">
 							<Users />
 							<a href="/user">Role</a>
@@ -104,7 +102,7 @@
 							{/snippet}
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content side="top" class="w-[--bits-dropdown-menu-anchor-width]">
-							{#if user.roleId == 3}
+							{#if user.roleCode == 'STD'}
 								<DropdownMenu.Item>
 									<span><a href={`/user/request/${user.id}`}>My Request</a></span>
 								</DropdownMenu.Item>

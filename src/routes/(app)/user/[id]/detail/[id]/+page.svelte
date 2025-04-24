@@ -77,7 +77,6 @@
 </button>
 
 <svelte:window bind:innerWidth={windowWidth} />
-<!-- {#if data.user?.roleId == 3} -->
 <div class="mx-10 my-10 rounded-md border-2 bg-uph p-5 md:h-[600px] lg:h-[600px]">
 	<div class="mb-10">
 		<Card.Root>
@@ -177,7 +176,7 @@
 								<form action="?/submit" method="post" enctype="multipart/form-data" use:enhance>
 									<input type="hidden" name="process" bind:value={$formData.process} />
 									<input type="hidden" name="studentId" bind:value={$formData.studentId} />
-									{#if (data.requestData?.status == 'PENDING' && data.user?.roleId == 1) || (data.requestData?.status == 'ONGOING' && data.user?.roleId == 2) || (data.requestData?.status == 'PROCESSING' && data.user?.roleId == 2)}
+									{#if (data.requestData?.status == 'PENDING' && data.user?.roleCode == 'HOD') || (data.requestData?.status == 'ONGOING' && data.user?.roleCode == 'ADM') || (data.requestData?.status == 'PROCESSING' && data.user?.roleCode == 'ADM')}
 										<Tabs.Root value="account" class="flex flex-col justify-between">
 											<Tabs.List class="grid w-full grid-cols-2">
 												<Tabs.Trigger value="approve"
@@ -383,8 +382,6 @@
 		</Card.Content>
 	</Card.Root>
 </div>
-
-<!-- {/if} -->
 
 <style>
 	.request-card::-webkit-scrollbar {

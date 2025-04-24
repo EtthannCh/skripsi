@@ -9,18 +9,23 @@ import { updateRoleSchema, type EmailList, type MajorList, type RoleList } from 
 
 export const load: PageServerLoad = async ({ cookies }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
-    if (user.roleId != 6) {
+    if (user.roleCode != 'HUPHM') {
         throw error(401, "Unauthorized");
     }
 
+    const roleIdResponse = (await supabase.from("role_db").select("id").in("code", ['HOD', 'ADM', 'STF']));
+    if (roleIdResponse.error || roleIdResponse.data.length == 0) {
+        throw fail(400, { message: "Next Role Not Found... Please Check Role Master Data" });
+    }
+
     const emailListResponse = await supabase.from("user_credentials").select("email, id, role_id, username, major_id")
-        .in("role_id", ["1", "2", "5"]).order("email", { ascending: true });
+        .in("role_id", roleIdResponse.data.map((v) => v.id)).order("email", { ascending: true });
     if (emailListResponse.error) {
         throw redirect(304, "/error")
     }
 
     const roleListResponse = await supabase.from("role_db").select("id, name")
-        .in("id", ["1", "2", "5"]).order("name", { ascending: true });
+        .in("id", roleIdResponse.data.map((v) => v.id)).order("name", { ascending: true });
     if (roleListResponse.error) {
         throw fail(400, { message: "Invalid Data" })
     }
@@ -54,11 +59,16 @@ export const actions = {
         }
 
         const userCookies: UserCookiesSchema = (await sessionManager.getSession(cookies)).data;
-        if (userCookies.roleId != 6) {
+        if (userCookies.roleCode != 'HUPHM') {
             return fail(400, { data: form, message: "Invalid Role" })
         }
 
-        if (["1", "2"].includes(form.data.roleId)) {
+        const roleIdResponse = (await supabase.from("role_db").select("id").in("code", ['HOD', 'ADM']));
+        if (roleIdResponse.error || roleIdResponse.data.length == 0) {
+            throw fail(400, { message: "Next Role Not Found... Please Check Role Master Data" });
+        }
+        
+        if (roleIdResponse.data.map((v) => v.id.toString()).includes(form.data.roleId)) {
             const existingUser = await supabase.from("user_credentials").select("id")
                 .eq("major_id", form.data.majorId)
                 .eq("role_id", form.data.roleId)

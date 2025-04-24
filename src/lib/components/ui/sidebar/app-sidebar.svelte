@@ -54,7 +54,7 @@
 							</Sidebar.MenuButton>
 						</Sidebar.MenuItem>
 					{/each}
-					{#if user.roleId == 6}
+					{#if user.roleCode == 'HUPHM'}
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
@@ -94,7 +94,7 @@
 						{/snippet}
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content side="top" class="w-[--bits-dropdown-menu-anchor-width]">
-						{#if user.roleId == 3}
+						{#if user.roleCode == 'STD'}
 							<a href={`/user/request/${user.id}`}>
 								<DropdownMenu.Item>
 									<span>My Request</span>

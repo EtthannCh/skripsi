@@ -6,7 +6,7 @@ import type { UserCookiesSchema } from "../../../../home/request-user-schema.js"
 
 export const load = async ({ params, cookies }) => {
     const userCookies: UserCookiesSchema = (await sessionManager.getSession(cookies)).data;
-    if (userCookies.roleId != 3) {
+    if (userCookies.roleCode != 'STD') {
         throw error(401, "Unauthorized");
     }
 

@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 
     let requestDbData: RequestDbSchema[] = [];
     let totalCount = 0;
-    if ([1, 2, 6].includes(user.roleId)) {
+    if (['HOD', 'ADM', 'HUPHM'].includes(user.roleCode)) {
         let query = (supabase.from("request_db")
             .select(
                 `id, status, user_id, form_id, request_code, major_id,
@@ -71,11 +71,11 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
             query = query.eq("form_id", formFilter);
             totalCountQuery = totalCountQuery.eq("form_id", formFilter);
         }
-        if (user.roleId == 1) {
+        if (user.roleCode == 'HOD') {
             query = query.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
             totalCountQuery = totalCountQuery.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
         }
-        else if (user.roleId == 2) {
+        else if (user.roleCode == 'ADM') {
             query = query.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"]);
             totalCountQuery = totalCountQuery.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"]);
         }
@@ -88,7 +88,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
         requestDbData = JSON.parse(JSON.stringify(requestDbDataFromDb));
         totalCount = Number(totalCountFromDb.count);
     }
-    if (user.roleId == 3 || !user.roleId) {
+    if (user.roleCode == 'STD' || !user.roleId) {
         requestDbData = [];
     };
 
@@ -149,13 +149,18 @@ export const actions = {
         if (majorDbData.id != userCookies.majorId) {
             return fail(400, { message: "Invalid Major... Please Check Again" });
         }
-        if (splittedField[4].trim() != userCookies.email.trim() && userCookies.roleId == 3 || splittedField[4].split("@")[0] != userCookies.email.split("@")[0]) {
+        if (splittedField[4].trim() != userCookies.email.trim() && userCookies.roleCode == 'STD' || splittedField[4].split("@")[0] != userCookies.email.split("@")[0]) {
             return fail(400, { message: "Invalid Student Email.. Please Use your Student Account" });
+        }
+
+        const roleIdResponse = (await supabase.from("role_db").select("id").eq("code", 'HOD'));
+        if(roleIdResponse.error){
+            return fail(400, {message:"Next Role Not Found... Please Check Role Master Data"});
         }
 
         const findKaprodiResponse = await supabase.from("user_credentials").select("email")
             .eq("major_id", userCookies.majorId)
-            .eq("role_id", 1);
+            .eq("role_id", roleIdResponse.data[0].id);
         if (findKaprodiResponse.error || findKaprodiResponse.data.length == 0) {
             return fail(400, { message: "Head of Department not Found... Please Contact Administrator" });
         }
@@ -217,7 +222,7 @@ export const actions = {
         }
 
         // TODO: send email ke kaprodi
-        if (userCookies.roleId == 3) {
+        if (userCookies.roleCode == 'STD') {
             const resend = new Resend(RESEND_API_KEY);
             const response = await resend.emails.send({
                 from: "no-reply@uph-academic-services.web.id",

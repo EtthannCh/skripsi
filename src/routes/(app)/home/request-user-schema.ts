@@ -1,4 +1,21 @@
 import { z } from "zod";
+export const roleCodeEnum = {
+    HOD: "HOD", // Kaprodi
+    ADM: "ADM", // Admin
+    STD: "STD", // Student
+    STF: "STF", // Staff
+    HUPHM: "HUPHM" // Head of UPH Medan
+};
+
+export const majorCodeEnum = {
+    INF: "INF",
+    IS: "IS",
+    MGT: "MGT",
+    HOS: "HOS",
+    LAW: "LAW",
+    ACC: "ACC",
+    UNV: "UNV"
+};
 
 export const userDbSchema = z.object({
     id: z.number(),
@@ -8,9 +25,17 @@ export const userDbSchema = z.object({
     email: z.string().max(200),
     role_id: z.number(),
     major_id: z.number(),
+    major_db: z.object({
+        code: z.enum(Object.keys(majorCodeEnum) as [keyof typeof majorCodeEnum, ...Array<keyof typeof majorCodeEnum>]),
+    }),
+    role_db: z.object({
+        code: z.enum(Object.keys(roleCodeEnum) as [keyof typeof roleCodeEnum, ...Array<keyof typeof roleCodeEnum>])
+    })
 });
 
 export type UserDbSchema = z.infer<typeof userDbSchema>;
+
+
 
 export const userCookiesSchema = z.object({
     id: z.number(),
@@ -18,7 +43,9 @@ export const userCookiesSchema = z.object({
     email: z.string(),
     username: z.string(),
     roleId: z.number(),
-    majorId: z.number()
+    roleCode: z.enum(Object.keys(roleCodeEnum) as [keyof typeof roleCodeEnum, ...Array<keyof typeof roleCodeEnum>]),
+    majorId: z.number(),
+    majorCode: z.enum(Object.keys(majorCodeEnum) as [keyof typeof majorCodeEnum, ...Array<keyof typeof majorCodeEnum>])
 })
 
 export type UserCookiesSchema = z.infer<typeof userCookiesSchema>;

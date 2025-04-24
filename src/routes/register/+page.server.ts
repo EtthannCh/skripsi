@@ -40,41 +40,51 @@ export const actions: Actions = {
         const NIM = form.data.email.split("@")[0];
         const emailType = form.data.email.split(".")[0].split("@")[1];
         const majorCode = NIM.substring(2, 5);
-        let majorId: number = 0;
-        let roleId: number = 0;
+        let majorCodeFromInput: string = '';
+        let roleCode: string = '';
         if (majorCode == "082") {
-            majorId = 1; // Informatics
+            majorCodeFromInput = 'INF'; // Informatics
         }
         else if (majorCode == "081") {
-            majorId = 2; // IS
+            majorCodeFromInput = 'IS'; // IS
         }
         else if (majorCode == "011") {
-            majorId = 3 // MGT
+            majorCodeFromInput = 'MGT' // MGT
         }
         else if (majorCode == "012") {
-            majorId = 6 // ACC
+            majorCodeFromInput = 'ACC' // ACC
         }
         else if (majorCode == "013") {
-            majorId = 4 // HOS
+            majorCodeFromInput = 'HOS' // HOS
         }
         else if (majorCode == "051") {
-            majorId = 5 // LAW
+            majorCodeFromInput = 'LAW' // LAW
         }
 
         if (emailType == "student") {
-            roleId = 3;
+            roleCode = 'STD';
         }
         else {
-            roleId = 5
-            majorId = 7;
+            roleCode = 'STF';
+            majorCodeFromInput = 'UNV';
         }
 
-        if (roleId == 0 || majorId == 0) {
+        if (roleCode == '' || majorCodeFromInput == '') {
             return fail(400, { data: form, message: "Invalid Input, Please Check Again" });
         }
 
-        if (roleId == 3 && NIM.length > 11) {
+        if ( roleCode == 'STD' && NIM.length > 11) {
             return fail(400, { data: form, message: "Please Enter a valid Student Number" });
+        }
+
+        const roleIdResponse = (await supabase.from("role_db").select("id").eq("code", roleCode));
+        if (roleIdResponse.error || roleIdResponse.data.length == 0) {
+            throw fail(400, { message: "Role Not Found... Please Check Role Master Data" });
+        }
+
+        const majorIdResponse = (await supabase.from("major_db").select("id").eq("code", majorCodeFromInput));
+        if (majorIdResponse.error || majorIdResponse.data.length == 0) {
+            throw fail(400, { message: "Role Not Found... Please Check Role Master Data" });
         }
 
         const pass = await bcrypt.hash(form.data.password, 15)
@@ -83,8 +93,8 @@ export const actions: Actions = {
             username: form.data.username,
             password: pass,
             otp: otp.toString(),
-            majorId,
-            roleId
+            majorId:majorIdResponse.data[0].id,
+            roleId:roleIdResponse.data[0].id
         }
         const otpResponse = await OtpSessionManager.createSession(cookies, userRegistration, form.data.email.toString());
         if (otpResponse.error) {

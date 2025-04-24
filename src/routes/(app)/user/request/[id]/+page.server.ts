@@ -6,7 +6,7 @@ import type { RequestHistorySchema, UserRequestSchema } from '../../[id]/detail/
 
 export const load = async ({ cookies, url }) => {
     const userCookies: UserCookiesSchema = (await sessionManager.getSession(cookies)).data;
-    if (userCookies.roleId != 3) {
+    if (userCookies.roleCode != 'STD') {
         throw error(401, "Unauthorized");
     }
 
