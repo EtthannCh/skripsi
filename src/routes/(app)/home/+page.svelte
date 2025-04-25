@@ -46,6 +46,10 @@
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { Dot } from 'lucide-svelte';
+	import { Bell } from 'lucide-svelte';
+	import Badge, { badgeVariants } from '$lib/components/ui/badge/badge.svelte';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -263,6 +267,25 @@
 		pageFilter = Number(pagesParam);
 	});
 
+	let unfinishedRequest: RequestDbSchema[] = $state([]);
+	const fetchRequestForReminder = async () => {
+		console.log(user.majorCode);
+		console.log(user.roleCode);
+
+		try {
+			const response = await fetch(
+				`../../api/reminder?majorCode=${user.majorCode}&roleCode=${user.roleCode}`
+			);
+			return await response.json();
+		} catch (error) {}
+	};
+
+	$effect.root(() => {
+		fetchRequestForReminder().then((v) => {
+			unfinishedRequest = v.pendingData;
+		});
+	});
+
 	let disabledFilter = $state(false);
 	$effect(() => {
 		if (calenderValue.start == undefined && calenderValue.end == undefined) {
@@ -306,6 +329,8 @@
 			isMobile = true;
 		}
 	});
+
+	let pendingDialogBool = $state(false);
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -441,10 +466,30 @@
 	</div>
 {:else if user.roleCode == 'ADM' || user.roleCode == 'HOD'}
 	<div class="mx-auto flex w-[1300px] flex-col rounded-md bg-white py-5">
-		<div
-			class="mx-auto flex w-[150px] items-center justify-center rounded-full bg-uph py-2 text-white"
-		>
-			<h1>Hi, {toTitleCase(user.username)}</h1>
+		<div class="my-5 flex items-center justify-center gap-10">
+			<div class="flex w-[150px] items-center justify-center rounded-full bg-uph py-2 text-white">
+				<h1>Hi, {toTitleCase(user.username)}</h1>
+			</div>
+			<div class="relative inline-flex w-fit rounded-full">
+				{#if unfinishedRequest?.length > 0}
+					<div
+						class="absolute bottom-auto left-auto right-0 top-1 z-10 inline-block -translate-y-1/2 translate-x-2/4 rotate-0 skew-x-0 skew-y-0 scale-x-100 scale-y-100 whitespace-nowrap rounded-full bg-red-600 px-2.5 py-1 text-center align-baseline text-xs font-bold leading-none text-white"
+					>
+						{unfinishedRequest?.length}
+					</div>
+				{/if}
+				<button
+					type="button"
+					class="shadow-primary-3 hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 active:bg-primary-600 active:shadow-primary-2 dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong inline-block rounded-full bg-uph px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white transition duration-150 ease-in-out focus:outline-none focus:ring-0 dark:shadow-black/30"
+					data-twe-ripple-init
+					data-twe-ripple-color="light"
+					onclick={() => {
+						pendingDialogBool = true;
+					}}
+				>
+					<Bell />
+				</button>
+			</div>
 		</div>
 		<div class="mx-[175px] flex items-center justify-center sm:flex-col md:flex-col lg:flex-row">
 			<div class="my-5 flex flex-row items-center gap-5">
@@ -579,11 +624,11 @@
 					filterHandler();
 				}}
 				disabled={disabledFilter}
-				class={`flex h-10 items-center rounded-md ${disabledFilter ? 'bg-gray-400' : 'bg-uphButton'} p-3 text-white`}
+				class={`flex items-center rounded-md ${disabledFilter ? 'bg-gray-400' : 'bg-uphButton'} p-3 text-white`}
 				>Filter</button
 			>
 			<button
-				class={`flex h-10 items-center rounded-md p-3 text-white ${disabledFilter ? ' bg-gray-400' : 'bg-uphButton '}`}
+				class={`flex items-center rounded-md p-3 text-white ${disabledFilter ? ' bg-gray-400' : 'bg-uphButton '}`}
 				disabled={disabledFilter}
 				onclick={() => {
 					filter = '';
@@ -710,6 +755,41 @@
 		<span class="text-3xl">Hi, {user.username}</span>
 	</div>
 {/if}
+
+<Dialog.Root bind:open={pendingDialogBool}>
+	<Dialog.Content class="sm:max-w-[425px]">
+		<Dialog.Header>
+			<Dialog.Title>Pending Request</Dialog.Title>
+			<Dialog.Description class="text-2xl">Please Process</Dialog.Description>
+		</Dialog.Header>
+		<div class="grid max-h-[300px] gap-10 overflow-y-scroll py-4">
+			{#if unfinishedRequest?.length == 0}
+				<span>Empty Pending Request. Good Job</span>
+			{:else}
+				{#each unfinishedRequest ?? [] as request}
+					<a
+						href={`user/${request?.user_credentials?.user_pkey}/detail/${request?.id}`}
+						class="flex flex-col items-center justify-between px-5 hover:border-4 hover:border-x-2 hover:border-uph hover:p-2"
+					>
+						<span class="flex justify-between gap-5">
+							<Badge color={badgeVariants({ variant: 'secondary' })}>{request?.status}</Badge>
+							<span>
+								{request?.request_code}
+							</span>
+						</span>
+						<span>
+							{new Date(request?.created_at).toLocaleDateString('en-us', {
+								day: '2-digit',
+								month: 'long',
+								year: 'numeric'
+							})}
+						</span>
+					</a>
+				{/each}
+			{/if}
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
 
 <style>
 	.wrapper-1::-webkit-scrollbar {
