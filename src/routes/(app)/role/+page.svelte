@@ -253,7 +253,6 @@
 							(v) => v.id == Number(selectedEmailMajorId)
 						)?.name}</span
 					>
-					{majorValue}
 					<Popover.Root bind:open={openMajorCombobox}>
 						<Popover.Trigger bind:ref={triggerRefMajor}>
 							{#snippet child({ props })}

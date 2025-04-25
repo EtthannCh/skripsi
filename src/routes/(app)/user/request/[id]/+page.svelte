@@ -94,7 +94,7 @@
 	<span>Back</span>
 </button>
 
-<div class={`w-full pl-10 overflow-x-scroll ${isMobile ? "":""}`}>
+<div class={`wrapper-1 w-full pl-10 overflow-x-scroll ${isMobile ? "":""}`}>
 	<div class="flex items-center gap-5 pb-5">
 		<Popover.Root bind:open>
 			<Popover.Trigger bind:ref={triggerRef}>

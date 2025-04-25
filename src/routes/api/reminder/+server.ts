@@ -5,7 +5,6 @@ import type { RequestDbSchema } from "../../(app)/home/request-user-schema";
 export async function GET({ url }) {
     const majorCode = url.searchParams.get("majorCode") ?? "";
     const roleCode = url.searchParams.get("roleCode") ?? "";
-    console.log(majorCode, roleCode);
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
@@ -31,7 +30,7 @@ export async function GET({ url }) {
         )
         .eq('status', 'PENDING')
         .eq("major_id", majorId);
-        // .lt('created_at', oneHourAgo);
+    // .lt('created_at', oneHourAgo);
 
 
     const requestPendingData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestPendingDataResponse.data));
@@ -65,7 +64,7 @@ export async function GET({ url }) {
         )
         .eq("major_id", majorId)
         .in('status', ["ONGOING", "PROCESSING"]);
-        // .lt('created_at', oneHourAgo);
+    // .lt('created_at', oneHourAgo);
 
     const requestOngoingProcessingData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestOngoingProcessingDataResponse.data));
     // for (const request of requestOngoingProcessingData) {
@@ -94,5 +93,7 @@ export async function GET({ url }) {
     }
     else if (roleCode == 'ADM') {
         return json({ pendingData: requestOngoingProcessingData })
+    } else {
+        return json({})
     }
 }
