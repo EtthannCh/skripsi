@@ -1,9 +1,21 @@
 <script>
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
+	let isMobile = $state(false);
+	let windowWidth = $state(0);
+	$effect(() => {
+		if (windowWidth > 1000) {
+			isMobile = false;
+		} else {
+			isMobile = true;
+		}
+	});
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} />
 <div class="flex min-h-screen flex-row items-center justify-center bg-uph text-white">
-	<img src={uphLogo} class="rounded-full" alt="uph_logo" />
+	{#if !isMobile}
+		<img src={uphLogo} class="rounded-full" alt="uph_logo" />
+	{/if}
 	<div class="flex flex-col justify-center text-center">
 		<div class="flex flex-col">
 			<span class="text-[36px]">Universitas Pelita Harapan Medan</span>
