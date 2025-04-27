@@ -55,7 +55,7 @@
 	</Sidebar.Provider>
 {:else}
 	<main
-		class={`${isMobile ? 'flex flex-col gap-5 w-full' : 'h-full'} w-full bg-slate-300`}
+		class={`${isMobile ? 'flex flex-col gap-5 h-[700px]' : ''} w-full bg-slate-300`}
 	>
 		<Sheet.Root>
 			<Sheet.Trigger class={`${buttonVariants({ variant: 'outline' })} mx-10 my-3`}

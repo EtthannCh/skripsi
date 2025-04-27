@@ -15,7 +15,7 @@
 </script>
 
 <div
-	class={`${mainPage ? 'mx-auto flex h-[500px] w-[500px] flex-col justify-center rounded-2xl bg-white' : ''}`}
+	class={`${mainPage ? 'wrapper-1 mx-auto flex h-[500px] max-w-[500px] flex-col justify-center overflow-x-scroll rounded-2xl bg-white' : ''}`}
 >
 	<h1 class={`text-xl ${mainPage ? ' flex flex-col items-center justify-center gap-5' : ''}`}>
 		<span>Request Code : {requestCode ?? data.userApprovalOrRejectFileUrl.request_code}</span>
@@ -82,3 +82,9 @@
 		<span>Back</span>
 	</button>
 </div>
+
+<style>
+	.wrapper-1::-webkit-scrollbar {
+		display: none;
+	}
+</style>

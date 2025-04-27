@@ -257,6 +257,7 @@
 																id="rejectFile"
 																name="rejectFile"
 																type="file"
+																accept="application/pdf"
 																bind:files={$rejectFile}
 																disabled={$file.length != 0 &&
 																	data.requestData.status == 'PROCESSING'}
