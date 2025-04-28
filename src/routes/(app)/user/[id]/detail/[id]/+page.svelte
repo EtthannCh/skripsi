@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import uphLogo from '$lib/assets/images/uph_logo.jpg';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -43,7 +42,6 @@
 				});
 			}
 			loading = false;
-			goto(page.url.pathname, { invalidateAll: true });
 		},
 		onSubmit: () => {
 			loading = true;
@@ -167,7 +165,7 @@
 							{/if}
 						</div>
 						<div class={`lg:w-[300px] ${isMobile ? 'w-[400px]' : ''}`}>
-							{#if loading}
+							{#if loading && data.requestData}
 								<div class="mx-10 mb-4 flex h-10 flex-col gap-3">
 									<span>Loading</span>
 									<Stretch color="#314986" />
