@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { navigating, page } from '$app/state';
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
+	import Badge, { badgeVariants } from '$lib/components/ui/badge/badge.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
@@ -9,6 +10,7 @@
 	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 	import DataTableLink from '$lib/components/ui/data-table/data-table-link.svelte';
 	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label/index.js';
@@ -26,6 +28,7 @@
 	} from '@internationalized/date';
 	import { type ColumnDef, type TableOptions } from '@tanstack/svelte-table';
 	import { getCoreRowModel } from '@tanstack/table-core';
+	import { Bell } from 'lucide-svelte';
 	import CalendarIcon from 'lucide-svelte/icons/calendar';
 	import Check from 'lucide-svelte/icons/check';
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
@@ -46,10 +49,6 @@
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { Dot } from 'lucide-svelte';
-	import { Bell } from 'lucide-svelte';
-	import Badge, { badgeVariants } from '$lib/components/ui/badge/badge.svelte';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -269,9 +268,6 @@
 
 	let unfinishedRequest: RequestDbSchema[] = $state([]);
 	const fetchRequestForReminder = async () => {
-		console.log(user.majorCode);
-		console.log(user.roleCode);
-
 		try {
 			const response = await fetch(
 				`../../api/reminder?majorCode=${user.majorCode}&roleCode=${user.roleCode}`
@@ -297,8 +293,12 @@
 
 		if (data.totalCount == 0) {
 			disabledExport = true;
+		} else {
+			disabledExport = false;
 		}
 	});
+
+	$inspect(data.totalCount);
 
 	const filterHandler = async () => {
 		await goto(
@@ -647,6 +647,8 @@
 				}}
 				>Reset
 			</button>
+			{'disabled export : ' + disabledExport}
+			{'disabled filter : ' + disabledFilter}
 			<button
 				class={`rounded-md ${disabledFilter || disabledExport ? ' bg-gray-400' : 'bg-uphButton '} p-3 text-white`}
 				onclick={exportToExcelFunction}
