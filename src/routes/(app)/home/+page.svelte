@@ -647,8 +647,6 @@
 				}}
 				>Reset
 			</button>
-			{'disabled export : ' + disabledExport}
-			{'disabled filter : ' + disabledFilter}
 			<button
 				class={`rounded-md ${disabledFilter || disabledExport ? ' bg-gray-400' : 'bg-uphButton '} p-3 text-white`}
 				onclick={exportToExcelFunction}
