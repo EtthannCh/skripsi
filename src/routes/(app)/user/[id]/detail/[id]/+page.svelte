@@ -81,8 +81,9 @@
 			<Card.Content class="flex items-center justify-between">
 				<div class="flex flex-col gap-3">
 					<Card.Title>Request Detail</Card.Title>
-					<Card.Description
-						>Request that are Submitted By {data.userData?.username} With Request ID :
+					<Card.Description class="text-xl"
+						>Request that are Submitted By <strong>{data.userData?.username}</strong> With Request
+						ID :
 						<strong>{data.requestData?.request_code}</strong></Card.Description
 					>
 				</div>
@@ -119,22 +120,22 @@
 				<Separator />
 				<Card.Content>
 					<div
-						class={`flex h-[250px] flex-row justify-between gap-5 lg:w-[800px] ${isMobile ? 'overflow-scroll' : ''}`}
+						class={`flex h-[250px] flex-row justify-between lg:w-[800px] ${isMobile ? 'overflow-scroll' : ''}`}
 					>
-						<div class="flex flex-col gap-5 lg:w-[450px]">
-							<Label class="text-lg">
+						<div class="flex flex-col gap-4 lg:w-[450px]">
+							<Label class="text-2xl">
 								<div class="flex items-center justify-between">
 									<span>NIM</span>
 									<span class="lg:w-[250px]"> : {data.userData?.email.split('@')[0]}</span>
 								</div>
 							</Label>
-							<Label class="text-lg">
+							<Label class="text-2xl">
 								<div class="flex items-center justify-between">
 									<span>Name </span>
 									<span class="text-gray-700 lg:w-[250px]"> : {data.userData?.username} </span>
 								</div>
 							</Label>
-							<Label class="text-lg">
+							<Label class="text-2xl">
 								<div class="flex items-center justify-between">
 									<div class="flex flex-col">
 										<span>Email </span>
@@ -143,7 +144,7 @@
 									<span class="lg:w-[250px]"> : {data.userData?.email}</span>
 								</div>
 							</Label>
-							<Label class="text-lg">
+							<Label class="text-2xl">
 								<div class="flex items-center justify-between">
 									<div class="flex flex-col">
 										<span>File </span>
@@ -156,7 +157,7 @@
 								</div>
 							</Label>
 							{#if data.requestData?.reason}
-								<Label class="text-lg">
+								<Label class="text-2xl">
 									<div class="flex items-center justify-between text-red-500">
 										<span>Reject Reason</span>
 										<span class="lg:w-[250px]"> : {data.requestData.reason}</span>
@@ -305,11 +306,11 @@
 		<Separator />
 		<Card.Content>
 			<div class="flex flex-row gap-5">
-				<Label class="text-lg">
+				<Label class="s">
 					<div class="flex flex-col items-start justify-between gap-2">
-						<span class="text-xl">Date of Submission</span>
+						<span class="text-2xl">Date of Submission</span>
 						<span class="flex flex-col">
-							<span
+							<span class="text-2xl"
 								>{data.requestData?.created_at
 									? `${new Date(data.requestData.created_at).toLocaleDateString('id-ID', {
 											day: '2-digit',
@@ -324,10 +325,10 @@
 				<div class={`flex justify-between ${isMobile ? 'flex-col' : 'flex-row'} gap-10`}>
 					{#if data.requetsHistoryData}
 						{#each data.requetsHistoryData as historyData, idx}
-							<Label class="text-lg ">
+							<Label class="text-2xl">
 								<div class="flex flex-col items-start justify-between gap-2">
 									<div class="flex">
-										<span class="text-xl"
+										<span class="text-2xl"
 											>{processArray[idx]}<sub>{processCaptionArray[idx]}</sub></span
 										>
 									</div>

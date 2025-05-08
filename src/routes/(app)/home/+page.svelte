@@ -127,7 +127,7 @@
 			accessorKey: 'request_code',
 			accessorFn: (row) => row.request_code,
 			header: 'Request Number',
-			size: 150
+			size: 200
 		},
 		{
 			accessorKey: 'status',
@@ -503,7 +503,7 @@
 						{#snippet child({ props })}
 							<Button
 								variant="outline"
-								class="justify-between max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
+								class="justify-between max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px] text-lg"
 								{...props}
 								role="combobox"
 								aria-expanded={open}
@@ -519,7 +519,7 @@
 							<Command.List>
 								<Command.Group>
 									{#each requestDbStatusCombobox as status}
-										<Command.Item
+										<Command.Item class="text-lg"
 											value={status.value}
 											onSelect={() => {
 												if (statusValue && statusValue == status.value) {
@@ -579,7 +579,7 @@
 						{#snippet child({ props })}
 							<Button
 								variant="outline"
-								class="justify-between max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
+								class="justify-between max-md:w-full text-lg max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
 								{...props}
 								role="combobox"
 								aria-expanded={open}
@@ -595,7 +595,7 @@
 							<Command.List>
 								<Command.Group>
 									{#each formDbCombobox as form}
-										<Command.Item
+										<Command.Item class="text-lg"
 											value={form.value}
 											onSelect={() => {
 												if (formValue && formValue == form.value) {
@@ -624,11 +624,11 @@
 					filterHandler();
 				}}
 				disabled={disabledFilter}
-				class={`flex items-center rounded-md ${disabledFilter ? 'bg-gray-400' : 'bg-uphButton'} p-3 text-white`}
+				class={`flex items-center rounded-md text-[18px] ${disabledFilter ? 'bg-gray-400' : 'bg-uphButton'} p-3 text-white`}
 				>Filter</button
 			>
 			<button
-				class={`flex items-center rounded-md p-3 text-white ${disabledFilter ? ' bg-gray-400' : 'bg-uphButton '}`}
+				class={`flex items-center rounded-md p-3 text-[18px] text-white ${disabledFilter ? ' bg-gray-400' : 'bg-uphButton '}`}
 				disabled={disabledFilter}
 				onclick={() => {
 					filter = '';
@@ -648,7 +648,7 @@
 				>Reset
 			</button>
 			<button
-				class={`rounded-md ${disabledFilter || disabledExport ? ' bg-gray-400' : 'bg-uphButton '} p-3 text-white`}
+				class={`rounded-md text-[18px] ${disabledFilter || disabledExport ? ' bg-gray-400' : 'bg-uphButton '} p-3 text-white`}
 				onclick={exportToExcelFunction}
 				disabled={disabledFilter || disabledExport}
 			>
@@ -668,7 +668,7 @@
 							<Table.Row>
 								{#each headerGroup.headers as header}
 									<Table.Head
-										class="border-x-[1px] border-y-[1px] border-black p-5 text-white"
+										class="border-x-[1px] border-y-[1px] border-black p-5 text-[18px] text-white"
 										style="width: {header.column.getSize()}px"
 									>
 										{#if !header.isPlaceholder}
@@ -686,7 +686,7 @@
 						{#each table.getRowModel().rows as row}
 							<Table.Row data-state={row.getIsSelected() && 'selected'}>
 								{#each row.getVisibleCells() as cell (cell.id)}
-									<Table.Cell class="border-x-[1px] border-y-[1px] border-black">
+									<Table.Cell class="border-x-[1px] border-y-[1px] border-black text-[18px]">
 										<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 									</Table.Cell>
 								{/each}
@@ -769,7 +769,7 @@
 				{#each unfinishedRequest ?? [] as request}
 					<a
 						href={`user/${request?.user_credentials?.user_pkey}/detail/${request?.id}`}
-						class="flex flex-col items-center justify-between px-5 hover:border-4 hover:border-x-2 hover:border-uph hover:p-2"
+						class="wrapper-1 flex flex-col items-center justify-between px-5 text-xl hover:border-4 hover:border-x-2 hover:border-uph hover:p-2"
 					>
 						<span class="flex justify-between gap-5">
 							<Badge color={badgeVariants({ variant: 'secondary' })}>{request?.status}</Badge>

@@ -103,6 +103,7 @@ export const actions: Actions = {
         }
 
         const resend = new Resend(RESEND_API_KEY);
+        // TODO: to -> form.data.email
         const response = await resend.emails.send({
             from: "no-reply@uph-academic-services.web.id",
             to: "kelvinrogue6@gmail.com",
