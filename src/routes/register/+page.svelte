@@ -10,8 +10,13 @@
 	import { registerSchema } from './register-schema';
 	import { navigating } from '$app/state';
 
+	// data ini merupakan hasil balikkan dari load di +page.server.ts
 	let { data } = $props();
+
+	// variable loading merupakan penanda jika form sedang di submit atau sudah selesai
 	let loading = $state(false);
+
+	// library form yang dipakai
 	const form = superForm(data.form.data, {
 		validators: zodClient(registerSchema),
 		onResult: ({ result }) => {
@@ -22,6 +27,7 @@
 				});
 				return goto('/verify-user', { invalidateAll: true });
 			} else if (result.type == 'failure') {
+				// yang return fail di +page.server.ts akan masuk ke dalam block if ini
 				toast.error(result.data?.message ?? 'Please Fill In the Form with Required Data', {
 					position: 'top-right',
 					dismissable: true
@@ -33,6 +39,8 @@
 			loading = true;
 		}
 	});
+
+	// kode dibawah ini untuk mengecek jika screen size adalah mobile atau bukan
 	let isMobile = $state(false);
 	let windowWidth = $state(0);
 	$effect(() => {
@@ -43,6 +51,7 @@
 		}
 	});
 
+	// mengakses propery yang ada di dalam variable 'form'
 	const { form: formData, enhance } = form;
 </script>
 
@@ -64,6 +73,7 @@
 			>
 				<h1 class="my-5 text-[36px]">REGISTER</h1>
 				<form method="POST" use:enhance action="?/register">
+					<!-- lihat dokumentasi superform / formsnap untuk lebih jelasnya terkait form -->
 					<Form.Field {form} name="username">
 						<Form.Control let:attrs>
 							<Form.Label>Username</Form.Label>

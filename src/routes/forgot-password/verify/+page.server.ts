@@ -9,6 +9,7 @@ import { otpInputSchema } from "../forgot-password-schema";
 
 export const load = async ({ cookies }) => {
     const userCookies: UserRegistration = (await OtpSessionManager.getSession(await cookies)).data;
+    // cek dulu jika cookies ada atau tidak, kalau tidak balikkan ke home route (lihat hooks.server.ts)
     if (!userCookies) {
         throw redirect(303, "/home");
     }

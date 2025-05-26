@@ -83,6 +83,7 @@
 
 	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
 	let selectedFormValue = $derived(formDbCombobox.find((f) => f.value === formValue)?.label);
+	// derived -> only trigger if the dependencies change (expression inside the derived function)
 	let formLoading = $state(false);
 
 	const form = superForm(data.form, {
@@ -122,6 +123,7 @@
 		};
 	});
 
+	// define columns for the table (look at the documentation of tanstack table)
 	const defaultColumns: ColumnDef<RequestDbSchema>[] = [
 		{
 			accessorKey: 'request_code',
@@ -217,7 +219,7 @@
 	const table = createSvelteTable(options);
 
 	const { form: formData, errors, enhance } = form;
-	const file = fileProxy(form, 'formFile');
+	const file = fileProxy(form, 'formFile'); // look at the superform documentation 
 
 	let filter: string = $state('');
 
@@ -276,6 +278,7 @@
 		} catch (error) {}
 	};
 
+	// $effect.root -> when a tracking scope is needed outside a component lifecycle to prevent states conflicts
 	$effect.root(() => {
 		fetchRequestForReminder().then((v) => {
 			unfinishedRequest = v.pendingData;
@@ -283,6 +286,8 @@
 	});
 
 	let disabledFilter = $state(false);
+
+	// $effect -> rerun the function whenever the state changes
 	$effect(() => {
 		if (calenderValue.start == undefined && calenderValue.end == undefined) {
 			toast.info('Please Select Both Start and End Date');

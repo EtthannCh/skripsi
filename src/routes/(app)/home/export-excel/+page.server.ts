@@ -17,12 +17,13 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
         throw error(401, "Unauthorized")
     }
 
+    // sql function
     let query = supabase.rpc("export_to_excel_table", {
         start_date: startDate,
         end_date: endDate,
         major_id_param: userCookies.majorId,
         filter_param: filter
-    }).limit(10);
+    });
 
     let formListQuery = supabase.from("form_db").select("*");
     if (status.length > 0) {

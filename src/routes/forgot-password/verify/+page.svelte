@@ -19,6 +19,7 @@
 					dismissable: true
 				});
 			} else if (result.type == 'failure') {
+				// yang return fail di +page.server.ts akan masuk ke dalam block if ini
 				toast.error(result.data?.message, {
 					position: 'top-right',
 					dismissable: true

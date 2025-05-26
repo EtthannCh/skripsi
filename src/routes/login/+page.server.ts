@@ -16,10 +16,13 @@ export const load = async () => {
 
 export const actions = {
     login: async ({ request, cookies }) => {
+
+        // validasi form dengan library superform
         const form = await superValidate(request, zod(loginSchema));
         if (!form.valid) {
             return fail(400, { form })
         }
+
         try {
             const { data, error } = await supabase.from("user_credentials")
                 .select('*, major_db(code), role_db(code)')
@@ -30,6 +33,7 @@ export const actions = {
                 return fail(400);
             }
 
+            // encrypt password dengan bcrypt library
             const matchPassword = await bcrypt.compare(form.data.password.toString(), user.password);
             const userSession: UserCookiesSchema = {
                 id: user.id,
@@ -45,6 +49,7 @@ export const actions = {
                 return fail(400, { data: form })
             }
             else if (form.data.email == user.email && matchPassword) {
+                // create a session if email and password match with credentials when register.
                 const { error, message } = await sessionManager.createSession(cookies, userSession, user.user_id);
                 if (error) {
                     return fail(400, {

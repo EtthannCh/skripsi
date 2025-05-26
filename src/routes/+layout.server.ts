@@ -5,6 +5,9 @@ import type { MajorDbSchema, UserCookiesSchema } from "./(app)/home/request-user
 
 export const load = async ({ cookies }) => {
     const user = (await sessionManager.getSession(cookies))?.data;
+
+    // !! means convert any value to boolean (true or false)
+    // if the user exists, then isLoggedIn true
     const isLoggedIn = !!user;
     let loggedInUser: UserCookiesSchema | undefined = undefined;
     if (user) {

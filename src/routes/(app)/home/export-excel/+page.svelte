@@ -190,6 +190,7 @@
 		}
 	];
 
+	// see tanstack table documentation
 	const optionsExcelTable: TableOptions<ExcelTableSchema> = {
 		data: data.exportTableData ?? [],
 		columns: defaultColumnsExcel,
@@ -201,6 +202,7 @@
 	};
 	let loading: boolean = $state(false);
 
+	// cek if the window is in mobile size or desktop size
 	let isMobile = $state(false);
 	let windowWidth = $state(0);
 	$effect(() => {

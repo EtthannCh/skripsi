@@ -26,15 +26,18 @@ export const actions = {
     verify: async ({ cookies, request }) => {
         const userCookies: UserRegistration = (await OtpSessionManager.getSession(await cookies)).data;
 
+        // validasi form dengan menggunakan library superform
         const form = await superValidate(request, zod(otpInputSchema));
         if (!form.valid) {
             return fail(400, { data: form, message: "Please Input Valid OTP (6 Number)!" })
         }
 
+        // jika tidak ada cookiesnya, maka akan menampilkan alert dengan pesan seperti dibawah ini
         if (!userCookies) {
             return fail(400, { data: form, message: "OTP Session Timeout... Please Try Again" });
         }
 
+        // jika tipe processnya reverify (meminta mengirim ulang kode)
         if (form.data.process == "reverify") {
             const otp1: number = Math.floor(Math.random() * (999999 - 100000) + 100000);
             await sessionManager.deleteSession(cookies);
@@ -64,6 +67,7 @@ export const actions = {
             console.log(response.error);
             throw redirect(304, "/verify-user")
         }
+
         if (form.data.otp != userCookies.otp) {
             return fail(400, { message: "Invalid OTP!!! Please Check Your Email and Try Again" });
         }
@@ -81,6 +85,9 @@ export const actions = {
             console.log(error);
             return fail(400, { message: "Error" })
         }
+
+        // jika sudah selesai verifikasi user, maka session akan dihapus
+        // karena akan digantikan dengan session yang baru setelah login
         await sessionManager.deleteSession(cookies);
         await sessionManager.deleteCookie(cookies);
 
