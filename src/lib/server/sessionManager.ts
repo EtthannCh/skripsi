@@ -11,6 +11,9 @@ const options = (maxAge: number, prefix: string, cookieName: string) => {
         httpOnly: true,
         cookiesOptions: {
             maxAge: maxAge * 60
+            //  * 60  = 60 detik (1 menit)
+            // 5 * 60 = 5 * 1 menit = 5 menit
+            // 60 * 60 = 60 * 1 menit = 60 menit
         },
         path: "/"
 

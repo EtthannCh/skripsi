@@ -28,8 +28,6 @@
 		validators: zodClient(approveRejectSchema),
 		dataType: 'json',
 		onResult: ({ result }) => {
-			console.log(result);
-
 			if (result.type == 'failure') {
 				toast.error(result.data?.message, {
 					position: 'top-right',

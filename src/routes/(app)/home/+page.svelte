@@ -218,7 +218,7 @@
 
 	const table = createSvelteTable(options);
 
-	const { form: formData, errors, enhance } = form;
+	const { form: formData, enhance } = form; // destructure the form variable
 	const file = fileProxy(form, 'formFile'); // look at the superform documentation 
 
 	let filter: string = $state('');
@@ -277,7 +277,7 @@
 			return await response.json();
 		} catch (error) {}
 	};
-
+	
 	// $effect.root -> when a tracking scope is needed outside a component lifecycle to prevent states conflicts
 	$effect.root(() => {
 		fetchRequestForReminder().then((v) => {
@@ -286,6 +286,9 @@
 	});
 
 	let disabledFilter = $state(false);
+
+	// let testingDerived = $derived.by(() => calenderValue.start == undefined && calenderValue.end == undefined);
+	// $inspect(testingDerived);
 
 	// $effect -> rerun the function whenever the state changes
 	$effect(() => {
@@ -303,8 +306,7 @@
 		}
 	});
 
-	$inspect(data.totalCount);
-
+	// this function is for server side pagination
 	const filterHandler = async () => {
 		await goto(
 			`/home?pages=${pageFilter}&filter=${filter}&status=${statusValue}&startDate=${new Date(calenderValue.start.toString()).toISOString().split('T')[0]}&endDate=${new Date(calenderValue.end.toString()).toISOString().split('T')[0]}&form=${formValue}`,
@@ -498,7 +500,7 @@
 		</div>
 		<div class="mx-[175px] flex items-center justify-center sm:flex-col md:flex-col lg:flex-row">
 			<div class="my-5 flex flex-row items-center gap-5">
-				<Input class="w-[100px] border-2 border-black" bind:value={filter} placeholder="Search" />
+				<Input class="w-auto border-2 border-black" bind:value={filter} placeholder="Search" />
 			</div>
 			<div
 				class="mx-5 flex items-center gap-5 max-md:flex-col max-sm:flex-col sm:flex-col md:flex-col lg:flex-row"

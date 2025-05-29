@@ -36,8 +36,6 @@
 		validators: zod(updateRoleSchema),
 		invalidateAll: true,
 		onResult: ({ result }) => {
-			console.log(result);
-
 			if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
 					position: 'top-right',
