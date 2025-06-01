@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
     const requestFormId: string = url.pathname.split("/")[4];
 
     // student data
-    const userDataFromDb = await supabase.from("user_credentials").select("id, username, email").eq("id", userPkey);
+    const userDataFromDb = await supabase.from("user_credentials").select("id, username, email, major_id ,major_db(code)").eq("id", userPkey);
     const requestDataFromDb = await supabase.from("request_db").select("*").eq("id", requestFormId);
     const requestHistoryDataFromDb = await supabase.from("request_history_db").select("*").eq("request_id", requestFormId);
 
@@ -42,7 +42,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
     }
 
     // student data
-    const userData: UserDetailSchema = userDataFromDb.data[0];
+    const userData: UserDetailSchema = JSON.parse(JSON.stringify(userDataFromDb.data[0]));
     const requestData: RequestDbSchema = requestDataFromDb.data[0];
     const requetsHistoryData: RequestHistorySchema[] = requestHistoryDataFromDb.data;
 

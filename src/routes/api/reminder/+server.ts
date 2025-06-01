@@ -21,7 +21,9 @@ export async function GET({ url }) {
             `
         )
         .eq('status', 'PENDING')
-        .eq("major_id", majorId);
+        .eq("major_id", majorId)
+        .order("created_at" ,{ascending:true})
+        ;
 
     const requestPendingData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestPendingDataResponse.data));
 
@@ -33,6 +35,7 @@ export async function GET({ url }) {
             `
         )
         .eq("major_id", majorId)
+        .order("created_at" ,{ascending:true})
         .in('status', ["ONGOING", "PROCESSING"]);
 
     const requestOngoingProcessingData: RequestDbSchema[] = JSON.parse(JSON.stringify(requestOngoingProcessingDataResponse.data));

@@ -137,7 +137,7 @@
 								<div class="flex items-center justify-between">
 									<div class="flex flex-col">
 										<span>Email </span>
-										<span>(Informatics)</span>
+										<span>({data.userData.major_db.code})</span>
 									</div>
 									<span class="lg:w-[250px]"> : {data.userData?.email}</span>
 								</div>

@@ -3,7 +3,6 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { ChevronUp, Users } from 'lucide-svelte';
 	import House from 'lucide-svelte/icons/house';
-	import Inbox from 'lucide-svelte/icons/inbox';
 	import * as DropdownMenu from '../dropdown-menu';
 
 	import { goto } from '$app/navigation';
@@ -11,8 +10,6 @@
 		MajorDbSchema,
 		UserCookiesSchema
 	} from '../../../../routes/(app)/home/request-user-schema';
-	import { navigating } from '$app/state';
-	import { SyncLoader } from 'svelte-loading-spinners';
 
 	let { user, majorData }: { user: UserCookiesSchema; majorData: MajorDbSchema } = $props();
 	const items = [
@@ -80,7 +77,7 @@
 								{...props}
 								class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-[50px]"
 							>
-								<span class="flex flex-col gap-1">
+								<span class="flex flex-col gap-1 max-h-[50px] overflow-y-scroll">
 									<span>
 										{`${user.username.toUpperCase()} ( ${majorData.code.toUpperCase()} )`}
 									</span>

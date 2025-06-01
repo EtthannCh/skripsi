@@ -10,9 +10,6 @@ import { userRequestSchema, type FormSchema, type MajorDbSchema, type RequestDbS
 
 export const load: PageServerLoad = async ({ cookies, url }) => {
     const user: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
-    if (!user) {
-        throw redirect(304, "/login");
-    }
 
     const date = new Date();
     // start date at the first day of the current month
@@ -89,10 +86,10 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 
         // Kalau usernya merupakan Head of Study Program, maka akan menampilkan request dengan status berikut
         if (user.roleCode == 'HOD') {
-            query = query.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
+            query = query.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"]);
 
             // in = the status is included in the status array
-            totalCountQuery = totalCountQuery.in("status", ["PENDING", "COMPLETED", "REJECTED"]);
+            totalCountQuery = totalCountQuery.in("status", ["PENDING", "ONGOING", "PROCESSING", "COMPLETED", "REJECTED"]);
         }
         // begitu juga dengan Admin
         else if (user.roleCode == 'ADM') {
@@ -222,7 +219,7 @@ export const actions = {
         const numberFormat = format.slice(1, -1).split('/')[1]
         const newNumberFormat = (numberFormat.slice(currentNumber.toString().length) + currentNumber).replaceAll('#', '0');
         
-        // formatnya bisa sesuaikan dengan yang db (perlu sesuaikan) atau hardcord dari sini juga bisa
+        // formatnya bisa sesuaikan dengan yang db (perlu sesuaikan) atau hardcode dari sini juga bisa
         const newFormat = `${majorDbData.code}/${newNumberFormat}/MDN/${currentYear}`
 
         const { error: errorInsertRequest } = await supabase.from("request_db").insert({

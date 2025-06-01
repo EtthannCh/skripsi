@@ -1,10 +1,14 @@
 import { z } from "zod";
-import { requestDbStatusEnum } from "../../../../home/request-user-schema";
+import { majorCodeEnum, requestDbStatusEnum } from "../../../../home/request-user-schema";
 
 export const userDetailSchema = z.object({
     id: z.number(),
     username: z.string(),
-    email: z.string()
+    email: z.string(),
+    major_id : z.number(),
+    major_db: z.object({
+        code: z.enum(Object.keys(majorCodeEnum) as [keyof typeof majorCodeEnum, ...Array<keyof typeof majorCodeEnum>])
+    }),
 })
 
 export type UserDetailSchema = z.infer<typeof userDetailSchema>;
