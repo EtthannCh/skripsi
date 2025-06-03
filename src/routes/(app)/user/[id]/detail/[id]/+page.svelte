@@ -16,6 +16,7 @@
 	import { requestDbStatusEnum, requestEnumColor } from '../../../../home/request-user-schema';
 	import type { PageData } from './$types';
 	import { approveRejectSchema } from './user-detail-schema';
+	import { page } from '$app/state';
 
 	let { data }: { data: PageData } = $props();
 
@@ -33,13 +34,18 @@
 					position: 'top-right',
 					dismissable: true
 				});
+				loading = false;
 			} else if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
 					position: 'top-right',
 					dismissable: true
 				});
+				loading = false;
 			}
-			loading = false;
+
+			setTimeout(() => {
+				goto(page.url.pathname, { invalidateAll: true });
+			}, 100);
 		},
 		onSubmit: () => {
 			loading = true;
