@@ -34,7 +34,6 @@
 					position: 'top-right',
 					dismissable: true
 				});
-				loading = false;
 			} else if (result.type == 'success') {
 				toast.success(result.data?.form.message, {
 					position: 'top-right',
@@ -53,7 +52,7 @@
 	});
 
 	const { form: formData, enhance } = form;
-	let file = fileProxy(form, 'approvalFile', { empty: undefined });
+	let file = fileProxy(form, 'approvalFile', { empty: undefined }); // convert to file
 	let rejectFile = fileProxy(form, 'rejectFile', { empty: undefined });
 
 	let isMobile = $state(false);

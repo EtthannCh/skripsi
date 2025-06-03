@@ -10,11 +10,13 @@
 	import { tick } from 'svelte';
 	import { SyncLoader } from 'svelte-loading-spinners';
 	import { toast } from 'svelte-sonner';
-	import { superForm } from 'sveltekit-superforms';
+	import SuperDebug, { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import type { PageData } from './$types';
 	import { updateRoleSchema } from './change-role-schema';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 
 	let { data }: { data: PageData } = $props();
 
@@ -47,25 +49,26 @@
 				value = '';
 				roleValue = '';
 				majorValue = '';
+				setTimeout(async () => {
+					await goto(page.url.pathname, { invalidateAll: true });
+					formLoading = false;
+				}, 100);
 			} else if (result.type == 'failure') {
 				toast.error(result.data?.message ?? 'Invalid Input', {
 					position: 'top-right',
 					dismissable: true
 				});
+				formLoading = false;
 			}
-
-			formLoading = false;
 		},
 		onSubmit: () => {
 			formLoading = true;
 		}
 	});
 
-	const selectedValue = $derived(data.emailList?.find((f) => f.id.toString() == value)?.email);
-	const selectedRoleValue = $derived(
-		data.roleList?.find((f) => f.id.toString() == roleValue)?.name
-	);
-	const selectedMajorValue = $derived(
+	let selectedValue = $derived(data.emailList?.find((f) => f.id.toString() == value)?.email);
+	let selectedRoleValue = $derived(data.roleList?.find((f) => f.id.toString() == roleValue)?.name);
+	let selectedMajorValue = $derived(
 		data.majorList?.find((v) => v.id.toString() == majorValue)?.name
 	);
 
@@ -106,12 +109,6 @@
 <div
 	class="mx-auto mt-10 flex max-w-[50%] flex-col items-center justify-center gap-10 rounded-md bg-white p-10"
 >
-	{#if formLoading}
-		<span>
-			<SyncLoader color="#007bff" />
-		</span>
-	{/if}
-
 	<form action="?/submit" method="post" use:enhance class="flex flex-col gap-5">
 		<h1 class="mb-5 text-center text-3xl">Change Role</h1>
 		<input type="hidden" name="roleId" bind:value={$formData.roleId} />
@@ -286,7 +283,7 @@
 														closeAndFocusTriggerMajor();
 													}}
 												>
-													<Check class={cn(value !== major.id.toString() && 'text-transparent')} />
+													<Check class={cn(majorValue !== major.id.toString() && 'text-transparent')} />
 													{major.name}
 												</Command.Item>
 											{/each}
@@ -300,6 +297,12 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
+		{#if formLoading}
+			<span>
+				<SyncLoader color="#007bff" />
+			</span>
+		{:else}
 		<button class="my-5 rounded-md bg-uphButton p-2 text-white" type="submit"> Submit</button>
+		{/if}
 	</form>
 </div>
