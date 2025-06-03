@@ -40,11 +40,11 @@
 					position: 'top-right',
 					dismissable: true
 				});
-				loading = false;
 			}
 
-			setTimeout(() => {
-				goto(page.url.pathname, { invalidateAll: true });
+			setTimeout(async () => {
+				await goto(page.url.pathname, { invalidateAll: true });
+				loading = false;
 			}, 100);
 		},
 		onSubmit: () => {
