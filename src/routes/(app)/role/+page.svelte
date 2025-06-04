@@ -237,6 +237,7 @@
 					</Popover.Root>
 				</div>
 			</Form.Control>
+			<Form.FieldErrors />
 		</Form.Field>
 		<Separator class="bg-black"></Separator>
 		<Form.Field {form} name="majorId">
