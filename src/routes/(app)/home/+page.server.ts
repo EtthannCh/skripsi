@@ -142,12 +142,17 @@ export const actions = {
         };
 
         const userCookies: UserCookiesSchema = (await sessionManager.getSession(await cookies)).data;
-        const { code } = JSON.parse(JSON.stringify((await supabase.from("form_db").select("code").eq("id", form.data.formId)).data))[0];
+        const formDbResponse = await supabase.from("form_db").select("*").eq("id", form.data.formId);
+        if(formDbResponse.error || formDbResponse.data.length == 0){
+            return fail(400, {message:"Form Not Found"});
+        }
+
+        const formDb : FormSchema = formDbResponse.data[0];
 
         // Contoh nama file : FOR-03-03082210001-INF-03082210001@student.uph.edu
         const splittedField: string[] = formName.split("-");
         const formCode = splittedField[0] + "_" + splittedField[1];
-        if (formCode != code) {
+        if (formCode != formDb.code) {
             return fail(400, { message: "Form does not Match with Selected File.. Please Rename or Choose the Correct Form" })
         }
 
@@ -185,7 +190,7 @@ export const actions = {
         }
         const kaprodi = findKaprodiResponse.data[0].email; // TODO: pake const ini
 
-        const fileName = `${code}-${form.data.formId}-${userCookies.username}-${userCookies.userId}-${(new Date().toISOString())}`.toString();
+        const fileName = `${formDb.code}-${form.data.formId}-${userCookies.username}-${userCookies.userId}-${(new Date().toISOString())}`.toString();
         const { error } = await supabase.storage.from("request_form_files")
             .upload(fileName, buffer, { contentType: "application/pdf" });
 
@@ -254,7 +259,16 @@ export const actions = {
                 from: "no-reply@uph-academic-services.web.id",
                 to: "kelvinrogue6@gmail.com",
                 subject: "A Request has been Received",
-                html: `<p>Form Request for student with Email : ${userCookies.email}.. Please Check Academic Service Website to Process Request</p>`
+                html: `
+                    <div>
+                    Form Request for student with Email : <strong>${userCookies.email}</strong>.. 
+                    <p>Details :</p> 
+                    <p> Name        : <strong>${userCookies.username}</strong></p>
+                    <p> Major       : <strong>${majorDbData.name}</strong></p>
+                    <p> Form Code   : <strong>${formDb.name}</strong></p>
+                    Please Check Academic Service Website to Process Request
+                    </div>
+                `
             })
             console.log(response.error);
 
