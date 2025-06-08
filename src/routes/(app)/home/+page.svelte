@@ -219,7 +219,7 @@
 	const table = createSvelteTable(options);
 
 	const { form: formData, enhance } = form; // destructure the form variable
-	const file = fileProxy(form, 'formFile'); // look at the superform documentation 
+	const file = fileProxy(form, 'formFile'); // look at the superform documentation
 
 	let filter: string = $state('');
 
@@ -277,7 +277,7 @@
 			return await response.json();
 		} catch (error) {}
 	};
-	
+
 	// $effect.root -> when a tracking scope is needed outside a component lifecycle to prevent states conflicts
 	$effect.root(() => {
 		fetchRequestForReminder().then((v) => {
@@ -338,6 +338,26 @@
 	});
 
 	let pendingDialogBool = $state(false);
+
+	function isDateGreater(d1: string) {
+		let newDate = new Date(d1);
+		let now = new Date();
+
+		const diffInMs = now.getTime() - newDate.getTime();
+		const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24)); // convert to days
+		// 1000 miliseconds = 1 second
+		// 60 seconds = 1 minute
+		// 60 minutes = 1 hour
+		// 24 hours = 1 day
+
+		if (diffInDays >= 3 && diffInDays <= 5) {
+			return '3';
+		} else if (diffInDays > 5) {
+			return '5';
+		} else {
+			return '0';
+		}
+	}
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -510,7 +530,7 @@
 						{#snippet child({ props })}
 							<Button
 								variant="outline"
-								class="justify-between max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px] text-lg"
+								class="justify-between text-lg max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
 								{...props}
 								role="combobox"
 								aria-expanded={open}
@@ -526,7 +546,8 @@
 							<Command.List>
 								<Command.Group>
 									{#each requestDbStatusCombobox as status}
-										<Command.Item class="text-lg"
+										<Command.Item
+											class="text-lg"
 											value={status.value}
 											onSelect={() => {
 												if (statusValue && statusValue == status.value) {
@@ -586,7 +607,7 @@
 						{#snippet child({ props })}
 							<Button
 								variant="outline"
-								class="justify-between max-md:w-full text-lg max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
+								class="justify-between text-lg max-md:w-full max-sm:w-full sm:w-full md:w-full lg:w-[200px]"
 								{...props}
 								role="combobox"
 								aria-expanded={open}
@@ -602,7 +623,8 @@
 							<Command.List>
 								<Command.Group>
 									{#each formDbCombobox as form}
-										<Command.Item class="text-lg"
+										<Command.Item
+											class="text-lg"
 											value={form.value}
 											onSelect={() => {
 												if (formValue && formValue == form.value) {
@@ -776,15 +798,15 @@
 				{#each unfinishedRequest ?? [] as request}
 					<a
 						href={`user/${request?.user_credentials?.user_pkey}/detail/${request?.id}`}
-						class="wrapper-1 flex flex-col items-center justify-between px-5 text-xl hover:border-4 hover:border-x-2 hover:border-uph hover:p-2"
+						class={`wrapper-1 flex gap-5 items-center justify-center rounded-md px-5 text-xl hover:border-4 hover:border-x-2 hover:border-uph hover:p-2 ${isDateGreater(request.created_at) == '5' ? ' bg-red-600 text-white' : isDateGreater(request.created_at) == '3' ? 'bg-orange-600' : ''}`}
 					>
-						<span class="flex justify-between gap-5">
+						<span class="flex items-center justify-between gap-5">
 							<Badge color={badgeVariants({ variant: 'secondary' })}>{request?.status}</Badge>
+						</span>
+						<span class={`${isDateGreater(request.created_at) == '5' ? 'text-white' : isDateGreater(request.created_at) == '3' ? 'text-white' : ''}`}>
 							<span>
 								{request?.request_code}
 							</span>
-						</span>
-						<span>
 							{new Date(request?.created_at).toLocaleDateString('en-us', {
 								day: '2-digit',
 								month: 'long',
