@@ -168,7 +168,7 @@
 										>
 									</tr>
 									<tr>
-										<td class="py-3">File</td>
+										<td class="py-3"><span class="text-2xl">File</span></td>
 										<td
 											><Label class="text-2xl">
 												<div class="flex items-center">
