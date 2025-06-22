@@ -160,7 +160,7 @@
 													<div class="flex flex-col">
 														<span
 															> : {data.requestData.form_db.name} ({data.requestData.form_db
-																.code})</span
+																.code.replace("_", "-")})</span
 														>
 													</div>
 												</div>
