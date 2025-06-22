@@ -1,17 +1,10 @@
 <script lang="ts">
+	import { EllipsisIcon } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import Ellipsis from 'lucide-svelte/icons/ellipsis';
-	let { id, approveFunc, rejectFunc }: { id: string; approveFunc: () => {}; rejectFunc: () => {} } =
-		$props();
+	import { goto, invalidateAll } from '$app/navigation';
 
-	const handleApprove = () => {
-		approveFunc();
-	};
-
-	const handleReject = () => {
-		rejectFunc();
-	};
+	let { id, url }: { id: string; url: string } = $props();
 </script>
 
 <DropdownMenu.Root>
@@ -19,12 +12,21 @@
 		{#snippet child({ props })}
 			<Button {...props} variant="ghost" size="icon" class="relative size-8 p-0">
 				<span class="sr-only">Open menu</span>
-				<Ellipsis class="size-4" />
+				<EllipsisIcon />
 			</Button>
 		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content>
-		<DropdownMenu.Item class=" text-green-600" onclick={handleApprove}>Approve</DropdownMenu.Item>
-		<DropdownMenu.Item class=" text-red-600" onclick={handleReject}>Reject</DropdownMenu.Item>
+		<DropdownMenu.Group>
+			<DropdownMenu.Label>Actions</DropdownMenu.Label>
+			<DropdownMenu.Item
+				onclick={() => {
+					goto(url, { invalidateAll: true });
+				}}
+			>
+				See Details
+			</DropdownMenu.Item>
+		</DropdownMenu.Group>
+		<DropdownMenu.Separator />
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

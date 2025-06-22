@@ -28,7 +28,7 @@
 	} from '@internationalized/date';
 	import { type ColumnDef, type TableOptions } from '@tanstack/svelte-table';
 	import { getCoreRowModel } from '@tanstack/table-core';
-	import { Bell } from 'lucide-svelte';
+	import { Bell, Icon } from 'lucide-svelte';
 	import CalendarIcon from 'lucide-svelte/icons/calendar';
 	import Check from 'lucide-svelte/icons/check';
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
@@ -49,6 +49,9 @@
 		type RequestDbSchema,
 		type UserCookiesSchema
 	} from './request-user-schema';
+	import DataTable from '$lib/components/ui/data-table/data-table.svelte';
+	import DataTableActions from '$lib/components/ui/data-table/data-table-actions.svelte';
+	import DataTableIcon from '$lib/components/ui/data-table/data-table-icon.svelte';
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
@@ -350,14 +353,68 @@
 		// 60 minutes = 1 hour
 		// 24 hours = 1 day
 
-		if (diffInDays >= 3 && diffInDays <= 5) {
+		if (diffInDays >= 3 && diffInDays < 5) {
 			return '3';
-		} else if (diffInDays > 5) {
+		} else if (diffInDays >= 5) {
 			return '5';
 		} else {
 			return '0';
 		}
 	}
+
+	export const quickRequestColumns: ColumnDef<RequestDbSchema>[] = [
+		{
+			accessorKey: '',
+			id: '1',
+			cell: ({ row }) => {
+				if (isDateGreater(row.original.created_at) == '3') {
+					return renderComponent(DataTableIcon, {
+						type: 'alert'
+					});
+				} else if (isDateGreater(row.original.created_at) == '5') {
+					return renderComponent(DataTableIcon, {
+						type: 'danger'
+					});
+				}
+			}
+		},
+		{
+			accessorKey: 'status',
+			header: 'Status'
+		},
+		{
+			accessorKey: 'request_code',
+			header: 'Request Code'
+		},
+		{
+			accessorKey: 'created_at',
+			header: 'Request Date',
+			cell: ({ row }) => {
+				return renderComponent(DataTableMultipleRowCell, {
+					value: new Date(row.original.created_at).toLocaleDateString('id-ID', {
+						day: '2-digit',
+						month: 'short',
+						year: 'numeric'
+					}),
+					value1: new Date(row.original.created_at).toLocaleTimeString()
+				});
+			}
+		},
+		{
+			accessorKey: 'form_db.name',
+			header: 'Request Name',
+			enableColumnFilter: true
+		},
+		{
+			id: 'actions',
+			cell: ({ row }) => {
+				return renderComponent(DataTableActions, {
+					id: String(row.original.id),
+					url: `/user/${row.original.user_credentials.user_pkey}/detail/${row.original.id}`
+				});
+			}
+		}
+	];
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -786,7 +843,7 @@
 {/if}
 
 <Dialog.Root bind:open={pendingDialogBool}>
-	<Dialog.Content class="sm:max-w-[425px]">
+	<Dialog.Content class="sm:max-h-[800px] sm:max-w-[800px]">
 		<Dialog.Header>
 			<Dialog.Title>Pending Request</Dialog.Title>
 			<Dialog.Description class="text-2xl">Please Process</Dialog.Description>
@@ -795,26 +852,7 @@
 			{#if unfinishedRequest?.length == 0}
 				<span>Empty Pending Request. Good Job</span>
 			{:else}
-				{#each unfinishedRequest ?? [] as request}
-					<a
-						href={`user/${request?.user_credentials?.user_pkey}/detail/${request?.id}`}
-						class={`wrapper-1 flex gap-5 items-center justify-center rounded-md px-5 text-xl hover:border-4 hover:border-x-2 hover:border-uph hover:p-2 ${isDateGreater(request.created_at) == '5' ? ' bg-red-600 text-white' : isDateGreater(request.created_at) == '3' ? 'bg-orange-600' : ''}`}
-					>
-						<span class="flex items-center justify-between gap-5">
-							<Badge color={badgeVariants({ variant: 'secondary' })}>{request?.status}</Badge>
-						</span>
-						<span class={`${isDateGreater(request.created_at) == '5' ? 'text-white' : isDateGreater(request.created_at) == '3' ? 'text-white' : ''}`}>
-							<span>
-								{request?.request_code}
-							</span>
-							{new Date(request?.created_at).toLocaleDateString('en-us', {
-								day: '2-digit',
-								month: 'long',
-								year: 'numeric'
-							})}
-						</span>
-					</a>
-				{/each}
+				<DataTable data={unfinishedRequest} columns={quickRequestColumns}></DataTable>
 			{/if}
 		</div>
 	</Dialog.Content>
