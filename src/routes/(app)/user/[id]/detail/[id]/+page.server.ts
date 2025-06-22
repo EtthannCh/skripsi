@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 
     // student data
     const userDataFromDb = await supabase.from("user_credentials").select("id, username, email, major_id ,major_db(code)").eq("id", userPkey);
-    const requestDataFromDb = await supabase.from("request_db").select("*").eq("id", requestFormId);
+    const requestDataFromDb = await supabase.from("request_db").select("*, form_db(name,code)").eq("id", requestFormId);
     const requestHistoryDataFromDb = await supabase.from("request_history_db").select("*").eq("request_id", requestFormId);
 
     if (userDataFromDb.error || userDataFromDb == undefined) {

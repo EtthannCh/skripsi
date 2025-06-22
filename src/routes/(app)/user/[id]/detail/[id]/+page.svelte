@@ -85,8 +85,10 @@
 				<div class="flex flex-col gap-3">
 					<Card.Title>Request Detail</Card.Title>
 					<Card.Description class="text-xl"
-						>Request that are Submitted By <strong>{data.userData?.username}</strong> With Request
-						ID :
+						>Request that are Submitted By <strong
+							>{data.userData?.username} ({data.userData?.email})</strong
+						>
+						With Request ID :
 						<strong>{data.requestData?.request_code}</strong></Card.Description
 					>
 				</div>
@@ -125,8 +127,71 @@
 					<div
 						class={`flex h-[250px] flex-row justify-between lg:w-[800px] ${isMobile ? 'overflow-scroll' : ''}`}
 					>
-						<div class="flex flex-col gap-4 lg:w-[450px]">
-							<Label class="text-2xl">
+						<div class="flex flex-col gap-4 lg:w-[750px]">
+							<table>
+								<tbody>
+									<tr>
+										<td class="py-3"> <span class="text-2xl">NIM</span></td>
+										<td
+											><Label class="text-2xl">
+												<div class="flex items-center justify-between">
+													<span class="lg:w-[250px]"> : {data.userData?.email.split('@')[0]}</span>
+												</div>
+											</Label></td
+										>
+									</tr>
+									<tr>
+										<td class="py-3"><span class="text-2xl">Name</span></td>
+										<td
+											><Label class="text-2xl">
+												<div class="flex items-center justify-between">
+													<span class="text-gray-700 lg:w-[250px]">
+														: {data.userData?.username}
+													</span>
+												</div>
+											</Label></td
+										>
+									</tr>
+									<tr>
+										<td class="py-3"><span class="text-2xl">Form Name (Form Code)</span></td>
+										<td
+											><Label class="text-2xl">
+												<div class="flex items-center justify-between">
+													<div class="flex flex-col">
+														<span
+															> : {data.requestData.form_db.name} ({data.requestData.form_db
+																.code})</span
+														>
+													</div>
+												</div>
+											</Label></td
+										>
+									</tr>
+									<tr>
+										<td class="py-3">File</td>
+										<td
+											><Label class="text-2xl">
+												<div class="flex items-center">
+													: <a
+														class="text-[#3e74c5] lg:w-[250px]"
+														href={data.requestData?.form_url}
+														target="_blank"><FileText /></a
+													>
+												</div>
+											</Label></td
+										>
+									</tr>
+								</tbody>
+								<tbody>
+									<tr>
+										<td> </td>
+										<td> </td>
+										<td></td>
+										<td> </td>
+									</tr>
+								</tbody>
+							</table>
+							<!-- <Label class="text-2xl">
 								<div class="flex items-center justify-between">
 									<span>NIM</span>
 									<span class="lg:w-[250px]"> : {data.userData?.email.split('@')[0]}</span>
@@ -141,10 +206,9 @@
 							<Label class="text-2xl">
 								<div class="flex items-center justify-between">
 									<div class="flex flex-col">
-										<span>Email </span>
-										<span>({data.userData.major_db.code})</span>
+										<span>Form Name (Form Code) :</span>
+										<span>{data.requestData.form_db.name} ({data.requestData.form_db.code})</span>
 									</div>
-									<span class="lg:w-[250px]"> : {data.userData?.email}</span>
 								</div>
 							</Label>
 							<Label class="text-2xl">
@@ -158,7 +222,8 @@
 										target="_blank"><FileText /></a
 									>
 								</div>
-							</Label>
+							</Label> -->
+
 							{#if data.requestData?.reason}
 								<Label class="text-2xl">
 									<div class="flex items-center justify-between text-red-500">

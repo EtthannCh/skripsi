@@ -746,7 +746,7 @@
 		</div>
 		<div class="overflow-x-auto px-5">
 			<div
-				class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1000px] overflow-y-scroll rounded-md border-2"
+				class="border-gray-500s m-3 mx-auto max-h-[600px] w-[1200px] overflow-y-scroll rounded-md border-2"
 			>
 				<Table.Root>
 					<Table.Header class="bg-uph">
@@ -754,7 +754,7 @@
 							<Table.Row>
 								{#each headerGroup.headers as header}
 									<Table.Head
-										class="border-x-[1px] border-y-[1px] border-black p-5 text-[18px] text-white"
+										class=" p-5 text-[18px] text-white"
 										style="width: {header.column.getSize()}px"
 									>
 										{#if !header.isPlaceholder}
@@ -772,7 +772,7 @@
 						{#each table.getRowModel().rows as row}
 							<Table.Row data-state={row.getIsSelected() && 'selected'}>
 								{#each row.getVisibleCells() as cell (cell.id)}
-									<Table.Cell class="border-x-[1px] border-y-[1px] border-black text-[18px]">
+									<Table.Cell class="text-[18px]">
 										<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 									</Table.Cell>
 								{/each}
