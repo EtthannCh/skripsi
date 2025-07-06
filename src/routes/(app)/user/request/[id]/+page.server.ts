@@ -19,9 +19,9 @@ export const load = async ({ cookies, url }) => {
         `
     )
         .eq("user_id", userCookies.userId)
-        .order("request_code", { ascending: true })
-        .range(pages * 6, (pages + 1) * 6)
-        .limit(6);
+        .order("request_code", { ascending: true });
+        // .range(pages * 6, (pages + 1) * 6)
+        // .limit(6);
     let totalRequestDbPerUserResponse = (supabase.from("request_db").select(`
             id, status, form_db!inner(code, name), reason, form_url, last_updated_by, request_code, created_at
             `, { count: 'exact' }).eq("user_id", userCookies.userId));

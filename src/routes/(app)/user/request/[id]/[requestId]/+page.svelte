@@ -3,7 +3,6 @@
 	import { ArrowLeft, FileText } from 'lucide-svelte';
 	import { Stretch } from 'svelte-loading-spinners';
 	import type { PageData } from './$types';
-
 	let {
 		data,
 		requestCode,
@@ -72,6 +71,74 @@
 			<Stretch color="#314986" />
 		</div>
 	{/if}
+	<div class="mt-4 p-4">
+		<h1 class="mb-6 text-center text-4xl font-semibold">Package status</h1>
+		<div class="container max-h-[500px] overflow-y-scroll">
+			<div class="grid-cols-12 flex-col text-gray-50 md:grid">
+				<div class="md:contents">
+					<div
+						class="col-start-4 col-end-12 my-4 w-full rounded-xl bg-yellow-300 p-4 shadow-md"
+					>
+						<h3 class="mb-1 text-lg font-semibold">Approved By</h3>
+						<p class="w-full text-justify leading-tight">Kaprodi</p>
+					</div>
+				</div>
+
+				<div class="flex md:contents">
+					<div class="relative col-start-2 col-end-4 mr-10 md:mx-auto">
+						<div class="flex h-full w-6 items-center justify-center">
+							<div class="pointer-events-none h-full w-1 bg-green-500"></div>
+						</div>
+						<div
+							class="absolute top-1/2 -mt-3 h-6 w-6 rounded-full bg-green-500 text-center shadow"
+						>
+							<i class="fas fa-check-circle text-white"></i>
+						</div>
+					</div>
+					<div
+						class="col-start-4 col-end-12 my-4 mr-auto w-full rounded-xl bg-green-500 p-4 shadow-md"
+					>
+						<h3 class="mb-1 text-lg font-semibold">Out for Delivery</h3>
+						<p class="text-justify leading-tight">22 July 2021, 01:00 PM</p>
+					</div>
+				</div>
+
+				<div class="flex md:contents">
+					<div class="relative col-start-2 col-end-4 mr-10 md:mx-auto">
+						<div class="flex h-full w-6 items-center justify-center">
+							<div class="pointer-events-none h-full w-1 bg-red-500"></div>
+						</div>
+						<div class="absolute top-1/2 -mt-3 h-6 w-6 rounded-full bg-red-500 text-center shadow">
+							<i class="fas fa-times-circle text-white"></i>
+						</div>
+					</div>
+					<div
+						class="col-start-4 col-end-12 my-4 mr-auto w-full rounded-xl bg-red-500 p-4 shadow-md"
+					>
+						<h3 class="mb-1 text-lg font-semibold text-gray-50">Cancelled</h3>
+						<p class="text-justify leading-tight">Customer cancelled the order</p>
+					</div>
+				</div>
+
+				<div class="flex md:contents">
+					<div class="relative col-start-2 col-end-4 mr-10 md:mx-auto">
+						<div class="flex h-full w-6 items-center justify-center">
+							<div class="pointer-events-none h-full w-1 bg-gray-300"></div>
+						</div>
+						<div class="absolute top-1/2 -mt-3 h-6 w-6 rounded-full bg-gray-300 text-center shadow">
+							<i class="fas fa-exclamation-circle text-gray-400"></i>
+						</div>
+					</div>
+					<div
+						class="col-start-4 col-end-12 my-4 mr-auto w-full rounded-xl bg-gray-300 p-4 shadow-md"
+					>
+						<h3 class="mb-1 text-lg font-semibold text-gray-400">Delivered</h3>
+						<p class="text-justify leading-tight"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	<button
 		class={`mx-auto my-5 flex w-[100px] rounded-md bg-uphButton p-3 text-white ${mainPage ? 'block' : 'hidden'}`}
 		onclick={() => {

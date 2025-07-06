@@ -77,7 +77,7 @@
 								{...props}
 								class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-[50px]"
 							>
-								<span class="flex flex-col gap-1 max-h-[50px] overflow-y-scroll">
+								<span class="flex flex-col gap-1 max-h-[200px]">
 									<span>
 										{`${user.username.toUpperCase()} ( ${majorData.code.toUpperCase()} )`}
 									</span>

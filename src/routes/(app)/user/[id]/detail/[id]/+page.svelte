@@ -158,9 +158,11 @@
 											><Label class="text-2xl">
 												<div class="flex items-center justify-between">
 													<div class="flex flex-col">
-														<span
-															> : {data.requestData.form_db.name} ({data.requestData.form_db
-																.code.replace("_", "-")})</span
+														<span>
+															: {data.requestData.form_db.name} ({data.requestData.form_db.code.replace(
+																'_',
+																'-'
+															)})</span
 														>
 													</div>
 												</div>
@@ -173,65 +175,20 @@
 											><Label class="text-2xl">
 												<div class="flex items-center">
 													: <a
-														class="text-[#3e74c5] lg:w-[250px]"
+														class="text-[#3e74c5] lg:w-[250px] flex items-center gap-5"
 														href={data.requestData?.form_url}
-														target="_blank"><FileText /></a
-													>
+														target="_blank"
+														><FileText />
+														{#if data.requestData?.reason}
+															<span class="text-red-600">( {data.requestData.reason})</span>
+														{/if}
+													</a>
 												</div>
 											</Label></td
 										>
 									</tr>
 								</tbody>
-								<tbody>
-									<tr>
-										<td> </td>
-										<td> </td>
-										<td></td>
-										<td> </td>
-									</tr>
-								</tbody>
 							</table>
-							<!-- <Label class="text-2xl">
-								<div class="flex items-center justify-between">
-									<span>NIM</span>
-									<span class="lg:w-[250px]"> : {data.userData?.email.split('@')[0]}</span>
-								</div>
-							</Label>
-							<Label class="text-2xl">
-								<div class="flex items-center justify-between">
-									<span>Name </span>
-									<span class="text-gray-700 lg:w-[250px]"> : {data.userData?.username} </span>
-								</div>
-							</Label>
-							<Label class="text-2xl">
-								<div class="flex items-center justify-between">
-									<div class="flex flex-col">
-										<span>Form Name (Form Code) :</span>
-										<span>{data.requestData.form_db.name} ({data.requestData.form_db.code})</span>
-									</div>
-								</div>
-							</Label>
-							<Label class="text-2xl">
-								<div class="flex items-center justify-between">
-									<div class="flex flex-col">
-										<span>File </span>
-									</div>
-									<a
-										class="text-[#3e74c5] lg:w-[250px]"
-										href={data.requestData?.form_url}
-										target="_blank"><FileText /></a
-									>
-								</div>
-							</Label> -->
-
-							{#if data.requestData?.reason}
-								<Label class="text-2xl">
-									<div class="flex items-center justify-between text-red-500">
-										<span>Reject Reason</span>
-										<span class="lg:w-[250px]"> : {data.requestData.reason}</span>
-									</div>
-								</Label>
-							{/if}
 						</div>
 						<div class={`lg:w-[300px] ${isMobile ? 'w-[400px]' : ''}`}>
 							{#if loading && data.requestData}

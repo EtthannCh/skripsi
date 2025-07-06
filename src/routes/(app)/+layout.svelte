@@ -61,7 +61,7 @@
 			<Sheet.Trigger class={`${buttonVariants({ variant: 'outline' })} mx-10 my-3`}
 				>Open Sidebar</Sheet.Trigger
 			>
-			<Sheet.Content side="left" class="w-[200px] bg-uph text-white" onClose={() => {}}>
+			<Sheet.Content side="left" class="w-[250px] bg-uph text-white" onClose={() => {}}>
 				<Sheet.Header>
 					<Sheet.Title class="my-3 flex flex-row items-center gap-5 text-white">
 						<img src={uphLogo} alt="logo uph" class="h-10 w-10 rounded-full" />
@@ -80,7 +80,7 @@
 						</div>
 					{/if}
 				</div>
-				<Sheet.Footer>
+				<Sheet.Footer class="absolute bottom-0 left-0">
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
 							{#snippet child({ props })}

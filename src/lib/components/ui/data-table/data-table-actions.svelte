@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { EllipsisIcon } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { EllipsisIcon } from 'lucide-svelte';
 
-	let { id, url }: { id: string; url: string } = $props();
+	let { url, requestHandler }: { url?: string; requestHandler?: () => void } =
+		$props();
 </script>
 
 <DropdownMenu.Root>
@@ -21,7 +22,11 @@
 			<DropdownMenu.Label>Actions</DropdownMenu.Label>
 			<DropdownMenu.Item
 				onclick={() => {
-					goto(url, { invalidateAll: true });
+					if (requestHandler) {
+						requestHandler();
+					} else {
+						goto(url ?? '', { invalidateAll: true });
+					}
 				}}
 			>
 				See Details

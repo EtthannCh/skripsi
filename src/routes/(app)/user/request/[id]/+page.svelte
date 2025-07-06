@@ -2,25 +2,35 @@
 	import { goto, preloadData, pushState } from '$app/navigation';
 	import { navigating, page } from '$app/state';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
+	import { createSvelteTable, renderComponent } from '$lib/components/ui/data-table';
 	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
+	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
+	import DataTable from '$lib/components/ui/data-table/data-table.svelte';
 	import * as Popover from '$lib/components/ui/popover/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import { cn } from '$lib/utils';
-	import { ArrowLeft } from 'lucide-svelte';
+	import {
+		getCoreRowModel,
+		getExpandedRowModel,
+		type ColumnDef,
+		type PaginationState,
+		type TableOptions
+	} from '@tanstack/table-core';
 	import Check from 'lucide-svelte/icons/check';
-	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
-	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
-	import { Stretch } from 'svelte-loading-spinners';
+	import { tick } from 'svelte';
+	import { Circle } from 'svelte-loading-spinners';
 	import { MediaQuery } from 'svelte/reactivity';
-	import { requestDbStatusCombobox, requestEnumColor } from '../../../home/request-user-schema';
+	import {
+		requestDbStatusCombobox,
+		requestDbStatusEnum,
+		requestEnumColor
+	} from '../../../home/request-user-schema';
 	import type { PageData } from './$types';
 	import RequestDetailPage from './[requestId]/+page.svelte';
-	import { tick } from 'svelte';
+	import type { TableDataType } from './user-request-schema';
+	import DataTableActions from '$lib/components/ui/data-table/data-table-actions.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -30,7 +40,6 @@
 	const fetchPreloadData = async (requestId: number) => {
 		const url = `${page.url.pathname}/${requestId}`;
 		const result = await preloadData(url);
-
 		if (result.type == 'loaded') {
 			pushState(url, { preloadedData: result.data });
 		} else {
@@ -50,11 +59,13 @@
 		}
 	});
 
+	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
 	let requestCode = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
 	let open = $state(false);
 	let statusValue = $state('');
 	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
+	let requestId: number = $state(0);
 
 	function closeAndFocusTrigger() {
 		open = false;
@@ -80,22 +91,113 @@
 			isMobile = true;
 		}
 	});
+
+	let dataTableData: TableDataType[] = $derived(
+		data.data.userRequestFromDb.map((v) => {
+			return {
+				id: v.id,
+				requestCode: v.request_code,
+				status: v.status,
+				formCode: v.form_db.code,
+				formName: v.form_db.name,
+				submissionDate: v.created_at
+			};
+		})
+	);
+
+	const columns: ColumnDef<TableDataType>[] = [
+		{
+			id: 'expander',
+			size: 50
+		},
+		{
+			id: 'requestCode',
+			header: 'Request Code',
+			accessorKey: 'requestCode',
+			accessorFn: (row) => row.requestCode,
+
+			size: 50,
+			cell: ({ row }) => {
+				return row.original.requestCode;
+			}
+		},
+		{
+			id: 'status',
+			header: 'Status',
+			accessorKey: 'status',
+			accessorFn: (row) => row.status,
+			size: 50,
+			cell: ({ row }) => {
+				return renderComponent(DataTableBadgeCell, {
+					value: requestDbStatusEnum[row.original.status],
+					className: `${requestEnumColor[row.original.status]} max-w-[150px]`
+				});
+			}
+		},
+		{
+			id: 'formCode',
+			header: 'Form Code',
+			accessorKey: 'formCode',
+			size: 50,
+			accessorFn: (row) => row.formCode,
+			cell: ({ row }) => {
+				return row.original.formCode.replace('_', '-');
+			}
+		},
+		{
+			id: 'formName',
+			header: 'Form Name',
+			accessorKey: 'formName',
+			accessorFn: (row) => row.formName,
+			cell: ({ row }) => {
+				return row.original.formName;
+			}
+		},
+		{
+			id: 'submissionDate',
+			header: 'Submission Date',
+			accessorKey: 'submissionDate',
+			accessorFn: (row) => row.submissionDate,
+			cell: ({ row }) => {
+				return renderComponent(DataTableMultipleRowCell, {
+					value: new Date(row.original.submissionDate).toLocaleDateString('id-ID', {
+						day: '2-digit',
+						month: 'short',
+						year: 'numeric'
+					}),
+					value1: new Date(row.original.submissionDate).toLocaleTimeString()
+				});
+			}
+		},
+		{
+			id: 'actions',
+			cell: ({ row }) => {
+				return renderComponent(DataTableActions, {
+					requestHandler: async () => {
+						requestCode = row.original.requestCode;
+						await fetchPreloadData(row.original.id);
+					}
+				});
+			}
+		}
+	];
+
+	const options: TableOptions<TableDataType> = {
+		get data() {
+			return dataTableData;
+		},
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		getExpandedRowModel: getExpandedRowModel()
+	};
+
+	const table = createSvelteTable(options);
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
 
-<button
-	class="mx-10 my-5 flex rounded-md bg-uphButton p-3 text-white"
-	onclick={() => {
-		goto('/home');
-	}}
->
-	<ArrowLeft />
-	<span>Back</span>
-</button>
-
-<div class={`wrapper-1 w-full pl-10 overflow-x-scroll ${isMobile ? "":""}`}>
-	<div class="flex items-center gap-5 pb-5">
+<div class={`wrapper-1 w-full overflow-x-scroll pl-10 ${isMobile ? '' : 'mt-5'}`}>
+	<div class={`flex items-center gap-5 pb-5 ${isMobile ? 'w-[260px]' : ''}`}>
 		<Popover.Root bind:open>
 			<Popover.Trigger bind:ref={triggerRef}>
 				{#snippet child({ props })}
@@ -139,21 +241,30 @@
 			</Popover.Content>
 		</Popover.Root>
 		<button
-			class="rounded-md bg-uphButton p-3 text-white"
+			class={`flex h-10 items-center justify-center gap-3 rounded-md bg-uphButton p-3 ${navigating.to != null ? 'text-gray-400' : 'text-white'}`}
 			onclick={() => {
 				filterHandler();
-			}}>Filter</button
+			}}
+			disabled={navigating.to != null}
 		>
-		{#if navigating.to || openDetailSheet}
-			<div class="mb-4 h-10">
-				<Stretch color="#314986" />
-			</div>
-		{/if}
+			{#if navigating.to || openDetailSheet}
+				<div>
+					<Circle size="27" color={navigating.to != null ? 'grey' : '#fff'} />
+				</div>
+			{/if}
+			Filter</button
+		>
 	</div>
+	<DataTable
+		data={dataTableData}
+		{columns}
+		className="bg-white p-5 mr-10 rounded-md"
+		headerClass="bg-uphButton text-white"
+	></DataTable>
 	<div
 		class={`wrapper-1 grid overflow-scroll ${windowWidth < 700 ? 'grid-cols-1 gap-36 ' : ''} ${windowWidth > 1300 ? ' grid-cols-3 gap-10' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2 gap-24 ' : ''} place-items-center`}
 	>
-		{#each data.data.userRequestFromDb as userRequest}
+		<!-- {#each data.data.userRequestFromDb as userRequest}
 			<div class="w-[320px]">
 				<Card.Root>
 					<Card.Header>
@@ -191,7 +302,7 @@
 					</Card.Content>
 				</Card.Root>
 			</div>
-		{/each}
+		{/each} -->
 
 		<Sheet.Root open={page.state.preloadedData != null}>
 			<Sheet.Content
@@ -210,7 +321,7 @@
 			</Sheet.Content>
 		</Sheet.Root>
 	</div>
-	<div
+	<!-- <div
 		class="sticky bottom-0 mx-auto my-5 flex w-[400px] items-center justify-center rounded-full bg-white py-2"
 	>
 		<Pagination.Root count={data.data.totalCount ?? 0} {perPage} {siblingCount}>
@@ -262,7 +373,7 @@
 				</Pagination.Content>
 			{/snippet}
 		</Pagination.Root>
-	</div>
+	</div> -->
 </div>
 
 <style>

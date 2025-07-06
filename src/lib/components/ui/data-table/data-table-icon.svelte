@@ -1,8 +1,8 @@
 <script lang="ts">
 	import * as HoverCard from '$lib/components/ui/hover-card/index.js';
-	import { OctagonAlert, TriangleAlert } from 'lucide-svelte';
+	import { OctagonAlert, TriangleAlert, ChevronsDown } from 'lucide-svelte';
 
-	let { type }: { type: string } = $props();
+	let { type, onClick }: { type: string; onClick?: () => void } = $props();
 </script>
 
 {#if type == 'alert'}
@@ -19,7 +19,7 @@
 		</HoverCard.Content>
 	</HoverCard.Root>
 {:else if type == 'danger'}
-<HoverCard.Root>
+	<HoverCard.Root>
 		<HoverCard.Trigger
 			class="rounded-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
 		>
@@ -31,4 +31,8 @@
 			</div>
 		</HoverCard.Content>
 	</HoverCard.Root>
+{:else if type == 'subrow'}
+	<button {onclick}>
+		<ChevronsDown color="blue" />
+	</button>
 {/if}

@@ -409,7 +409,6 @@
 			id: 'actions',
 			cell: ({ row }) => {
 				return renderComponent(DataTableActions, {
-					id: String(row.original.id),
 					url: `/user/${row.original.user_credentials.user_pkey}/detail/${row.original.id}`
 				});
 			}
