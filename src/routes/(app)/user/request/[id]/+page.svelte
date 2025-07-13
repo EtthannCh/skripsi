@@ -89,7 +89,8 @@
 				status: v.status,
 				formCode: v.form_db.code,
 				formName: v.form_db.name,
-				submissionDate: v.created_at
+				submissionDate: v.created_at,
+				reason: v.reason
 			};
 		})
 	);
@@ -160,6 +161,14 @@
 					}),
 					value1: new Date(row.original.submissionDate).toLocaleTimeString()
 				});
+			}
+		},
+		{
+			id: 'reason',
+			header: 'Rejection Reason',
+			accessorFn: (row) => row.reason,
+			cell: ({ row }) => {
+				return row.original.reason;
 			}
 		}
 	];
@@ -238,7 +247,7 @@
 	<DataTableSubRowTracking
 		data={dataTableData}
 		{columns}
-		className="bg-white p-5 mr-10 rounded-md"
+		className="bg-white p-5 mr-10 rounded-md mb-5"
 		headerClass="bg-uphButton text-white"
 		fetchHandler={fetchPreloadData}
 	></DataTableSubRowTracking>

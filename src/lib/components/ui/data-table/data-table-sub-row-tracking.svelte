@@ -196,12 +196,20 @@
 																	{data.userRequestHistory[0]
 																		? new Date(
 																				data.userRequestHistory[0]?.created_at
-																			).toLocaleDateString('id-ID', {
+																			).toLocaleDateString('en-us', {
 																				day: '2-digit',
-																				month: 'short',
+																				month: 'long',
 																				year: 'numeric'
 																			})
-																		: 'Pending'}
+																		: new Date(
+																				data.userRequestHistory[
+																					data.userRequestHistory.length - 1
+																				].created_at
+																			).toLocaleDateString('en-us', {
+																				day: '2-digit',
+																				month: 'long',
+																				year: '2-digit'
+																			})}
 																</div>
 															</div>
 
@@ -218,12 +226,20 @@
 																	{data.userRequestHistory[1]
 																		? new Date(
 																				data.userRequestHistory[1]?.created_at
-																			).toLocaleDateString('id-ID', {
+																			).toLocaleDateString('en-us', {
 																				day: '2-digit',
-																				month: 'short',
+																				month: 'long',
 																				year: 'numeric'
 																			})
-																		: 'Pending'}
+																		: new Date(
+																				data.userRequestHistory[
+																					data.userRequestHistory.length - 1
+																				].created_at
+																			).toLocaleDateString('en-us', {
+																				day: '2-digit',
+																				month: 'long',
+																				year: '2-digit'
+																			})}
 																</div>
 															</div>
 
@@ -234,27 +250,41 @@
 																	3
 																</div>
 																<div
-																	class="mb-1 flex items-center gap-2 text-sm font-semibold text-uphButton"
+																	class="mb-1 text-sm font-semibold text-uphButton"
 																>
-																	<span> Finished </span>
-																	<span>
-																		{#if data.userApprovalOrRejectFileUrl.completion_file_url}
-																			<a href={data.userApprovalOrRejectFileUrl.completion_file_url} target="_blank">
-																				<FileText />
-																			</a>
-																		{/if}
-																	</span>
+																	<div class="flex items-center gap-2">
+																		<span> Finished </span>
+																		<span>
+																			{#if data.userApprovalOrRejectFileUrl.completion_file_url}
+																				<a
+																					href={data.userApprovalOrRejectFileUrl
+																						.completion_file_url}
+																					target="_blank"
+																				>
+																					<FileText />
+																				</a>
+																			{/if}
+																		</span>
+																	</div>
 																</div>
 																<div class="text-xs text-gray-500">
 																	{data.userRequestHistory[2]
 																		? new Date(
 																				data.userRequestHistory[2]?.created_at
-																			).toLocaleDateString('id-ID', {
+																			).toLocaleDateString('en-us', {
 																				day: '2-digit',
 																				month: 'long',
 																				year: 'numeric'
 																			})
-																		: 'Pending'}
+																		: new Date(
+																				data.userRequestHistory[
+																					data.userRequestHistory.length - 1
+																				].created_at
+																			).toLocaleDateString('en-us', {
+																				day: '2-digit',
+																				month: 'long',
+																				year: '2-digit'
+																			})}
 																</div>
 															</div>
 														</div>

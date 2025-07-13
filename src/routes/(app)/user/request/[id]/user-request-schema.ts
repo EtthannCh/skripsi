@@ -9,6 +9,7 @@ export const tableDataType = z.object({
     formCode: z.string(),
     formName: z.string(),
     submissionDate: z.string(),
+    reason:z.string(),
 });
 
 export type TableDataType = z.infer<typeof tableDataType>;
@@ -19,6 +20,7 @@ export const userApprovalOrRejectFileUrlType = z.object({
     status: z.enum(Object.keys(requestDbStatusEnum) as [keyof typeof requestDbStatusEnum, ...Array<keyof typeof requestDbStatusEnum>]),
     completion_file_url: z.string(),
     created_by_id: z.string(),
+    reason: z.string()
 })
 
 export const userRequestHistoryType = z.object({
