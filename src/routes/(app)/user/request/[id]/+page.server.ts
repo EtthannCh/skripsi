@@ -10,7 +10,6 @@ export const load = async ({ cookies, url }) => {
         throw error(401, "Unauthorized");
     }
 
-    const pages = Number(url.searchParams.get("pages") ?? 0);
     const status = url.searchParams.get("status") ?? "";
 
     let userRequestResponse = supabase.from("request_db").select(

@@ -28,6 +28,7 @@ export type ApproveRejectSchema = z.infer<typeof approveRejectSchema>;
 
 export const requestHistorySchema = z.object({
     id: z.number(),
+    status: z.enum(Object.keys(requestDbStatusEnum) as [keyof typeof requestDbStatusEnum, ...Array<keyof typeof requestDbStatusEnum>]),
     request_id: z.number(),
     created_by_id: z.string(),
     created_by: z.string(),

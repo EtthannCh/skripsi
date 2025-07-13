@@ -1,20 +1,18 @@
 <script lang="ts">
-	import { goto, preloadData, pushState } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { navigating, page } from '$app/state';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Command from '$lib/components/ui/command/index.js';
-	import { createSvelteTable, renderComponent } from '$lib/components/ui/data-table';
+	import { renderComponent } from '$lib/components/ui/data-table';
 	import DataTableBadgeCell from '$lib/components/ui/data-table/data-table-badge-cell.svelte';
 	import DataTableMultipleRowCell from '$lib/components/ui/data-table/data-table-multiple-row-cell.svelte';
-	import DataTable from '$lib/components/ui/data-table/data-table.svelte';
+	import DataTableSubRowTracking from '$lib/components/ui/data-table/data-table-sub-row-tracking.svelte';
 	import * as Popover from '$lib/components/ui/popover/index.js';
-	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import { cn } from '$lib/utils';
 	import {
 		getCoreRowModel,
 		getExpandedRowModel,
 		type ColumnDef,
-		type PaginationState,
 		type TableOptions
 	} from '@tanstack/table-core';
 	import Check from 'lucide-svelte/icons/check';
@@ -28,9 +26,7 @@
 		requestEnumColor
 	} from '../../../home/request-user-schema';
 	import type { PageData } from './$types';
-	import RequestDetailPage from './[requestId]/+page.svelte';
 	import type { TableDataType } from './user-request-schema';
-	import DataTableActions from '$lib/components/ui/data-table/data-table-actions.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -38,13 +34,9 @@
 	const perPage = $derived(isDesktop.current ? 6 : 6);
 	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 	const fetchPreloadData = async (requestId: number) => {
-		const url = `${page.url.pathname}/${requestId}`;
-		const result = await preloadData(url);
-		if (result.type == 'loaded') {
-			pushState(url, { preloadedData: result.data });
-		} else {
-			goto(url);
-		}
+		const url = `${page.url.pathname}/fetch-history?requestId=${requestId}`;
+		const response = await fetch(url);
+		return await response.json();
 	};
 
 	let pagesFilter: number = $state(0);
@@ -59,13 +51,10 @@
 		}
 	});
 
-	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
-	let requestCode = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
 	let open = $state(false);
 	let statusValue = $state('');
 	let selectedValue = $derived(requestDbStatusCombobox.find((f) => f.value === statusValue)?.label);
-	let requestId: number = $state(0);
 
 	function closeAndFocusTrigger() {
 		open = false;
@@ -109,6 +98,10 @@
 		{
 			id: 'expander',
 			size: 50
+		},
+		{
+			accessorKey: 'requestId',
+			accessorFn: (row) => row.id
 		},
 		{
 			id: 'requestCode',
@@ -168,17 +161,6 @@
 					value1: new Date(row.original.submissionDate).toLocaleTimeString()
 				});
 			}
-		},
-		{
-			id: 'actions',
-			cell: ({ row }) => {
-				return renderComponent(DataTableActions, {
-					requestHandler: async () => {
-						requestCode = row.original.requestCode;
-						await fetchPreloadData(row.original.id);
-					}
-				});
-			}
 		}
 	];
 
@@ -190,8 +172,6 @@
 		getCoreRowModel: getCoreRowModel(),
 		getExpandedRowModel: getExpandedRowModel()
 	};
-
-	const table = createSvelteTable(options);
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -255,125 +235,13 @@
 			Filter</button
 		>
 	</div>
-	<DataTable
+	<DataTableSubRowTracking
 		data={dataTableData}
 		{columns}
 		className="bg-white p-5 mr-10 rounded-md"
 		headerClass="bg-uphButton text-white"
-	></DataTable>
-	<div
-		class={`wrapper-1 grid overflow-scroll ${windowWidth < 700 ? 'grid-cols-1 gap-36 ' : ''} ${windowWidth > 1300 ? ' grid-cols-3 gap-10' : ''} ${windowWidth < 1300 && windowWidth > 700 ? 'grid-cols-2 gap-24 ' : ''} place-items-center`}
-	>
-		<!-- {#each data.data.userRequestFromDb as userRequest}
-			<div class="w-[320px]">
-				<Card.Root>
-					<Card.Header>
-						<Card.Title>{userRequest.request_code}</Card.Title>
-						<Card.Description></Card.Description>
-					</Card.Header>
-					<Separator />
-					<Card.Content>
-						<DataTableBadgeCell
-							className={`${requestEnumColor[userRequest.status]} mb-5`}
-							value={userRequest.status}
-						></DataTableBadgeCell>
-						<div class="scrollbar-hidden flex flex-row gap-5">
-							<div class="flex justify-between gap-6">
-								<div class="flex flex-col gap-5">
-									<span>Form Code : {userRequest.form_db.code.replace('_', '-')}</span>
-									<span>Form Name : {userRequest.form_db.name}</span>
-									<span
-										>Submission Date : {new Date(userRequest.created_at).toLocaleDateString(
-											'id-ID',
-											{ day: '2-digit', month: 'short', year: 'numeric' }
-										)}</span
-									>
-									<Button
-										variant="outline"
-										onclick={() => {
-											fetchPreloadData(userRequest.id);
-											requestCode = userRequest.request_code;
-											openDetailSheet = true;
-										}}>Detail</Button
-									>
-								</div>
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-			</div>
-		{/each} -->
-
-		<Sheet.Root open={page.state.preloadedData != null}>
-			<Sheet.Content
-				side="right"
-				onInteractOutside={() => {
-					window.history.back();
-				}}
-				onClose={() => {
-					window.history.back();
-				}}
-			>
-				<Sheet.Header>
-					<Sheet.Title class="pb-5 text-3xl">Process Details</Sheet.Title>
-				</Sheet.Header>
-				<RequestDetailPage isMainPage={false} data={page.state.preloadedData} {requestCode} />
-			</Sheet.Content>
-		</Sheet.Root>
-	</div>
-	<!-- <div
-		class="sticky bottom-0 mx-auto my-5 flex w-[400px] items-center justify-center rounded-full bg-white py-2"
-	>
-		<Pagination.Root count={data.data.totalCount ?? 0} {perPage} {siblingCount}>
-			{#snippet children({ pages })}
-				<Pagination.Content>
-					<Pagination.Item>
-						<Pagination.PrevButton
-							onclick={() => {
-								pagesFilter -= 1;
-								filterHandler();
-							}}
-						>
-							<ChevronLeft class="size-4" />
-							<span class="hidden sm:block">Previous</span>
-						</Pagination.PrevButton>
-					</Pagination.Item>
-					{#each pages as page (page.key)}
-						{#if page.type === 'ellipsis'}
-							<Pagination.Item>
-								<Pagination.Ellipsis />
-							</Pagination.Item>
-						{:else}
-							<Pagination.Item>
-								<Pagination.Link
-									{page}
-									isActive={pagesFilter + 1 === page.value}
-									onclick={() => {
-										pagesFilter = Number(page.value) - 1;
-										filterHandler();
-									}}
-								>
-									{page.value}
-								</Pagination.Link>
-							</Pagination.Item>
-						{/if}
-					{/each}
-					<Pagination.Item>
-						<Pagination.NextButton
-							disabled={data.data.userRequestFromDb.length == 0}
-							onclick={() => {
-								pagesFilter += 1;
-								filterHandler();
-							}}
-						>
-							<span class="hidden sm:block">Next</span>
-							<ChevronRight class="size-4" />
-						</Pagination.NextButton>
-					</Pagination.Item>
-				</Pagination.Content>
-			{/snippet}
-		</Pagination.Root>
-	</div> -->
+		fetchHandler={fetchPreloadData}
+	></DataTableSubRowTracking>
 </div>
 
 <style>

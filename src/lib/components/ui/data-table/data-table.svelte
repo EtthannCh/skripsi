@@ -11,6 +11,7 @@
 		type PaginationState
 	} from '@tanstack/table-core';
 	import { SquareChevronDown, SquareChevronUp } from 'lucide-svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import Button from '../button/button.svelte';
 	import { Input } from '../input';
 	import DataTableSubRowTracking from './data-table-sub-row-tracking.svelte';
@@ -21,13 +22,32 @@
 		className?: string;
 		headerClass?: string;
 		size?: string;
+		historyData?: TData[];
+		fetchHandler?: (id: number) => void;
+		filterHandler?: (pageSize: number) => void;
 	};
 
-	let { data, columns, className, headerClass, size }: DataTableProps<TData, TValue> =
-		$props();
+	// pagination
+	const isDesktop = new MediaQuery('(min-width: 768px)');
+	const perPage = $derived(isDesktop.current ? 5 : 5);
+	const siblingCount = $derived(isDesktop.current ? 1 : 0);
+	let pagesFilter: number = $state(0);
+
+	let {
+		data,
+		columns,
+		className,
+		headerClass,
+		size,
+		historyData,
+		fetchHandler,
+		filterHandler
+	}: DataTableProps<TData, TValue> = $props();
 	let expanded = $state<ExpandedState>({});
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
 	let globalFilter = $state('');
+	let selectedRowId = $state(0);
+	
 
 	const table = createSvelteTable({
 		get data() {
@@ -60,7 +80,6 @@
 				expanded = updater;
 			}
 		},
-
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
@@ -105,29 +124,10 @@
 					<Table.Row data-state={row.getIsSelected() && 'selected'} class="text-[18px]">
 						{#each row.getVisibleCells() as cell, idx (cell.id)}
 							<Table.Cell>
-								{#if idx == 0}
-									<button
-										onclick={() => {
-											const handler = row.getToggleExpandedHandler();
-											handler();
-										}}
-									>
-										{#if row.getIsExpanded()}
-											<SquareChevronUp color="black" />
-										{:else}
-											<SquareChevronDown color="black" />
-										{/if}
-									</button>
-								{/if}
 								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 							</Table.Cell>
 						{/each}
 					</Table.Row>
-					{#if row.getIsExpanded()}
-						<Table.Cell colspan={table.getAllLeafColumns().length}>
-							<DataTableSubRowTracking data={[]} {columns}></DataTableSubRowTracking>
-						</Table.Cell>
-					{/if}
 				{:else}
 					<Table.Row>
 						<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
@@ -137,6 +137,59 @@
 		</Table.Root>
 	</div>
 	<div class="flex items-center justify-end space-x-2 py-4">
+		<!-- <div
+			class="sticky bottom-0 mx-auto my-5 flex w-[400px] items-center justify-center rounded-full bg-white py-2"
+		>
+			<Pagination.Root count={historyData.length ?? 0} {perPage} {siblingCount}>
+				{#snippet children({ pages })}
+					<Pagination.Content>
+						<Pagination.Item>
+							<Pagination.PrevButton
+								onclick={() => {
+									pagesFilter -= 1;
+									filterHandler(pagesFilter);
+								}}
+							>
+								<ChevronLeft class="size-4" />
+								<span class="hidden sm:block">Previous</span>
+							</Pagination.PrevButton>
+						</Pagination.Item>
+						{#each pages as page (page.key)}
+							{#if page.type === 'ellipsis'}
+								<Pagination.Item>
+									<Pagination.Ellipsis />
+								</Pagination.Item>
+							{:else}
+								<Pagination.Item>
+									<Pagination.Link
+										{page}
+										isActive={pagesFilter + 1 === page.value}
+										onclick={() => {
+											pagesFilter = Number(page.value) - 1;
+											filterHandler(pagesFilter);
+										}}
+									>
+										{page.value}
+									</Pagination.Link>
+								</Pagination.Item>
+							{/if}
+						{/each}
+						<Pagination.Item>
+							<Pagination.NextButton
+								disabled={historyData.length == 0}
+								onclick={() => {
+									pagesFilter += 1;
+									filterHandler(pagesFilter);
+								}}
+							>
+								<span class="hidden sm:block">Next</span>
+								<ChevronRight class="size-4" />
+							</Pagination.NextButton>
+						</Pagination.Item>
+					</Pagination.Content>
+				{/snippet}
+			</Pagination.Root>
+		</div> -->
 		<Button
 			variant="outline"
 			size="sm"
