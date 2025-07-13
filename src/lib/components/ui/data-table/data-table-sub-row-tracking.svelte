@@ -12,7 +12,7 @@
 		type PaginationState,
 		type VisibilityState
 	} from '@tanstack/table-core';
-	import { SquareChevronDown, SquareChevronUp } from 'lucide-svelte';
+	import { FileText, SquareChevronDown, SquareChevronUp } from 'lucide-svelte';
 	import { tick } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import type { UserRequestHistoryType } from '../../../../routes/(app)/user/request/[id]/user-request-schema';
@@ -90,7 +90,7 @@
 		}
 	});
 
-	table.getColumn("requestId")?.toggleVisibility(false);
+	table.getColumn('requestId')?.toggleVisibility(false);
 </script>
 
 <div class={className}>
@@ -126,8 +126,7 @@
 				{#each table.getRowModel().rows as row (row.id)}
 					<Table.Row data-state={row.getIsSelected() && 'selected'} class="text-[18px]">
 						{#each row.getVisibleCells() as cell, idx (cell.id)}
-							<Table.Cell
-								>
+							<Table.Cell>
 								{#if idx == 0}
 									<button
 										onclick={async () => {
@@ -140,6 +139,7 @@
 											if (row.getIsExpanded()) {
 												await tick();
 												historyData = response;
+												console.log(response);
 											}
 										}}
 									>
@@ -185,7 +185,7 @@
 
 															<div class="relative z-10 flex flex-col items-center text-center">
 																<div
-																	class="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-uphButton text-sm font-bold text-white"
+																	class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-uphButton text-sm font-bold text-white"
 																>
 																	1
 																</div>
@@ -207,7 +207,7 @@
 
 															<div class="relative z-10 flex flex-col items-center text-center">
 																<div
-																	class="mb-2 ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-uphButton text-sm font-bold text-white"
+																	class="mb-2 ml-2 flex h-10 w-10 items-center justify-center rounded-full bg-uphButton text-sm font-bold text-white"
 																>
 																	2
 																</div>
@@ -229,12 +229,21 @@
 
 															<div class="relative z-10 flex flex-col items-center text-center">
 																<div
-																	class="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-uphButton text-sm font-bold text-white"
+																	class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-uphButton text-sm font-bold text-white"
 																>
 																	3
 																</div>
-																<div class="mb-1 text-sm font-semibold text-uphButton">
-																	Finished
+																<div
+																	class="mb-1 flex items-center gap-2 text-sm font-semibold text-uphButton"
+																>
+																	<span> Finished </span>
+																	<span>
+																		{#if data.userApprovalOrRejectFileUrl.completion_file_url}
+																			<a href={data.userApprovalOrRejectFileUrl.completion_file_url} target="_blank">
+																				<FileText />
+																			</a>
+																		{/if}
+																	</span>
 																</div>
 																<div class="text-xs text-gray-500">
 																	{data.userRequestHistory[2]

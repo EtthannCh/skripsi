@@ -17,8 +17,8 @@ export const userApprovalOrRejectFileUrlType = z.object({
     id: z.number(),
     request_id: z.number(),
     status: z.enum(Object.keys(requestDbStatusEnum) as [keyof typeof requestDbStatusEnum, ...Array<keyof typeof requestDbStatusEnum>]),
-    file_url: z.string(),
-    created_by_id: z.string()
+    completion_file_url: z.string(),
+    created_by_id: z.string(),
 })
 
 export const userRequestHistoryType = z.object({
